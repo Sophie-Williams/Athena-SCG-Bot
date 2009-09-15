@@ -1,0 +1,105 @@
+<html><head><title>PlayerServer.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="keyw">package</span><span class="def"> player;
+
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.http.classes.*;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.http.server.*;
+
+</span><span class="keyw">import</span><span class="def"> java.io.BufferedReader;
+</span><span class="keyw">import</span><span class="def"> java.io.IOException;
+</span><span class="keyw">import</span><span class="def"> java.io.InputStreamReader;
+
+</span><span class="keyw">import</span><span class="def"> logging.Logger;
+</span><span class="keyw">import</span><span class="def"> scg.Util;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PlayerContext;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.lib.*;
+
+</span><span class="com">/** Server class for the player. Dispatches to HTTP methods with context. */</span><span class="def">
+@Server
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> PlayerServer {
+
+    </span><span class="com">/** Path the player server listens for */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> EntryPath = </span><span class="str">"/player"</span><span class="def">;
+    </span><span class="com">/** Default port for the Player */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> DEFAULT_PORT = </span><span class="num">8000</span><span class="def">;
+
+    </span><span class="com">/** Port number for this player instance */</span><span class="def">
+    @Port
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> port;
+    </span><span class="com">/** logger instance for the player */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Logger log;
+   
+    </span><span class="keyw">public</span><span class="def"> </span><span class="func">PlayerServer</span><span class="def">(Logger l){ </span><span class="keyw">this</span><span class="def">(DEFAULT_PORT, l); }
+    </span><span class="keyw">public</span><span class="def"> </span><span class="func">PlayerServer</span><span class="def">(</span><span class="keyw">int</span><span class="def"> p, Logger l){ port = p; log = l; }
+
+    </span><span class="com">/** Handle an Admin request at the EntryPath */</span><span class="def">
+    @</span><span class="func">Path</span><span class="def">(EntryPath)
+    </span><span class="keyw">public</span><span class="def"> HTTPResp </span><span class="func">playerResponse</span><span class="def">(HTTPReq req){
+        </span><span class="keyw">try</span><span class="def"> {
+            </span><span class="com">// Get the player context from the body of the request</span><span class="def">
+            PlayerContext pContext = PlayerContext.</span><span class="func">parse</span><span class="def">(req.</span><span class="func">getBodyString</span><span class="def">());
+            </span><span class="com">// Run the Player</span><span class="def">
+            </span><span class="keyw">return</span><span class="def"> </span><span class="func">createResponse</span><span class="def">(pContext);
+        } </span><span class="keyw">catch</span><span class="def"> (Exception e) {
+            </span><span class="com">// Error Creating the Player's Context</span><span class="def">
+            log.</span><span class="func">error</span><span class="def">(</span><span class="str">"Exception: "</span><span class="def">+e.</span><span class="func">getMessage</span><span class="def">());
+            log.</span><span class="func">error</span><span class="def">(</span><span class="str">"Request Body:\n"</span><span class="def">+req.</span><span class="func">getBodyString</span><span class="def">()+</span><span class="str">"\n"</span><span class="def">);
+            </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">error</span><span class="def">(</span><span class="str">""</span><span class="def">+e);
+        }
+    }
+
+    </span><span class="com">/** Default Handler for other paths */</span><span class="def">
+    @Path
+    </span><span class="keyw">public</span><span class="def"> HTTPResp </span><span class="func">defaultResponse</span><span class="def">(){
+        </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">error</span><span class="def">(</span><span class="str">"Unknown Request"</span><span class="def">);
+    }
+
+    </span><span class="com">/** Formulate a player response for a given PlyerContext */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> HTTPResp </span><span class="func">createResponse</span><span class="def">(PlayerContext ctx){
+        </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">textResponse</span><span class="def">(Player.</span><span class="func">create</span><span class="def">(ctx, log).</span><span class="func">play</span><span class="def">().</span><span class="func">toString</span><span class="def">());
+    }
+
+    </span><span class="com">/** Clear message for Linux terminals */</span><span class="def"> 
+    </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> clearer = List.</span><span class="func">create</span><span class="def">(</span><span class="num">0x1b</span><span class="def">,</span><span class="num">0x5b</span><span class="def">,</span><span class="num">0x48</span><span class="def">,</span><span class="num">0x1b</span><span class="def">,</span><span class="num">0x5b</span><span class="def">,</span><span class="num">0x32</span><span class="def">,</span><span class="num">0x4a</span><span class="def">,</span><span class="num">0x00</span><span class="def">)
+    .</span><span class="func">map</span><span class="def">(</span><span class="keyw">new</span><span class="def"> List.Map&lt;</span><span class="prim">Integer</span><span class="def">, Character&gt;(){
+        </span><span class="keyw">public</span><span class="def"> Character </span><span class="func">map</span><span class="def">(</span><span class="prim">Integer</span><span class="def"> i){ </span><span class="keyw">return</span><span class="def"> (char)(</span><span class="keyw">int</span><span class="def">)i; }
+    }).</span><span class="func">toString</span><span class="def">(</span><span class="str">""</span><span class="def">,</span><span class="str">""</span><span class="def">);
+    
+    </span><span class="com">/** Main method to run the PlayerServer. Will be called by Player Main. */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">run</span><span class="def">(</span><span class="keyw">int</span><span class="def"> port, Logger log) </span><span class="keyw">throws</span><span class="def"> IOException{
+        </span><span class="com">// Create a new Server</span><span class="def">
+        ServerThread server = Factory.</span><span class="func">create</span><span class="def">(</span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerServer</span><span class="def">(port,log));
+        
+        </span><span class="com">// Buffer text from the terminal</span><span class="def">
+        BufferedReader input = </span><span class="keyw">new</span><span class="def"> </span><span class="func">BufferedReader</span><span class="def">(</span><span class="keyw">new</span><span class="def"> </span><span class="func">InputStreamReader</span><span class="def">(System.</span><span class="keyw">in</span><span class="def">));
+        </span><span class="prim">String</span><span class="def"> inpt = </span><span class="str">""</span><span class="def">;
+        </span><span class="keyw">do</span><span class="def"> {
+            System.out.</span><span class="func">print</span><span class="def">(</span><span class="str">"\n ** Type '</span><span class="def">exit</span><span class="str">' to shutdown: "</span><span class="def">);
+            System.out.</span><span class="func">flush</span><span class="def">();
+            inpt = input.</span><span class="func">readLine</span><span class="def">().</span><span class="func">trim</span><span class="def">();
+            </span><span class="com">// Respond to (limited) input commands</span><span class="def">
+            </span><span class="keyw">if</span><span class="def">(inpt.</span><span class="func">equals</span><span class="def">(</span><span class="str">"clear"</span><span class="def">))
+                System.err.</span><span class="func">print</span><span class="def">(clearer);
+        } </span><span class="keyw">while</span><span class="def"> (!inpt.</span><span class="func">equals</span><span class="def">(</span><span class="str">"exit"</span><span class="def">));
+        log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Shutting down Player Server"</span><span class="def">);
+        </span><span class="com">// Kill the PlayerServer thread</span><span class="def">
+        server.</span><span class="func">shutdown</span><span class="def">();
+    }
+}
+</span></pre></body></html>

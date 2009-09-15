@@ -1,0 +1,115 @@
+<html><head><title>HistoryFile.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="keyw">package</span><span class="def"> scg.game;
+
+</span><span class="keyw">import</span><span class="def"> java.io.File;
+</span><span class="keyw">import</span><span class="def"> java.io.FileOutputStream;
+</span><span class="keyw">import</span><span class="def"> java.io.IOException;
+</span><span class="keyw">import</span><span class="def"> java.io.OutputStreamWriter;
+</span><span class="keyw">import</span><span class="def"> java.io.Writer;
+</span><span class="keyw">import</span><span class="def"> java.util.Date;
+
+</span><span class="keyw">import</span><span class="def"> scg.Util;
+</span><span class="keyw">import</span><span class="def"> scg.game.Game.PlayerStore;
+</span><span class="keyw">import</span><span class="def"> scg.gen.Event;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PlayerSpec;
+</span><span class="keyw">import</span><span class="def"> scg.gen.Round;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.lib.Entry;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.lib.List;
+
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> HistoryFile {
+
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> historyFile;
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Writer history;
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">boolean</span><span class="def"> headerPrinted = </span><span class="keyw">false</span><span class="def">;
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="func">HistoryFile</span><span class="def">(</span><span class="prim">String</span><span class="def"> prefix, Date compTime, </span><span class="prim">String</span><span class="def"> suffix) </span><span class="keyw">throws</span><span class="def"> Exception {
+        </span><span class="keyw">this</span><span class="def">.historyFile = prefix + Util.</span><span class="func">getFileNameSafeDate</span><span class="def">(compTime) + suffix;
+        File f = </span><span class="keyw">new</span><span class="def"> </span><span class="func">File</span><span class="def">(historyFile);
+        </span><span class="keyw">if</span><span class="def"> (!f.</span><span class="func">exists</span><span class="def">()) {
+            f.</span><span class="func">createNewFile</span><span class="def">();
+        }
+        </span><span class="keyw">this</span><span class="def">.history = </span><span class="keyw">new</span><span class="def"> </span><span class="func">OutputStreamWriter</span><span class="def">(</span><span class="keyw">new</span><span class="def"> </span><span class="func">FileOutputStream</span><span class="def">(f));
+    }
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">header</span><span class="def">(List&lt;Game.Player&gt; players) </span><span class="keyw">throws</span><span class="def"> IOException{
+        </span><span class="keyw">if</span><span class="def"> (headerPrinted) {
+            </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">RuntimeException</span><span class="def">(</span><span class="str">"Header can be printed only once"</span><span class="def">);
+        }
+        history.</span><span class="func">append</span><span class="def">(players.</span><span class="func">toString</span><span class="def">(</span><span class="str">"\n"</span><span class="def">, </span><span class="str">"  "</span><span class="def">));
+        history.</span><span class="func">append</span><span class="def">(</span><span class="str">"\n\n"</span><span class="def">);
+        history.</span><span class="func">flush</span><span class="def">();
+        headerPrinted = </span><span class="keyw">true</span><span class="def">;
+    }
+
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">int</span><span class="def"> round = -</span><span class="num">1</span><span class="def">;
+    </span><span class="keyw">private</span><span class="def"> List&lt;Event&gt; roundEvents = List.</span><span class="func">create</span><span class="def">();
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">startRound</span><span class="def">(</span><span class="keyw">int</span><span class="def"> numRound){
+        </span><span class="keyw">this</span><span class="def">.round = numRound;
+        </span><span class="keyw">this</span><span class="def">.roundEvents = List.</span><span class="func">create</span><span class="def">();
+    }
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">flushRound</span><span class="def">() </span><span class="keyw">throws</span><span class="def"> IOException{
+        Round r = </span><span class="keyw">new</span><span class="def"> </span><span class="func">Round</span><span class="def">(round, roundEvents.</span><span class="func">reverse</span><span class="def">());
+        history.</span><span class="func">append</span><span class="def">(r.</span><span class="func">toString</span><span class="def">() + </span><span class="str">"\n"</span><span class="def">);
+        history.</span><span class="func">flush</span><span class="def">();
+        round = -</span><span class="num">1</span><span class="def">;
+    }
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">recordEvent</span><span class="def">(</span><span class="keyw">int</span><span class="def"> playerID, Event event){
+        </span><span class="keyw">if</span><span class="def"> (round == -</span><span class="num">1</span><span class="def">) {
+            </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">RuntimeException</span><span class="def">(</span><span class="str">"Can record events in the context of a round only"</span><span class="def">);
+        }
+        </span><span class="keyw">this</span><span class="def">.roundEvents = </span><span class="keyw">this</span><span class="def">.roundEvents.</span><span class="func">push</span><span class="def">(event);
+    }
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">footer</span><span class="def">(List&lt;Entry&lt;PlayerSpec, PlayerStore&gt;&gt; playersState) </span><span class="keyw">throws</span><span class="def"> IOException{
+        history.</span><span class="func">append</span><span class="def">(</span><span class="str">"**** Final Results *****\n"</span><span class="def">);
+        List&lt;Entry&lt;PlayerSpec, PlayerStore&gt;&gt; sortedState = playersState
+                .</span><span class="func">sort</span><span class="def">(</span><span class="keyw">new</span><span class="def"> List.Comp&lt;Entry&lt;PlayerSpec, PlayerStore&gt;&gt;() {
+
+                    @Override
+                    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">boolean</span><span class="def"> </span><span class="func">comp</span><span class="def">(Entry&lt;PlayerSpec, PlayerStore&gt; a, Entry&lt;PlayerSpec, PlayerStore&gt; b){
+                        </span><span class="keyw">if</span><span class="def"> (a.</span><span class="func">getVal</span><span class="def">().kicked && !b.</span><span class="func">getVal</span><span class="def">().kicked) {
+                            </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">false</span><span class="def">;
+                        }
+                        </span><span class="keyw">if</span><span class="def"> (!a.</span><span class="func">getVal</span><span class="def">().kicked && b.</span><span class="func">getVal</span><span class="def">().kicked) {
+                            </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">true</span><span class="def">;
+                        }
+                        </span><span class="keyw">return</span><span class="def"> a.</span><span class="func">getVal</span><span class="def">().account &gt; b.</span><span class="func">getVal</span><span class="def">().account;
+                    }
+                });
+
+        history.</span><span class="func">append</span><span class="def">(sortedState.</span><span class="func">fold</span><span class="def">(</span><span class="keyw">new</span><span class="def"> List.Fold&lt;Entry&lt;PlayerSpec, PlayerStore&gt;, </span><span class="prim">String</span><span class="def">&gt;() {
+
+            @Override
+            </span><span class="keyw">public</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">fold</span><span class="def">(Entry&lt;PlayerSpec, PlayerStore&gt; f, </span><span class="prim">String</span><span class="def"> r){
+                </span><span class="prim">String</span><span class="def"> k = f.</span><span class="func">getVal</span><span class="def">().kicked ? </span><span class="str">" * "</span><span class="def"> : </span><span class="str">"  "</span><span class="def">;
+                </span><span class="keyw">return</span><span class="def"> r + </span><span class="str">"\n"</span><span class="def"> + f.</span><span class="func">getKey</span><span class="def">().</span><span class="func">getName</span><span class="def">() + </span><span class="str">" : "</span><span class="def"> + k + f.</span><span class="func">getVal</span><span class="def">().account;
+            }
+        }, </span><span class="str">""</span><span class="def">));
+
+        history.</span><span class="func">flush</span><span class="def">();
+        history.</span><span class="func">close</span><span class="def">();
+        </span><span class="com">// TODO: Should we close the File too?</span><span class="def">
+
+    }
+}
+</span></pre></body></html>

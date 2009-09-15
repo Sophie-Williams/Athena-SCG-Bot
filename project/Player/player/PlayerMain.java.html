@@ -1,0 +1,97 @@
+<html><head><title>PlayerMain.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="keyw">package</span><span class="def"> player;
+
+</span><span class="keyw">import</span><span class="def"> java.io.IOException;
+</span><span class="keyw">import</span><span class="def"> logging.Logger;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.lib.List;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.util.CLI;
+
+</span><span class="com">/** Main Player Class, Registers a player, and sets up a server */</span><span class="def">
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> PlayerMain {
+
+    </span><span class="com">/** Options */</span><span class="def">
+    </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> HELP = </span><span class="str">"--help"</span><span class="def">,
+                        NO_REG = </span><span class="str">"--noreg"</span><span class="def">;
+   
+    </span><span class="com">/** Print usage information and Quit */</span><span class="def">
+    </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">usage</span><span class="def">(</span><span class="prim">String</span><span class="def"> err){
+        </span><span class="keyw">if</span><span class="def">(err.</span><span class="func">length</span><span class="def">()&gt;</span><span class="num">0</span><span class="def">)
+            System.err.</span><span class="func">println</span><span class="def">(</span><span class="str">"\n !! "</span><span class="def">+err+</span><span class="str">"\n"</span><span class="def">);
+        System.err.</span><span class="func">println</span><span class="def">(</span><span class="str">" ** Usage: PlayerMain &lt;PlayerPort&gt; &lt;ServerAddr&gt; "</span><span class="def">
+                + </span><span class="str">"&lt;TeamName&gt; &lt;Password&gt;\n"</span><span class="def">
+                + </span><span class="str">"    Options can be:\n"</span><span class="def">
+                + </span><span class="str">"      --help      : Print this message\n"</span><span class="def">
+                + </span><span class="str">"      --noreg     : Skip registration, assume the Admin knows where you\n"</span><span class="def">
+                + </span><span class="str">"                      are.  If you use noreg then you only need to provide\n"</span><span class="def">
+                + </span><span class="str">"                      your PlayerPort #.\n\n"</span><span class="def">
+                + </span><span class="str">"  * NOTE: For a real competition you cannot use '</span><span class="def">noreg</span><span class="str">' and *must* give\n"</span><span class="def">
+                + </span><span class="str">"           all arguments.\n\n"</span><span class="def">
+                + </span><span class="str">"    Port : the socket port the Player listens on. Should be an integer &gt; 1024\n"</span><span class="def">
+                + </span><span class="str">"    ServerAddr : Given by the Course Staff. This may be a host name/URL or\n"</span><span class="def">
+                + </span><span class="str">"                   an IP Address.\n"</span><span class="def">
+                + </span><span class="str">"    TeamName : must be the same as when you pre-registered.\n"</span><span class="def">
+                + </span><span class="str">"    Password : same as when you pre-registered.\n\n"</span><span class="def">
+                + </span><span class="str">"  Typical Usages will be:\n"</span><span class="def">
+                + </span><span class="str">"      java player.PlayerMain 7000 aurail.ccs.neu.edu \"MyTeam\" \"MyPass\"\n"</span><span class="def">
+                + </span><span class="str">"      java player.PlayerMain 7000 --noreg\n"</span><span class="def">);
+        System.</span><span class="func">exit</span><span class="def">(err.</span><span class="func">length</span><span class="def">()&gt;</span><span class="num">0</span><span class="def">?</span><span class="num">1</span><span class="def">:</span><span class="num">0</span><span class="def">);
+    }
+    
+    </span><span class="com">/** Run the Player... */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">main</span><span class="def">(</span><span class="prim">String</span><span class="def">[] argArr) </span><span class="keyw">throws</span><span class="def"> Exception{
+        List&lt;</span><span class="prim">String</span><span class="def">&gt; split[] = CLI.</span><span class="func">splitArgs</span><span class="def">(argArr),
+                     options = split[CLI.OPTS],
+                     args = split[CLI.ARGS];
+        </span><span class="keyw">if</span><span class="def">(options.</span><span class="func">contains</span><span class="def">(HELP))</span><span class="func">usage</span><span class="def">(</span><span class="str">""</span><span class="def">);
+        
+        </span><span class="com">// Is registration needed?</span><span class="def">
+        </span><span class="keyw">boolean</span><span class="def"> doreg = !options.</span><span class="func">contains</span><span class="def">(NO_REG);
+        </span><span class="keyw">if</span><span class="def">(args.</span><span class="func">length</span><span class="def">() &lt; </span><span class="num">1</span><span class="def"> || (doreg && args.</span><span class="func">length</span><span class="def">() != </span><span class="num">4</span><span class="def">)){
+            </span><span class="func">usage</span><span class="def">(</span><span class="str">"Not enough manditory arguments"</span><span class="def">);
+            </span><span class="keyw">return</span><span class="def">;
+        }
+        </span><span class="com">// Player's Port Number is first</span><span class="def">
+        </span><span class="keyw">int</span><span class="def"> port = </span><span class="prim">Integer</span><span class="def">.</span><span class="func">parseInt</span><span class="def">(args.</span><span class="func">lookup</span><span class="def">(</span><span class="num">0</span><span class="def">));
+        
+        </span><span class="com">// Other arguments are just for registration</span><span class="def">
+        </span><span class="prim">String</span><span class="def"> serve = doreg?args.</span><span class="func">lookup</span><span class="def">(</span><span class="num">1</span><span class="def">):</span><span class="str">""</span><span class="def">,
+               team = doreg?args.</span><span class="func">lookup</span><span class="def">(</span><span class="num">2</span><span class="def">):</span><span class="str">"No Name"</span><span class="def">,
+               pass = doreg?args.</span><span class="func">lookup</span><span class="def">(</span><span class="num">3</span><span class="def">):</span><span class="str">""</span><span class="def">;
+               
+        </span><span class="com">// Create a new Logger</span><span class="def">
+        Logger log = Logger.</span><span class="func">text</span><span class="def">(System.out, scg.Util.</span><span class="func">logFileName</span><span class="def">(</span><span class="str">"player"</span><span class="def">));
+
+        </span><span class="com">// Register if Needed</span><span class="def">
+        </span><span class="keyw">if</span><span class="def">(doreg){
+            </span><span class="keyw">if</span><span class="def">(!</span><span class="keyw">new</span><span class="def"> </span><span class="func">Register</span><span class="def">(serve,log).</span><span class="func">doReg</span><span class="def">(team, pass, port))
+                System.</span><span class="func">exit</span><span class="def">(</span><span class="num">1</span><span class="def">);
+            log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Player '</span><span class="def"></span><span class="str">" + team + "</span><span class="def"></span><span class="str">' Registered Successfully"</span><span class="def">);
+        }
+        </span><span class="com">// Start the Player Server... it will wait for its turn</span><span class="def">
+        log.</span><span class="func">notify</span><span class="def">(</span><span class="str">"Player Started for Team '</span><span class="def"></span><span class="str">" + team + "</span><span class="def"></span><span class="str">'"</span><span class="def">);
+        </span><span class="keyw">try</span><span class="def"> {
+            PlayerServer.</span><span class="func">run</span><span class="def">(port, log);
+        } </span><span class="keyw">catch</span><span class="def"> (IOException ie) {
+            log.</span><span class="func">error</span><span class="def">(</span><span class="str">"IOException: "</span><span class="def"> + ie.</span><span class="func">getMessage</span><span class="def">());
+        }
+        log.</span><span class="func">notify</span><span class="def">(</span><span class="str">"Player Shutdown"</span><span class="def">);
+    }
+}
+</span></pre></body></html>

@@ -1,0 +1,212 @@
+<html><head><title>PreRegServer.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="keyw">package</span><span class="def"> prereg;
+
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.http.classes.*;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.http.server.*;
+
+</span><span class="keyw">import</span><span class="def"> java.io.FileInputStream;
+</span><span class="keyw">import</span><span class="def"> java.io.File;
+</span><span class="keyw">import</span><span class="def"> java.io.IOException;
+</span><span class="keyw">import</span><span class="def"> java.net.Socket;
+</span><span class="keyw">import</span><span class="def"> java.util.Date;
+
+</span><span class="keyw">import</span><span class="def"> logging.Logger;
+</span><span class="keyw">import</span><span class="def"> scg.Util;
+</span><span class="keyw">import</span><span class="def"> scg.gen.ParseException;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PasswordEntry;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PasswordFile;
+</span><span class="keyw">import</span><span class="def"> scg.gen.TeamFile;
+</span><span class="keyw">import</span><span class="def"> scg.gen.TeamSpec;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.lib.List;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.lib.Map;
+
+</span><span class="com">/**
+ * Pre Registration Server. Accepts browser "form" for registering Team Names
+ * and Passwords.
+ */</span><span class="def">
+@</span><span class="func">Server</span><span class="def">()
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> PreRegServer {
+
+    </span><span class="com">/** Path the RegServer Listens On */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> PATH_ENTRY = </span><span class="str">"/preregister"</span><span class="def">;
+    </span><span class="com">/** Simple Status Path */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> STATUS = </span><span class="str">"/status"</span><span class="def">;
+    </span><span class="com">/** Admins Listening (incoming) Port */</span><span class="def">
+    @</span><span class="func">Port</span><span class="def">()
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> PORT = </span><span class="num">7002</span><span class="def">;
+    </span><span class="com">/** Hashed Passwords File */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> PASS_FILE = </span><span class="str">"files/passwords.txt"</span><span class="def">;
+    </span><span class="com">/** Team Members File */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> TEAM_FILE = </span><span class="str">"files/teams.txt"</span><span class="def">;
+
+    </span><span class="com">/** Form Arugument Names */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> FORM_TEAM = </span><span class="str">"teamname"</span><span class="def">;
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> FORM_PASS = </span><span class="str">"pass"</span><span class="def">;
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> FORM_MEMBERS = </span><span class="str">"members"</span><span class="def">;
+
+    </span><span class="com">/** Currently registered Teams */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> List&lt;TeamSpec&gt; teams = List.</span><span class="func">create</span><span class="def">();
+    </span><span class="com">/** Logger for the Registration Process */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Logger log;
+
+    </span><span class="com">/**
+     * Create a PreRegServer with the given Teams. Pre-registration sets
+     * Player/Team Passwords for future competitions.
+     */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="func">PreRegServer</span><span class="def">(List&lt;TeamSpec&gt; tms, Logger l) {
+        teams = tms;
+        log = l;
+    }
+
+    </span><span class="com">/**  */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> PreRegServer </span><span class="func">create</span><span class="def">(List&lt;TeamSpec&gt; tms, Logger l){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">PreRegServer</span><span class="def">(tms, l);
+    }
+
+    </span><span class="com">/**  */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> PreRegServer </span><span class="func">create</span><span class="def">(Logger l) </span><span class="keyw">throws</span><span class="def"> IOException, ParseException{
+        File teamFile = </span><span class="keyw">new</span><span class="def"> </span><span class="func">File</span><span class="def">(TEAM_FILE);
+        </span><span class="keyw">if</span><span class="def">(!teamFile.</span><span class="func">canWrite</span><span class="def">())
+            teamFile.</span><span class="func">createNewFile</span><span class="def">();
+        List&lt;TeamSpec&gt; ts = TeamFile.</span><span class="func">parse</span><span class="def">(</span><span class="keyw">new</span><span class="def"> </span><span class="func">FileInputStream</span><span class="def">(TEAM_FILE)).</span><span class="func">getTeams</span><span class="def">();
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">PreRegServer</span><span class="def">(ts, l);
+    }
+
+    </span><span class="com">/** Main URL handler for the RegServer */</span><span class="def">
+    @</span><span class="func">Path</span><span class="def">(PATH_ENTRY)
+    </span><span class="keyw">public</span><span class="def"> HTTPResp </span><span class="func">registerResp</span><span class="def">(HTTPReq req, Socket sock){
+        log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Pre-registration Request from: "</span><span class="def">+sock.</span><span class="func">getInetAddress</span><span class="def">());
+        </span><span class="keyw">synchronized</span><span class="def"> (teams) {
+            Map&lt;</span><span class="prim">String</span><span class="def">, </span><span class="prim">String</span><span class="def">&gt; map = req.</span><span class="func">bodyArgs</span><span class="def">().</span><span class="func">transformValues</span><span class="def">(</span><span class="keyw">new</span><span class="def"> List.Map&lt;</span><span class="prim">String</span><span class="def">, </span><span class="prim">String</span><span class="def">&gt;() {
+                </span><span class="keyw">public</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">map</span><span class="def">(</span><span class="prim">String</span><span class="def"> a){ </span><span class="keyw">return</span><span class="def"> Util.</span><span class="func">decodeURL</span><span class="def">(a); }
+            });
+            </span><span class="keyw">if</span><span class="def"> (map.</span><span class="func">containsKey</span><span class="def">(FORM_TEAM) && map.</span><span class="func">containsKey</span><span class="def">(FORM_PASS) && map.</span><span class="func">containsKey</span><span class="def">(FORM_MEMBERS)) {
+                TeamSpec newSpec = TeamSpec.</span><span class="func">create</span><span class="def">(map.</span><span class="func">get</span><span class="def">(FORM_TEAM), map.</span><span class="func">get</span><span class="def">(FORM_PASS), map.</span><span class="func">get</span><span class="def">(FORM_MEMBERS));
+                </span><span class="keyw">if</span><span class="def"> (teams.</span><span class="func">contains</span><span class="def">(newSpec.</span><span class="func">sameNamePred</span><span class="def">())) {
+                    </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">htmlError</span><span class="def">(</span><span class="func">errorPage</span><span class="def">(log.</span><span class="func">error</span><span class="def">(</span><span class="func">htmlTeam</span><span class="def">(newSpec.</span><span class="func">getName</span><span class="def">()) + </span><span class="str">" Already Exists"</span><span class="def">)));
+                }
+                teams = teams.</span><span class="func">push</span><span class="def">(newSpec);
+                log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Flushing Teams/Password Files"</span><span class="def">);
+                </span><span class="keyw">try</span><span class="def"> {
+                    </span><span class="keyw">new</span><span class="def"> </span><span class="func">TeamFile</span><span class="def">(teams).</span><span class="func">write</span><span class="def">(TEAM_FILE);
+                    log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Teams File Flushed"</span><span class="def">);
+                    </span><span class="keyw">new</span><span class="def"> </span><span class="func">PasswordFile</span><span class="def">(teams.</span><span class="func">map</span><span class="def">(</span><span class="keyw">new</span><span class="def"> List.Map&lt;TeamSpec, PasswordEntry&gt;() {
+
+                        @Override
+                        </span><span class="keyw">public</span><span class="def"> PasswordEntry </span><span class="func">map</span><span class="def">(TeamSpec s){
+                            </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">PasswordEntry</span><span class="def">(s.</span><span class="func">getName</span><span class="def">(), s.</span><span class="func">getPasshash</span><span class="def">());
+                        }
+                    })).</span><span class="func">write</span><span class="def">(PASS_FILE);
+                    log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Password File Flushed"</span><span class="def">);
+                } </span><span class="keyw">catch</span><span class="def"> (Exception e) {
+                    log.</span><span class="func">error</span><span class="def">(</span><span class="str">"Unable to Save one of the files"</span><span class="def">);
+                }
+                </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">htmlResponse</span><span class="def">(</span><span class="func">htmlPage</span><span class="def">(</span><span class="str">"Success"</span><span class="def">, </span><span class="str">"&lt;center&gt;&lt;div style='</span><span class="def">textalign:center;width:</span><span class="str">"
+                        + "</span><span class="def"></span><span class="num">400</span><span class="def">px;height:</span><span class="num">200</span><span class="def">px;border:solid blue </span><span class="num">1</span><span class="def">px</span><span class="str">'&gt;&lt;h1&gt;Success&lt;/h1&gt;&lt;br/&gt;&lt;br/&gt;&lt;h3&gt;"</span><span class="def">
+                        + log.</span><span class="func">event</span><span class="def">(</span><span class="func">htmlTeam</span><span class="def">(newSpec.</span><span class="func">getName</span><span class="def">()) + </span><span class="str">" is Registered"</span><span class="def">) + </span><span class="str">"&lt;/h3&gt;&lt;/div&gt;&lt;/center&gt;"</span><span class="def">));
+            }
+            </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">htmlError</span><span class="def">(</span><span class="func">errorPage</span><span class="def">(log.</span><span class="func">error</span><span class="def">(</span><span class="str">"Missing Form Arguments"</span><span class="def">)));
+        }
+    }
+
+    </span><span class="com">/** Main URL handler for the RegServer */</span><span class="def">
+    @</span><span class="func">Path</span><span class="def">(STATUS)
+    </span><span class="keyw">public</span><span class="def"> HTTPResp </span><span class="func">statusResp</span><span class="def">(HTTPReq req, Socket sock){
+        log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Status Request from: "</span><span class="def">+sock.</span><span class="func">getInetAddress</span><span class="def">());
+        </span><span class="keyw">synchronized</span><span class="def"> (teams) {
+            </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">htmlResponse</span><span class="def">(
+                    </span><span class="func">wrap</span><span class="def">(</span><span class="func">wrap</span><span class="def">(</span><span class="func">wrap</span><span class="def">(</span><span class="func">wrap</span><span class="def">(
+                            </span><span class="func">wrap</span><span class="def">(</span><span class="str">"PreReg Status"</span><span class="def">,</span><span class="str">"title"</span><span class="def">)+
+                            </span><span class="func">wrap</span><span class="def">(</span><span class="str">"table,td,th{ padding:5px;border:1px solid blue; }"</span><span class="def">,</span><span class="str">"style"</span><span class="def">),</span><span class="str">"head"</span><span class="def">)+
+                            </span><span class="func">wrap</span><span class="def">(</span><span class="str">"Registered Teams"</span><span class="def">,</span><span class="str">"h3"</span><span class="def">)+
+                            </span><span class="func">wrap</span><span class="def">(</span><span class="func">wrap</span><span class="def">(
+                                    </span><span class="func">wrap</span><span class="def">(</span><span class="str">"#"</span><span class="def">,</span><span class="str">"th"</span><span class="def">)+
+                                    </span><span class="func">wrap</span><span class="def">(</span><span class="str">"Name"</span><span class="def">,</span><span class="str">"th"</span><span class="def">)+
+                                    </span><span class="func">wrap</span><span class="def">(</span><span class="str">"Hash"</span><span class="def">,</span><span class="str">"th"</span><span class="def">)+
+                                    </span><span class="func">wrap</span><span class="def">(</span><span class="str">"Members"</span><span class="def">,</span><span class="str">"th"</span><span class="def">),</span><span class="str">"tr"</span><span class="def">)+
+                                    teams.</span><span class="func">fold</span><span class="def">(</span><span class="keyw">new</span><span class="def"> List.Fold&lt;TeamSpec, </span><span class="prim">String</span><span class="def">&gt;(){
+                                        </span><span class="keyw">int</span><span class="def"> count = </span><span class="num">0</span><span class="def">;
+                                        </span><span class="keyw">public</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">fold</span><span class="def">(TeamSpec t, </span><span class="prim">String</span><span class="def"> r){
+                                            </span><span class="keyw">return</span><span class="def"> </span><span class="func">wrap</span><span class="def">(
+                                                    </span><span class="func">wrap</span><span class="def">(</span><span class="str">""</span><span class="def">+(++count),</span><span class="str">"td"</span><span class="def">)+
+                                                    </span><span class="func">wrap</span><span class="def">(t.</span><span class="func">getName</span><span class="def">(),</span><span class="str">"td"</span><span class="def">)+
+                                                    </span><span class="func">wrap</span><span class="def">(t.</span><span class="func">getPasshash</span><span class="def">(),</span><span class="str">"td"</span><span class="def">)+
+                                                    </span><span class="func">wrap</span><span class="def">(t.</span><span class="func">getPlayers</span><span class="def">().</span><span class="func">toString</span><span class="def">(</span><span class="str">", "</span><span class="def">,</span><span class="str">""</span><span class="def">),
+                                                        </span><span class="str">"td"</span><span class="def">),</span><span class="str">"tr"</span><span class="def">);
+                                        }
+                                    },</span><span class="str">""</span><span class="def">),
+                            </span><span class="str">"table"</span><span class="def">),</span><span class="str">"center"</span><span class="def">),</span><span class="str">"body"</span><span class="def">),</span><span class="str">"html"</span><span class="def">));
+        }
+    }
+    
+    </span><span class="com">/** Wrap a Team Name */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">htmlTeam</span><span class="def">(</span><span class="prim">String</span><span class="def"> t){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="str">"Team '</span><span class="def"></span><span class="str">"+wrap(t,"</span><span class="def">i</span><span class="str">")+"</span><span class="def"></span><span class="str">'"</span><span class="def">;
+    }
+    </span><span class="com">/** Wrap a Team Name */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">wrap</span><span class="def">(</span><span class="prim">String</span><span class="def"> s, </span><span class="prim">String</span><span class="def"> tag){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="str">"&lt;"</span><span class="def">+tag+</span><span class="str">"&gt;"</span><span class="def">+s+</span><span class="str">"&lt;/"</span><span class="def">+tag+</span><span class="str">"&gt;"</span><span class="def">;
+    }
+    @</span><span class="func">Path</span><span class="def">()
+    </span><span class="keyw">public</span><span class="def"> HTTPResp </span><span class="func">defaultResp</span><span class="def">(HTTPReq req){
+        </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">htmlError</span><span class="def">(</span><span class="func">errorPage</span><span class="def">(</span><span class="str">"Unaccepted URL Request:&lt;br/&gt;&lt;br/&gt;&lt;span style='</span><span class="def">color:red</span><span class="str">'&gt;"</span><span class="def">
+                + req.</span><span class="func">trimmedUrl</span><span class="def">() + </span><span class="str">"&lt;/span&gt;"</span><span class="def">));
+    }
+
+    </span><span class="com">/** Present an HTML Error Page */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">errorPage</span><span class="def">(</span><span class="prim">String</span><span class="def"> msg){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">htmlPage</span><span class="def">(</span><span class="str">"!ERROR!"</span><span class="def">, </span><span class="str">"&lt;center&gt;&lt;div style='</span><span class="def">textalign:center;width:</span><span class="num">400</span><span class="def">px;height:</span><span class="str">"
+                + "</span><span class="def"></span><span class="num">200</span><span class="def">px;border:solid red </span><span class="num">1</span><span class="def">px</span><span class="str">'&gt;&lt;h3&gt;ERROR&lt;br/&gt;&lt;br/&gt;"</span><span class="def"> + msg + </span><span class="str">"&lt;/h3&gt;&lt;/div&gt;"</span><span class="def">);
+    }
+
+    </span><span class="com">/** Present an HTML Page */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">htmlPage</span><span class="def">(</span><span class="prim">String</span><span class="def"> title, </span><span class="prim">String</span><span class="def"> body){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="str">"&lt;html&gt;&lt;head&gt;&lt;title&gt;"</span><span class="def"> + title + </span><span class="str">"&lt;/title&gt;&lt;/head&gt;&lt;body&gt;\n"</span><span class="def"> + </span><span class="str">"\n"</span><span class="def"> + body + </span><span class="str">"\n&lt;/body&gt;&lt;/html&gt;"</span><span class="def">;
+    }
+
+    </span><span class="com">/** Run the pre-registration server, until the "window" closes. */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> List&lt;TeamSpec&gt; </span><span class="func">runPreRegistration</span><span class="def">(</span><span class="prim">String</span><span class="def"> startDate) </span><span class="keyw">throws</span><span class="def"> IOException, java.text.ParseException{
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">runPreRegistration</span><span class="def">(Util.</span><span class="func">parseDate</span><span class="def">(startDate));
+    }
+
+    </span><span class="com">/** Run the pre-registration server, until the "window" closes. */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> List&lt;TeamSpec&gt; </span><span class="func">runPreRegistration</span><span class="def">(Date start) </span><span class="keyw">throws</span><span class="def"> IOException{
+        ServerThread server = Factory.</span><span class="func">create</span><span class="def">(</span><span class="keyw">this</span><span class="def">);
+        log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Pre Registration Opened"</span><span class="def">);
+        log.</span><span class="func">notify</span><span class="def">(</span><span class="str">"Pre Reg will Close at: "</span><span class="def"> + Util.</span><span class="func">printDate</span><span class="def">(start));
+        Util.</span><span class="func">waitUntil</span><span class="def">(start);
+        server.</span><span class="func">shutdown</span><span class="def">();
+        log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Pre Registration Closed"</span><span class="def">);
+        </span><span class="keyw">return</span><span class="def"> teams;
+    }
+
+    </span><span class="com">/** Main Program for the Server. */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">main</span><span class="def">(</span><span class="prim">String</span><span class="def">[] args) </span><span class="keyw">throws</span><span class="def"> Exception{
+        </span><span class="keyw">if</span><span class="def">(args.length != </span><span class="num">1</span><span class="def">) {
+            System.err.</span><span class="func">println</span><span class="def">(</span><span class="str">" !! Usage: java PreRegServer &lt;RegClose&gt;"</span><span class="def">);
+            </span><span class="keyw">return</span><span class="def">;
+        }
+        </span><span class="prim">String</span><span class="def"> start = args.length &gt; </span><span class="num">0</span><span class="def"> ? args[</span><span class="num">0</span><span class="def">] : </span><span class="str">"9/15/2009 3:00:00 pm"</span><span class="def">;
+        PreRegServer server = PreRegServer.</span><span class="func">create</span><span class="def">(Logger.</span><span class="func">text</span><span class="def">(System.err, Util.</span><span class="func">logFileName</span><span class="def">(</span><span class="str">"prereg"</span><span class="def">)));
+        System.err.</span><span class="func">println</span><span class="def">(</span><span class="str">"\nPre Registered Teams:\n"</span><span class="def"> + server.</span><span class="func">runPreRegistration</span><span class="def">(start).</span><span class="func">toString</span><span class="def">());
+        System.err.</span><span class="func">println</span><span class="def">(</span><span class="str">"\n ******* DONE : "</span><span class="def"> + Util.</span><span class="func">printDate</span><span class="def">(Util.</span><span class="func">now</span><span class="def">()) + </span><span class="str">" ************"</span><span class="def">);
+    }
+}
+</span></pre></body></html>

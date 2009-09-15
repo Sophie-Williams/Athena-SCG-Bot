@@ -1,0 +1,53 @@
+<html><head><title>SolveTask.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="keyw">package</span><span class="def"> player.tasks;
+
+</span><span class="keyw">import</span><span class="def"> logging.Logger;
+</span><span class="keyw">import</span><span class="def"> scg.gen.*;
+</span><span class="keyw">import</span><span class="def"> scg.Util;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.lib.*;
+
+</span><span class="com">/** Solve the provided Problem instances ASAP */</span><span class="def">
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> SolveTask {
+
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Logger log;
+    </span><span class="com">/** Create a SolveTask with the given Logger */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="func">SolveTask</span><span class="def">(Logger l){ log = l; }
+
+    </span><span class="com">/** Do the actual solving of Problem instances */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> SolveTrans </span><span class="func">solve</span><span class="def">(ProvidedChallenge ch){
+        log.</span><span class="func">notify</span><span class="def">(</span><span class="str">"Solving : #"</span><span class="def">+ch.</span><span class="func">getKey</span><span class="def">());
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">SolveTrans</span><span class="def">(</span><span class="func">solve</span><span class="def">(ch.</span><span class="func">getInstance</span><span class="def">()), ch.</span><span class="func">getKey</span><span class="def">());
+    }
+    
+    </span><span class="com">/** Solve the given Problem Instance */</span><span class="def">
+    Solution </span><span class="func">solve</span><span class="def">(Problem p){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Solution</span><span class="def">(</span><span class="func">randomAssign</span><span class="def">(p.</span><span class="func">getVars</span><span class="def">()));
+    }
+    
+    </span><span class="com">/** Random Assignment to each of the variables */</span><span class="def">
+    Map&lt;Var, Boolean&gt; </span><span class="func">randomAssign</span><span class="def">(List&lt;Var&gt; vs){
+        </span><span class="keyw">return</span><span class="def"> Map.</span><span class="func">create</span><span class="def">(vs.</span><span class="func">map</span><span class="def">(</span><span class="keyw">new</span><span class="def"> List.Map&lt;Var, Entry&lt;Var, Boolean&gt;&gt;(){
+            </span><span class="keyw">public</span><span class="def"> Entry&lt;Var, Boolean&gt; </span><span class="func">map</span><span class="def">(Var v){
+                </span><span class="keyw">return</span><span class="def"> Entry.</span><span class="func">create</span><span class="def">(v, Util.</span><span class="func">coinFlip</span><span class="def">());
+            }
+        }));
+    }
+}
+</span></pre></body></html>

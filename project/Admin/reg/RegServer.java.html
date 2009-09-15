@@ -1,0 +1,169 @@
+<html><head><title>RegServer.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="keyw">package</span><span class="def"> reg;
+
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.http.classes.*;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.http.server.*;
+
+</span><span class="keyw">import</span><span class="def"> java.io.FileInputStream;
+</span><span class="keyw">import</span><span class="def"> java.io.IOException;
+</span><span class="keyw">import</span><span class="def"> java.net.Socket;
+</span><span class="keyw">import</span><span class="def"> java.util.Date;
+
+</span><span class="keyw">import</span><span class="def"> logging.Logger;
+</span><span class="keyw">import</span><span class="def"> scg.Util;
+</span><span class="keyw">import</span><span class="def"> scg.Constants;
+</span><span class="keyw">import</span><span class="def"> scg.gen.ParseException;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PasswordFile;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PlayerSpec;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.lib.List;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.lib.Map;
+
+</span><span class="com">/**
+ * Player/Competition Registration Server. Waits for registration requests, and
+ * responds accordingly.
+ * &lt;p&gt;
+ * The registration protocol is as follows:
+ * &lt;ul&gt;
+ * &lt;li&gt;The Palyer sends a {@link gen.PlayerSpec PlayerSpec} as the body of a
+ * POST to the RegServer, including a URL argument.&lt;/li&gt;
+ * &lt;li&gt;The full URL request will be: &lt;quote&gt;
+ * &lt;tt&gt;RegServer.PATH_ENTRY+"?"+RegServer.PASS_URL_ARG+"="+PASSWORD&lt;/tt&gt;
+ *        &lt;/quote&gt;
+ *        where &lt;tt&gt;PASSWORD&lt;/tt&gt; is the Player/Team password as registered with
+ *        the Teaching Staff (to be described separately).&lt;/li&gt;
+ *        
+ *     &lt;li&gt;If registration succeeds, an HTTP Response with code 200 (OK) will be
+ *         sent back, with a short description "Player '...' has been Registered".&lt;li&gt;
+ *  &lt;/ul&gt;
+ *  &lt;/p&gt;
+ */</span><span class="def">
+@Server
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> RegServer {
+
+    </span><span class="com">/** Listening (incoming) Port */</span><span class="def">
+    @Port
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> PORT = Constants.REG_PORT;
+    
+    </span><span class="com">/** Password List */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Map&lt;</span><span class="prim">String</span><span class="def">, </span><span class="prim">String</span><span class="def">&gt; passwds;
+    </span><span class="com">/** Currently registered Players */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> List&lt;PlayerSpec&gt; players = List.</span><span class="func">create</span><span class="def">();
+    </span><span class="com">/** Logger for the Registration Process */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Logger log;
+
+    </span><span class="com">/**
+     * Create a RegServer with the given Passwords. Players/Teams will submit a
+     * Passsword, which we will 'encrypt' and store to verify the registration
+     * for competitions.
+     */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="func">RegServer</span><span class="def">(Map&lt;</span><span class="prim">String</span><span class="def">, </span><span class="prim">String</span><span class="def">&gt; ps, Logger l) {
+        passwds = ps;
+        log = l;
+    }
+
+    </span><span class="com">/**
+     * Create a RegServer with the given Passwords. Players/Teams will submit a
+     * Passsword, which we will 'encrypt' and store to verify the registration
+     * for competitions.
+     */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RegServer </span><span class="func">create</span><span class="def">(Map&lt;</span><span class="prim">String</span><span class="def">, </span><span class="prim">String</span><span class="def">&gt; ps, Logger l){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">RegServer</span><span class="def">(ps, l);
+    }
+
+    </span><span class="com">/**
+     * Create a RegServer with the given Logger. Passwords will be loaded from
+     * the usual File.
+     */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RegServer </span><span class="func">create</span><span class="def">(Logger l) </span><span class="keyw">throws</span><span class="def"> ParseException, IOException{
+        PasswordFile file = PasswordFile.</span><span class="func">parse</span><span class="def">(</span><span class="keyw">new</span><span class="def"> </span><span class="func">FileInputStream</span><span class="def">(Constants.PASS_FILE));
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">create</span><span class="def">(file.</span><span class="func">getPasswordMap</span><span class="def">(), l);
+    }
+
+    </span><span class="com">/** Main URL handler for the RegServer */</span><span class="def">
+    @</span><span class="func">Path</span><span class="def">(Constants.REG_PATH_ENTRY)
+    </span><span class="keyw">public</span><span class="def"> HTTPResp </span><span class="func">registerResp</span><span class="def">(HTTPReq req, Socket sock){
+        log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Registration Request from: "</span><span class="def">+sock.</span><span class="func">getInetAddress</span><span class="def">());
+        </span><span class="keyw">synchronized</span><span class="def"> (players) {
+            </span><span class="keyw">try</span><span class="def"> {
+                PlayerSpec spec = PlayerSpec.</span><span class="func">parse</span><span class="def">(req.</span><span class="func">getBodyString</span><span class="def">());
+                </span><span class="keyw">if</span><span class="def"> (!passwds.</span><span class="func">containsKey</span><span class="def">(spec.</span><span class="func">getName</span><span class="def">())) {
+                    </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">error</span><span class="def">(log.</span><span class="func">error</span><span class="def">(</span><span class="str">"Unknown Team Name '</span><span class="def"></span><span class="str">" + spec.getName() + "</span><span class="def"></span><span class="str">'"</span><span class="def">));
+                }
+                </span><span class="keyw">if</span><span class="def"> (players.</span><span class="func">contains</span><span class="def">(spec.</span><span class="func">sameNamePred</span><span class="def">())) {
+                    </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">error</span><span class="def">(log.</span><span class="func">error</span><span class="def">(</span><span class="str">"Player '</span><span class="def"></span><span class="str">" + spec.getName() + "</span><span class="def"></span><span class="str">' Already Registered"</span><span class="def">));
+                }
+
+                Map&lt;</span><span class="prim">String</span><span class="def">, </span><span class="prim">String</span><span class="def">&gt; args = req.</span><span class="func">urlArgs</span><span class="def">();
+                </span><span class="keyw">if</span><span class="def"> (!args.</span><span class="func">containsKey</span><span class="def">(Constants.PASS_URL_ARG)) {
+                    </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">error</span><span class="def">(log.</span><span class="func">error</span><span class="def">(</span><span class="str">"No Password Given"</span><span class="def">));
+                }
+                </span><span class="keyw">if</span><span class="def"> (</span><span class="func">verify</span><span class="def">(passwds.</span><span class="func">get</span><span class="def">(spec.</span><span class="func">getName</span><span class="def">()), args.</span><span class="func">get</span><span class="def">(Constants.PASS_URL_ARG))) {
+                    </span><span class="keyw">if</span><span class="def"> (spec.</span><span class="func">getAddress</span><span class="def">().</span><span class="func">equals</span><span class="def">(Constants.REG_AUTO)) {
+                        spec = spec.</span><span class="func">changeAddress</span><span class="def">(sock.</span><span class="func">getInetAddress</span><span class="def">().</span><span class="func">getHostAddress</span><span class="def">());
+                    }
+                    players = players.</span><span class="func">push</span><span class="def">(spec);
+                    log.</span><span class="func">notify</span><span class="def">(</span><span class="str">"Registering '</span><span class="def"></span><span class="str">" + spec.getName() + "</span><span class="def"></span><span class="str">' at "</span><span class="def"> + spec.</span><span class="func">getAddress</span><span class="def">() + </span><span class="str">":"</span><span class="def"> + spec.</span><span class="func">getPort</span><span class="def">());
+                    </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">textResponse</span><span class="def">(log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Player '</span><span class="def"></span><span class="str">" + spec.getName() + "</span><span class="def"></span><span class="str">' has been Registered"</span><span class="def">));
+                }
+                </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">error</span><span class="def">(log.</span><span class="func">error</span><span class="def">(</span><span class="str">"Password Does not Match Player '</span><span class="def"></span><span class="str">" + spec.getName() + "</span><span class="def"></span><span class="str">'"</span><span class="def">));
+            } </span><span class="keyw">catch</span><span class="def"> (ParseException pe) {
+                </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">error</span><span class="def">(log.</span><span class="func">error</span><span class="def">(</span><span class="str">"Error Parsing Registration (gen.PlayerSpec)"</span><span class="def">));
+            }
+        }
+    }
+
+    </span><span class="com">/** Encrypt and Verify the given Password agains the known 'Hash' */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">boolean</span><span class="def"> </span><span class="func">verify</span><span class="def">(</span><span class="prim">String</span><span class="def"> known, </span><span class="prim">String</span><span class="def"> unknownPlain){
+        </span><span class="keyw">return</span><span class="def"> known.</span><span class="func">equals</span><span class="def">(Util.</span><span class="func">encrypt</span><span class="def">(unknownPlain));
+    }
+
+    @</span><span class="func">Path</span><span class="def">()
+    </span><span class="keyw">public</span><span class="def"> HTTPResp </span><span class="func">defaultResp</span><span class="def">(HTTPReq req){
+        </span><span class="keyw">return</span><span class="def"> HTTPResp.</span><span class="func">error</span><span class="def">(</span><span class="str">"Unhandled Server Path '</span><span class="def"></span><span class="str">" + req.trimmedUrl() + "</span><span class="def"></span><span class="str">'"</span><span class="def">);
+    }
+
+    </span><span class="com">/** Run the registration server, until the competition starts. */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> List&lt;PlayerSpec&gt; </span><span class="func">runRegistration</span><span class="def">(</span><span class="prim">String</span><span class="def"> startDate) </span><span class="keyw">throws</span><span class="def"> IOException, java.text.ParseException{
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">runRegistration</span><span class="def">(Util.</span><span class="func">parseDate</span><span class="def">(startDate));
+    }
+
+    </span><span class="com">/** Run the registration server, until the competition starts. */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> List&lt;PlayerSpec&gt; </span><span class="func">runRegistration</span><span class="def">(Date start) </span><span class="keyw">throws</span><span class="def"> IOException{
+        ServerThread server = Factory.</span><span class="func">create</span><span class="def">(</span><span class="keyw">this</span><span class="def">);
+        log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Registration Opened"</span><span class="def">);
+        log.</span><span class="func">notify</span><span class="def">(</span><span class="str">"Competition will start at: "</span><span class="def"> + Util.</span><span class="func">printDate</span><span class="def">(start));
+        Util.</span><span class="func">waitUntil</span><span class="def">(start);
+        server.</span><span class="func">shutdown</span><span class="def">();
+        log.</span><span class="func">event</span><span class="def">(</span><span class="str">"Registration Closed"</span><span class="def">);
+        </span><span class="keyw">return</span><span class="def"> players;
+    }
+
+    </span><span class="com">/** Main Test for the Server. */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">main</span><span class="def">(</span><span class="prim">String</span><span class="def">[] args) </span><span class="keyw">throws</span><span class="def"> Exception{
+        </span><span class="keyw">if</span><span class="def"> (args.length != </span><span class="num">1</span><span class="def">) {
+            System.err.</span><span class="func">println</span><span class="def">(</span><span class="str">" !! Usage: java RegServer &lt;Comp Start&gt;"</span><span class="def">);
+        }
+        </span><span class="prim">String</span><span class="def"> start = args.length &gt; </span><span class="num">0</span><span class="def"> ? args[</span><span class="num">0</span><span class="def">] : </span><span class="str">"7/5/2009 2:40:00 PM EDT"</span><span class="def">;
+        RegServer server = RegServer.</span><span class="func">create</span><span class="def">(Logger.</span><span class="func">text</span><span class="def">(System.err));
+        System.err.</span><span class="func">println</span><span class="def">(</span><span class="str">"\nRegistered Teams:\n"</span><span class="def"> + server.</span><span class="func">runRegistration</span><span class="def">(start).</span><span class="func">toString</span><span class="def">());
+        System.err.</span><span class="func">println</span><span class="def">(</span><span class="str">"\n ******* DONE : "</span><span class="def"> + Util.</span><span class="func">printDate</span><span class="def">(Util.</span><span class="func">now</span><span class="def">()) + </span><span class="str">" ************"</span><span class="def">);
+    }
+}
+</span></pre></body></html>

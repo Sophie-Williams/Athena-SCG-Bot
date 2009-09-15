@@ -1,0 +1,522 @@
+<html><head><title>RelationCore.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="com">/**
+ * 
+ */</span><span class="def">
+</span><span class="keyw">package</span><span class="def"> edu.neu.ccs.evergreen.ir;
+
+</span><span class="com">/**
+ * @author mohsen
+ * Class RelationCore provides primitive operations for managing packed truth tables
+ * RelationCore is a utility class
+ * 
+ * Insertion Sort code reused from: http://www.java2s.com/Code/Java/Collections-Data-Structure/Selectionsort.htm
+ */</span><span class="def">
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> RelationCore {
+	
+	</span><span class="com">/*
+	 * Permutation Semantics constant SOURCE @see rename
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> SOURCE = </span><span class="num">0</span><span class="def">;
+	</span><span class="com">/*
+	 * Permutation Semantics constant TARGET @see rename
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> TARGET = </span><span class="num">1</span><span class="def">;
+ 
+	</span><span class="com">/**
+	 * The maximum rank handled by relationCore class
+	 * The minimum rank is 1 
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> MaxRank = </span><span class="num">5</span><span class="def">;
+	</span><span class="com">/**
+	 * Returns a magic number associated with a certain truth table column and value
+	 * The magic number associated with column number 0 of the truth table and value 0
+	 * is basically a sequence of alternating 0 and 1 bits, packed together in one integer.
+	 * The magic number associated with column number 0 of the truth table and value 1
+	 * is a sequence of alternating 1 and 0 bits, packed together in one integer.
+	 * In general: (getMagicNumber(r,n,0) == ~getMagicNumber(r,n,1))
+	 * For column 1: magic numbers are fromed from sequences of two 0's followed by two 1's
+	 * For column 2: magic numbers are formed from sequences of four 0's followed by four 1's
+	 * For column 3: magic numbers are formed from sequeneces of eight 0's followed by eight 1's
+	 * For column 4:magic numbers are formed from sequeneces of sixteen 0's followed by sixteen 1's
+	 * There is no other possible columns as long as we are using 32 bit integers
+	 * @param rank The rank of the relation, used to determine the truth table height and to check
+	 * the position argument
+	 * @param variablePosition the position of the desired magic number
+	 * @param value the value associated with the desired magic number
+	 * @return
+	 * @throws IllegalArgumentException
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">getMagicNumber</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> variablePosition, </span><span class="keyw">int</span><span class="def"> value) </span><span class="keyw">throws</span><span class="def"> IllegalArgumentException{
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkVariablePosition</span><span class="def">(variablePosition, rank);
+		</span><span class="func">checkValue</span><span class="def">(value);
+		
+		</span><span class="com">//Truth Table order</span><span class="def">
+		</span><span class="com">//each entry in this array represents a packed truth table column</span><span class="def">
+		</span><span class="keyw">int</span><span class="def">[] MagicNumbers= {
+				</span><span class="num">0x55555555</span><span class="def">, 
+				</span><span class="num">0x33333333</span><span class="def">,
+				</span><span class="num">0x0F0F0F0F</span><span class="def">,
+				</span><span class="num">0x00FF00FF</span><span class="def">,
+				</span><span class="num">0x0000FFFF</span><span class="def">
+				};
+		
+		</span><span class="com">// used to cut the truth table column at a certain height</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> mask = </span><span class="func">getMask</span><span class="def">(rank);
+		
+		</span><span class="com">//cut the truth table column</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> maskedColumn = ((MagicNumbers[variablePosition])&mask);
+		
+		</span><span class="com">//for value 0 return the masked truth table column</span><span class="def">
+		</span><span class="com">//for value 1 return the one's complement of the masked truth table column</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> returnval = (value==</span><span class="num">1</span><span class="def">?mask^maskedColumn:maskedColumn);
+	 </span><span class="keyw">return</span><span class="def"> returnval;
+	}
+	
+	</span><span class="com">/**
+	 * @param rank the rank for which a mask is seeked
+	 * @return 2^2^rank-1 taking care of the case where 2^2^n is out side
+	 * the integer range but 2^2^n-1 is not
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">getMask</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="keyw">int</span><span class="def">[] mask = {
+				</span><span class="num">0x1</span><span class="def">,
+				</span><span class="num">0x3</span><span class="def">,
+				</span><span class="num">0xF</span><span class="def">,
+				</span><span class="num">0xFF</span><span class="def">,
+				</span><span class="num">0xFFFF</span><span class="def">,
+				</span><span class="num">0xFFFFFFFF</span><span class="def">
+		};
+		</span><span class="keyw">return</span><span class="def"> mask[rank];
+	}
+	
+	</span><span class="com">/**
+	 * Checks if the variable at a given position is irrelevant to the relation
+	 * @param relationNumber The relation number
+	 * @param rank rank of the relation
+	 * @param variablePosition the variable to be checked 
+	 * @return true if the variable at vairablePosition is irrelevant otherwise returns false
+	 */</span><span class="def">
+	</span><span class="keyw">static</span><span class="def"> </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">boolean</span><span class="def"> </span><span class="func">isIrrelevant</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber,</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> variablePosition){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		</span><span class="func">checkVariablePosition</span><span class="def">(variablePosition, rank);
+		
+		</span><span class="com">//Note that the maximum value of variable position is less than rank by one</span><span class="def">
+		</span><span class="com">//Therefore, right shift by (1&lt;&lt;variablePosition) won't reach 32 therefore, it'll always execute</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> m = </span><span class="func">getMagicNumber</span><span class="def">(rank,variablePosition, </span><span class="num">1</span><span class="def">);
+		</span><span class="com">//Must use &gt;&gt;&gt; (unsigned shift right) coz relations of rank 5 might be -ve</span><span class="def">
+		</span><span class="keyw">return</span><span class="def"> ((relationNumber&m)&gt;&gt;&gt;(</span><span class="num">1</span><span class="def">&lt;&lt;variablePosition))==(relationNumber&(~m));
+
+</span><span class="com">/*		The old less efficient way of checking for variable irrelevance
+ * 		used for cross checking both methods now
+ * 
+ 		int r0 = reduce(relationNumber,variableNumber,0);
+		int r1 = reduce(relationNumber,variableNumber,1);
+		return (r0==r1);
+*/</span><span class="def">	}
+
+	
+	</span><span class="com">/**
+	 * Counts the number of relevantVariables in the given relation
+	 * @param relationNumber the relation number whose number of relevant variables is to be counted
+	 * @param rank rank of the given relation
+	 * @return The number of relevant variables in the given relation
+	 */</span><span class="def">
+	</span><span class="keyw">static</span><span class="def"> </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">numberOfRelevantVariables</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber, </span><span class="keyw">int</span><span class="def"> rank){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		
+		</span><span class="keyw">int</span><span class="def"> relevantVariables = rank;
+		</span><span class="keyw">for</span><span class="def"> (</span><span class="keyw">int</span><span class="def"> variablePosition=</span><span class="num">0</span><span class="def">;variablePosition&lt;rank;variablePosition++){
+			</span><span class="keyw">if</span><span class="def"> (</span><span class="func">isIrrelevant</span><span class="def">(relationNumber,rank, variablePosition)) relevantVariables--;
+		}
+		</span><span class="keyw">return</span><span class="def"> relevantVariables;
+	}
+	
+	</span><span class="com">/**
+	 * Checks if the given relation forces the given variablePosition
+	 * @param relationNumber
+	 * @param rank rank of the given relation
+	 * @param variablePosition positon of the varible checked for being forced
+	 * @return 0 if the given relation forces the given variable to 0
+	 *         1 if the given relation forces the given variable to 1
+	 *         -1 given relation doesn't forces the given variable
+	 */</span><span class="def">
+	</span><span class="keyw">static</span><span class="def"> </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">isForced</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber,</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> variablePosition){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		</span><span class="func">checkVariablePosition</span><span class="def">(variablePosition, rank);
+		
+		</span><span class="keyw">if</span><span class="def"> (</span><span class="func">isIrrelevant</span><span class="def">(relationNumber, rank, variablePosition)){
+			</span><span class="keyw">return</span><span class="def"> -</span><span class="num">1</span><span class="def">;
+		}</span><span class="keyw">else</span><span class="def">{
+			</span><span class="keyw">int</span><span class="def"> m = </span><span class="func">getMagicNumber</span><span class="def">(rank,variablePosition, </span><span class="num">1</span><span class="def">);
+			</span><span class="keyw">int</span><span class="def"> rm = relationNumber&m;
+			</span><span class="keyw">if</span><span class="def">(rm == </span><span class="num">0</span><span class="def">){
+				</span><span class="keyw">return</span><span class="def"> </span><span class="num">0</span><span class="def">;
+			}</span><span class="keyw">else</span><span class="def"> </span><span class="keyw">if</span><span class="def"> (rm==relationNumber){
+				</span><span class="keyw">return</span><span class="def"> </span><span class="num">1</span><span class="def">;
+			}</span><span class="keyw">else</span><span class="def">{
+				</span><span class="keyw">return</span><span class="def"> -</span><span class="num">1</span><span class="def">;
+			}
+		}		
+	}
+	
+	</span><span class="com">/**
+	 * starting at the given startPosition, get the position of the first variable forced by the given relation.
+	 * @param relationNumber relation number
+	 * @param rank rank of the given relation number
+	 * @param startPosition
+	 * @return -1 if nothing is forced
+	 *         the position of the first forced variable
+	 */</span><span class="def">
+	</span><span class="keyw">static</span><span class="def"> </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">firstForcedVariable</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber,</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> startPosition){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		</span><span class="func">checkVariablePosition</span><span class="def">(startPosition, rank);
+		
+		</span><span class="keyw">int</span><span class="def"> forcedVarPos = -</span><span class="num">1</span><span class="def">;
+		</span><span class="keyw">for</span><span class="def">(</span><span class="keyw">int</span><span class="def"> variablePosition=startPosition;variablePosition&lt;rank;variablePosition++){
+			</span><span class="keyw">if</span><span class="def">(</span><span class="func">isForced</span><span class="def">(relationNumber, rank, variablePosition)!=-</span><span class="num">1</span><span class="def">){
+				forcedVarPos = variablePosition;
+				</span><span class="keyw">break</span><span class="def">;
+			}
+		}
+		</span><span class="keyw">return</span><span class="def"> forcedVarPos;
+	}
+	
+	</span><span class="com">/**
+	 * NMaps one of the variables in a relation i.e. replaces it by it's complement
+	 * for example: nMapping x in Or(x,y,z) results in: or(!x,y,z)
+	 * @param relationNumber 
+	 * @param rank rank of the given relation
+	 * @param variablePosition the variable to be nmapped
+	 * @return The number of the given relation with the specified variable nmapped
+	 */</span><span class="def">
+	</span><span class="keyw">static</span><span class="def"> </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">nMap</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber,</span><span class="keyw">int</span><span class="def"> rank,</span><span class="keyw">int</span><span class="def"> variablePosition){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		</span><span class="func">checkVariablePosition</span><span class="def">(variablePosition, rank);
+		
+		</span><span class="keyw">int</span><span class="def"> m0 = </span><span class="func">getMagicNumber</span><span class="def">(rank, variablePosition, </span><span class="num">0</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> m1 = </span><span class="func">getMagicNumber</span><span class="def">(rank, variablePosition, </span><span class="num">1</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> s = (</span><span class="num">1</span><span class="def">&lt;&lt;variablePosition);
+		</span><span class="com">//Note: unsigned right shift</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> r = ((relationNumber&m0)&lt;&lt;s)|((relationNumber&m1)&gt;&gt;&gt;s);
+		</span><span class="keyw">return</span><span class="def"> r;
+	}
+
+	</span><span class="com">/**
+	 * Reduces a relation by assigning a value to one of its variables
+	 * @param relationNumber
+	 * @param rank
+	 * @param variablePosition
+	 * @param value
+	 * @return
+	 */</span><span class="def">
+	</span><span class="keyw">static</span><span class="def"> </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">reduce</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber,</span><span class="keyw">int</span><span class="def"> rank,</span><span class="keyw">int</span><span class="def"> variablePosition,</span><span class="keyw">int</span><span class="def"> value){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		</span><span class="func">checkVariablePosition</span><span class="def">(variablePosition, rank);
+		</span><span class="func">checkValue</span><span class="def">(value);
+		
+		</span><span class="keyw">int</span><span class="def"> m = </span><span class="func">getMagicNumber</span><span class="def">(rank, variablePosition, value);
+		</span><span class="keyw">int</span><span class="def"> rm = (relationNumber&m);
+		</span><span class="keyw">if</span><span class="def"> (value==</span><span class="num">0</span><span class="def">){
+			rm = rm|(rm&lt;&lt;(</span><span class="num">1</span><span class="def">&lt;&lt;variablePosition));
+		}</span><span class="keyw">else</span><span class="def">{
+			</span><span class="com">//unsigned right shift</span><span class="def">
+			rm = rm|(rm&gt;&gt;&gt;(</span><span class="num">1</span><span class="def">&lt;&lt;variablePosition));
+		}
+		</span><span class="keyw">return</span><span class="def"> rm; 		 
+	}
+	
+	</span><span class="com">/**
+	 * Swaps two vairables in a relation. When variables are swapped, The truth table order gets scrambled
+	 * rows of the truth table needs to be reordered to restore the correct truth table order.
+	 * Here are two exmples showing how the swap method works for two relations:
+	 * 1in3(x,y,z), x implies z. We are swapping variables at positions 0,2 i.e: x ,z
+	 * 
+	 *      original relations            scrambled truth table      restored truth table ordering  
+	 * Row# x y z 1in3(x,y,z)  x=&gt;z  ||  z y x 1in3(z,y,x) x=&gt;z  ||  z y x 1in3(z,y,x) x=&gt;z old_Row#
+	 * ------------------------------||--------------------------||---------------------------------
+	 * 0    0 0 0   0           1    ||  0 0 0   0          1    ||  0 0 0    0         1      0
+	 * 1    0 0 1   1           1    ||  1 0 0   1          1    ||  0 0 1    1         0      4
+	 * 2    0 1 0   1           1    ||  0 1 0   1          1    ||  0 1 0    1         1      2
+	 * 3    0 1 1   0           1    ||  1 1 0   0          1    ||  0 1 1    0         0      6
+	 * 4    1 0 0   1           0    ||  0 0 1   1          0    ||  1 0 0    1         1      1
+	 * 5    1 0 1   0           1    ||  1 0 1   0          1    ||  1 0 1    0         1      5
+	 * 6    1 1 0   0           0    ||  0 1 1   0          0    ||  1 1 0    0         1      3
+	 * 7    1 1 1   0           1    ||  1 1 1   0          1    ||  1 1 1    0         1      7
+	 * 
+	 * @param relationNumber
+	 * @param rank
+	 * @param variablePosition1
+	 * @param variablePosition2
+	 * @return
+	 */</span><span class="def">
+	</span><span class="keyw">static</span><span class="def"> </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">swap</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber,</span><span class="keyw">int</span><span class="def"> rank,</span><span class="keyw">int</span><span class="def"> variablePosition1,</span><span class="keyw">int</span><span class="def"> variablePosition2){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		</span><span class="func">checkVariablePosition</span><span class="def">(variablePosition1, rank);
+		</span><span class="func">checkVariablePosition</span><span class="def">(variablePosition1, rank);
+		
+		</span><span class="com">//Swapping the variable with itself</span><span class="def">
+		</span><span class="keyw">if</span><span class="def"> (variablePosition1==variablePosition2) </span><span class="keyw">return</span><span class="def"> relationNumber;
+		</span><span class="com">//swap Dim1,Dim2; </span><span class="def">
+		</span><span class="com">//Can't we tell java to automatically do the swap by just stating the condition that dim1&gt;dim2</span><span class="def">
+		</span><span class="keyw">if</span><span class="def">(variablePosition1&gt;variablePosition2) {
+			</span><span class="keyw">int</span><span class="def"> tmp=variablePosition1;
+			variablePosition1=variablePosition2;
+			variablePosition2=tmp;
+		}
+		
+		</span><span class="keyw">int</span><span class="def"> d10 = </span><span class="func">getMagicNumber</span><span class="def">(rank, variablePosition1, </span><span class="num">0</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> d11 = </span><span class="func">getMagicNumber</span><span class="def">(rank, variablePosition1, </span><span class="num">1</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> d20 = </span><span class="func">getMagicNumber</span><span class="def">(rank, variablePosition2, </span><span class="num">0</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> d21 = </span><span class="func">getMagicNumber</span><span class="def">(rank, variablePosition2, </span><span class="num">1</span><span class="def">);		
+		
+		</span><span class="com">//1in3(x,y,z), swap x,z</span><span class="def">
+		</span><span class="com">//x=&gt;z</span><span class="def">
+		</span><span class="com">/*
+		 *      original relations            scrambled truth table      restored truth table ordering  
+		 * Row# x y z 1in3(x,y,z)  x=&gt;z  ||  z y x 1in3(z,y,x) x=&gt;z  ||  z y x 1in3(z,y,x) x=&gt;z old_Row#
+		 * ------------------------------||--------------------------||---------------------------------
+		 * 0    0 0 0   0           1    ||  0 0 0   0          1    ||  0 0 0    0         1      0
+		 * 1    0 0 1   1           1    ||  1 0 0   1          1    ||  0 0 1    1         0      4
+		 * 2    0 1 0   1           1    ||  0 1 0   1          1    ||  0 1 0    1         1      2
+		 * 3    0 1 1   0           1    ||  1 1 0   0          1    ||  0 1 1    0         0      6
+		 * 4    1 0 0   1           0    ||  0 0 1   1          0    ||  1 0 0    1         1      1
+ 		 * 5    1 0 1   0           1    ||  1 0 1   0          1    ||  1 0 1    0         1      5
+ 		 * 6    1 1 0   0           0    ||  0 1 1   0          0    ||  1 1 0    0         1      3
+		 * 7    1 1 1   0           1    ||  1 1 1   0          1    ||  1 1 1    0         1      7
+		 */</span><span class="def">
+		</span><span class="com">//Rows with either 0 or 1 in both columns stay the same</span><span class="def">
+		</span><span class="com">//e.g. row 0, row 7, other rows depending on the two swapped columns</span><span class="def">
+		</span><span class="com">//same_filter selects these rows based on the columns</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> same_filter = d11&d21|d10&d20;
+		</span><span class="com">//Assuming that column1 is to the right of column2 which is valid by the swapping we do at the begining of this method</span><span class="def">
+		</span><span class="com">//Rows where column1 is 0 and column2 is 1 must be moved up because after doing the swap we'll have a 0 in column 2 and 1 in column 1</span><span class="def">
+		</span><span class="com">//simply because the 0 in column2 means that the row number of column2 becomes smaller than the row number of column1. to restore the proper numbering</span><span class="def">
+		</span><span class="com">//we have to swap the two rows</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> up_filter = d21&d10;
+		</span><span class="com">//Select rows to be moved down. the reasoning is similar to up_filter</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> dn_filter = d20&d11;
+		</span><span class="com">//shift_amount is the difference between the row number in the before we do the swap and the row number after we do the swap</span><span class="def">
+		</span><span class="com">//for example if we are swapping the variable at position 2 with the variable at position 0 then the rows to be swapped are of the form		</span><span class="def">
+		</span><span class="com">// bbbbb1b0 and bbbbb0b1 where b stands for an arbitrary bits that stays the same.</span><span class="def">
+		</span><span class="com">// Noting that: bbbbb1b0 - bbbbb0b1 is the same as: (bbbbb1b0-bbbbb0b0) - (bbbbb0b1-bbbbb0b0)</span><span class="def">
+		</span><span class="com">// by subtracting bbbbb0b0 from both numbers we get</span><span class="def">
+		</span><span class="com">// 00000100 and 00000001</span><span class="def">
+		</span><span class="com">// Therefore we need to shift both ways by 2^variablePosition2 - 2^variablePosition1</span><span class="def">
+		
+		</span><span class="keyw">int</span><span class="def"> shift_amt = (</span><span class="num">1</span><span class="def">&lt;&lt;variablePosition2)-(</span><span class="num">1</span><span class="def">&lt;&lt;variablePosition1); 
+		
+		</span><span class="com">// rows to stay at their locations</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> s = relationNumber&same_filter;
+		</span><span class="com">//rows to go up</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> u = relationNumber&up_filter;
+		</span><span class="com">//rows to go down</span><span class="def">
+		</span><span class="keyw">int</span><span class="def"> d = relationNumber&dn_filter;
+		
+		</span><span class="com">//move the rows and combine the three components</span><span class="def">
+		</span><span class="keyw">return</span><span class="def"> (s|(d&lt;&lt;shift_amt)|(u&gt;&gt;&gt;shift_amt));
+	}
+	
+	</span><span class="com">/**
+	 * permute the variables in the given relationNumber according to the given permutation
+	 * fix the truth table order after doing the permutation. @see swap
+	 * @param relationNumber
+	 * @param rank rank of the given relation
+	 * @param permutationSemantics specifies how the permutation should be applied. can be either RelationCore.SOURCE or RelationCore.TARGET
+	 * for example: &lt;p&gt;
+	 *    for the relation: R(v2,v1,v0) &lt;p&gt;
+	 *    and the permutation {1,2,0} 
+	 *    SOURCE semantics means that v0 goes to position1, v1 goes to position2, v2 goes to position 0
+	 *    TARGET semantics means that position0 gets v1, position1 gets v2, position2 gets v0
+	 * @param permutation an array of variable positions describing the desired location of every variables
+	 * for example: &lt;p&gt;
+	 *    for the relation: R(v2,v1,v0) &lt;p&gt;
+	 *    and the permutation {1,2,0} means v0 goes to position1, v1 goes to position2, v2 goes to position 0
+	 * @return the modified relationNumber
+	 */</span><span class="def">
+	</span><span class="keyw">static</span><span class="def"> </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">renme</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber,</span><span class="keyw">int</span><span class="def"> rank,</span><span class="keyw">int</span><span class="def"> permutationSemantics, </span><span class="keyw">int</span><span class="def">...permutation){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		</span><span class="func">checkPermutation</span><span class="def">(rank, permutation);
+		</span><span class="func">checkPermutationSemantics</span><span class="def">(permutationSemantics);
+		
+		</span><span class="com">//sort dimensions</span><span class="def">
+	    </span><span class="keyw">int</span><span class="def"> out, </span><span class="keyw">in</span><span class="def">, min, tmp;
+
+	    </span><span class="keyw">for</span><span class="def"> (out = </span><span class="num">0</span><span class="def">; out &lt; rank - </span><span class="num">1</span><span class="def">; out++){
+	      min = out; </span><span class="com">// minimum</span><span class="def">
+	      </span><span class="keyw">for</span><span class="def"> (</span><span class="keyw">in</span><span class="def"> = out + </span><span class="num">1</span><span class="def">; </span><span class="keyw">in</span><span class="def"> &lt; rank; </span><span class="keyw">in</span><span class="def">++){
+	        </span><span class="com">// inner loop</span><span class="def">
+	        </span><span class="keyw">if</span><span class="def"> (permutation[</span><span class="keyw">in</span><span class="def">] &lt; permutation[min]) </span><span class="com">// if min greater,</span><span class="def">
+	          min = </span><span class="keyw">in</span><span class="def">; </span><span class="com">// a new min</span><span class="def">
+	      }
+	      </span><span class="com">//swap elements at min,out</span><span class="def">
+	      tmp = permutation[out];
+	      permutation[out] = permutation[min];
+	      permutation[min] = tmp;
+	      </span><span class="com">//see</span><span class="def">
+	      </span><span class="keyw">switch</span><span class="def">(permutationSemantics){
+	      </span><span class="keyw">case</span><span class="def"> SOURCE:
+	    	  relationNumber = </span><span class="func">swap</span><span class="def">(relationNumber,rank,permutation[min],permutation[out]);
+	    	  </span><span class="keyw">break</span><span class="def">;
+	      </span><span class="keyw">case</span><span class="def"> TARGET:
+	    	  relationNumber = </span><span class="func">swap</span><span class="def">(relationNumber,rank,min,out);
+	    	  </span><span class="keyw">break</span><span class="def">;
+	    	  </span><span class="keyw">default</span><span class="def">: </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"Internal Error: Unsupported semantics"</span><span class="def">+permutationSemantics);
+	      }
+	    }	    
+		</span><span class="keyw">return</span><span class="def"> relationNumber;
+	}
+
+	</span><span class="com">/**
+	 * returns the number of ones in the given relationNumber
+	 * @param relationNumber
+	 * @param rank
+	 * @return
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">ones</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber,</span><span class="keyw">int</span><span class="def"> rank){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		
+		</span><span class="keyw">int</span><span class="def"> c=</span><span class="num">0</span><span class="def">;
+		</span><span class="keyw">for</span><span class="def">(</span><span class="keyw">int</span><span class="def"> i=</span><span class="num">0</span><span class="def">;i&lt;(</span><span class="num">1</span><span class="def">&lt;&lt;rank);i++){
+			</span><span class="keyw">if</span><span class="def"> ((relationNumber&(</span><span class="num">1</span><span class="def">&lt;&lt;i))!=</span><span class="num">0</span><span class="def">) c++;
+		}
+		</span><span class="keyw">return</span><span class="def"> c;
+	}
+	</span><span class="com">/**
+	 * @param relationNumber
+	 * @param rank
+	 * @param numberOfTrueVars used to identify a set of rows in the truth table
+	 * @return counts the number of ones corresponding to truth table rows with the given number of true variables
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">q</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber, </span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> numberOfTrueVars){
+		</span><span class="func">checkRank</span><span class="def">(rank);
+		</span><span class="func">checkRelationNumber</span><span class="def">(relationNumber, rank);
+		</span><span class="keyw">if</span><span class="def">(numberOfTrueVars&gt;rank) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"A relation of rank "</span><span class="def">+rank+</span><span class="str">" can have up to "</span><span class="def">+rank+</span><span class="str">" true vars"</span><span class="def">);
+		
+		</span><span class="keyw">int</span><span class="def"> m = RelationNumberUtil.</span><span class="func">xTrueVars</span><span class="def">(rank, numberOfTrueVars);
+		</span><span class="keyw">return</span><span class="def"> </span><span class="func">ones</span><span class="def">(relationNumber&m, rank);
+	}
+	
+	</span><span class="com">/**
+	 * Checks if the given Relation number argument is within the range of relations of the given rank
+	 * for example: relations of rank 3 must be within the range [0,255]
+	 * in general a relation of rank n must be within the range [0,2^2^n-1]
+	 * The method is used to check the arguments of a method. Therefore, it works by throwing an instance of 
+	 * IllegalArgumentException if the relationNumber is invalid otherwise nothing is thrown
+	 * @param RelationNumber relation number to be checked for validity
+	 * @param Rank rank of the given relation number to check against
+	 * @throws IllegalArgumentException thrown in case the relation number is outside the
+	 * range of valid relation numbers for the given rank
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">checkRelationNumber</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber, </span><span class="keyw">int</span><span class="def"> rank) </span><span class="keyw">throws</span><span class="def"> IllegalArgumentException{
+		</span><span class="keyw">int</span><span class="def"> upperbound = </span><span class="func">getMask</span><span class="def">(rank);
+		</span><span class="keyw">if</span><span class="def">((relationNumber&(~upperbound))!=</span><span class="num">0</span><span class="def">)
+			</span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"RelationNumber "</span><span class="def">+relationNumber+</span><span class="str">" out of range for rank "</span><span class="def">+rank);
+	</span><span class="com">//  Sometimes the relation number uses the bit sign</span><span class="def">
+	</span><span class="com">// Therefore it is incorrect to check the relation number to be greater than 0</span><span class="def">
+	</span><span class="com">//	if((relationNumber&lt;0)||(relationNumber&gt;=upperbound)) </span><span class="def">
+	</span><span class="com">//		throw new IllegalArgumentException("RelationNumber "+relationNumber+" out of range for rank "+rank); </span><span class="def">
+	}
+
+	</span><span class="com">/**
+	 * Checks if the given variablePosition argument is valid for the given rank
+	 * for example: relations of rank 3 have variables only at positions 2,1,0
+	 * in general a relation of rank n can have variables at positions in range [0,n-1]
+	 * The method is used to check the arguments of a method. Therefore, it works by throwing an instance of 
+	 * IllegalArgumentException if the variable position is invalid otherwise nothing is thrown
+	 * @param variablePosition the checked position
+	 * @param rank the rank of the relation to check the position agaiest
+	 * @throws IllegalArgumentException thrown in case of invalid variable position
+	 */</span><span class="def">	
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">checkVariablePosition</span><span class="def">(</span><span class="keyw">int</span><span class="def"> variablePosition, </span><span class="keyw">int</span><span class="def"> rank) </span><span class="keyw">throws</span><span class="def"> IllegalArgumentException{
+		</span><span class="keyw">if</span><span class="def">((variablePosition&lt;</span><span class="num">0</span><span class="def">)||(variablePosition&gt;=rank))
+				</span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"Variable Position "</span><span class="def">+variablePosition+</span><span class="str">" is invalid for relations of rank "</span><span class="def">+rank);
+	}
+	
+	</span><span class="com">/**
+	 * Checks if the given value is either 0 or 1. An IllegalArgumentException is thrown if value is not 0 nor 1.
+	 * @param value the value that needs to be checked
+	 * @throws IllegalArgumentException
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">checkValue</span><span class="def">(</span><span class="keyw">int</span><span class="def"> value) </span><span class="keyw">throws</span><span class="def"> IllegalArgumentException{
+		</span><span class="keyw">if</span><span class="def">((value&lt;</span><span class="num">0</span><span class="def">)||(value&gt;</span><span class="num">1</span><span class="def">))
+			</span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"Variables can only be either 0 or 1. recieved "</span><span class="def">+value);
+	}
+	
+	</span><span class="com">/**
+	 * Checks if the given rank is valid. 32 Bit integers allow for up to rank 5
+	 * Rank has to be &gt;=1.
+	 * If the rank is outside the range an IllegalArgumentExcepton is thrown
+	 * @param rank the rank to be checked
+	 * @throws IllegalArgumentException
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">checkRank</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank) </span><span class="keyw">throws</span><span class="def"> IllegalArgumentException{
+		</span><span class="keyw">if</span><span class="def">((rank&lt;</span><span class="num">1</span><span class="def">)||(rank&gt;MaxRank))
+			</span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"Supported ranks are within [1,5]. Sent rank "</span><span class="def">+rank);
+	}
+	
+	</span><span class="com">/**
+	 * For the given permutation check the following:&lt;p&gt;
+	 * 1. The number of elements of the permutation must be equal to the given rank
+	 * 2. every element in the permutation must be a valid variable position for the given rank
+	 * 3. Non of the elements is repeated.
+	 * 
+	 * @param rank 
+	 * @param permutation
+	 * @throws IllegalArgumentException thown if any of the above checks fail
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">checkPermutation</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank,</span><span class="keyw">int</span><span class="def">...permutation) </span><span class="keyw">throws</span><span class="def"> IllegalArgumentException{
+		</span><span class="keyw">if</span><span class="def">(permutation.length!=rank)
+			</span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"Invalid Permutation: incorrect number of variable positions"</span><span class="def">);
+
+		</span><span class="com">//initialize a counter array</span><span class="def">
+		</span><span class="keyw">int</span><span class="def">[] positions = </span><span class="keyw">new</span><span class="def"> </span><span class="keyw">int</span><span class="def">[rank];
+		</span><span class="keyw">for</span><span class="def">(</span><span class="keyw">int</span><span class="def"> i = </span><span class="num">0</span><span class="def">;i&lt;rank;i++){
+			positions[i] = </span><span class="num">0</span><span class="def">;
+		}
+		
+		</span><span class="keyw">for</span><span class="def">(</span><span class="keyw">int</span><span class="def"> variablePosition: permutation){
+			</span><span class="func">checkVariablePosition</span><span class="def">(variablePosition, rank);
+			</span><span class="keyw">if</span><span class="def"> (positions[variablePosition]!=</span><span class="num">0</span><span class="def">)
+				</span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"Invalid Permutation: position "</span><span class="def">+variablePosition+</span><span class="str">" repeated"</span><span class="def">);
+			positions[variablePosition]++;
+		}
+	}
+	</span><span class="com">/**
+	 * Checks if the given value is either 0 or 1. An IllegalArgumentException is thrown if value is not 0 nor 1.
+	 * @param value the value that needs to be checked
+	 * @throws IllegalArgumentException
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">checkPermutationSemantics</span><span class="def">(</span><span class="keyw">int</span><span class="def"> permutationSemantics) </span><span class="keyw">throws</span><span class="def"> IllegalArgumentException{
+		</span><span class="keyw">if</span><span class="def">(!((permutationSemantics==SOURCE)||(permutationSemantics==TARGET)))
+			</span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"Illegal permutation semantics. Should be either RelationCore.SOURCE or RelationCore.TARGET"</span><span class="def">);
+	}
+}
+</span></pre></body></html>

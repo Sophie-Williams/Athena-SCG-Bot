@@ -1,0 +1,318 @@
+<html><head><title>AdminState.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="com">// ** This class was generated with DemFGen (vers:06/04/2009)</span><span class="def">
+
+</span><span class="keyw">package</span><span class="def"> scg.gen;
+
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.demfgen.lib.Empty;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.demfgen.lib.Entry;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.demfgen.lib.List;
+</span><span class="keyw">import</span><span class="def"> edu.neu.ccs.demeterf.demfgen.lib.Map;
+
+</span><span class="com">/** Representation of AdminState */</span><span class="def">
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> AdminState {
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Map&lt;PlayerID, PlayerSpec&gt; players;
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Map&lt;PlayerID, PlayerStore&gt; store;
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Map&lt;PlayerID, </span><span class="prim">Double</span><span class="def">&gt; accounts;
+
+    </span><span class="com">/** Construct a(n) AdminState Instance */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="func">AdminState</span><span class="def">(Map&lt;PlayerID, PlayerSpec&gt; players,
+            Map&lt;PlayerID, PlayerStore&gt; store, Map&lt;PlayerID, </span><span class="prim">Double</span><span class="def">&gt; accounts) {
+        </span><span class="keyw">this</span><span class="def">.players = players;
+        </span><span class="keyw">this</span><span class="def">.store = store;
+        </span><span class="keyw">this</span><span class="def">.accounts = accounts;
+    }
+
+    </span><span class="com">/** Is the given object Equal to this AdminState? */</span><span class="def">
+    @Override
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">boolean</span><span class="def"> </span><span class="func">equals</span><span class="def">(</span><span class="prim">Object</span><span class="def"> o){
+        </span><span class="keyw">if</span><span class="def"> (!(o </span><span class="keyw">instanceof</span><span class="def"> AdminState)) {
+            </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">false</span><span class="def">;
+        }
+        </span><span class="keyw">if</span><span class="def"> (o == </span><span class="keyw">this</span><span class="def">) {
+            </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">true</span><span class="def">;
+        }
+        AdminState oo = (AdminState) o;
+        </span><span class="keyw">return</span><span class="def"> ((</span><span class="prim">Object</span><span class="def">) players).</span><span class="func">equals</span><span class="def">(oo.players)
+                && ((</span><span class="prim">Object</span><span class="def">) store).</span><span class="func">equals</span><span class="def">(oo.store)
+                && ((</span><span class="prim">Object</span><span class="def">) accounts).</span><span class="func">equals</span><span class="def">(oo.accounts);
+    }
+
+    </span><span class="com">/** Parse an instance of AdminState from the given String */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> AdminState </span><span class="func">parse</span><span class="def">(</span><span class="prim">String</span><span class="def"> inpt) </span><span class="keyw">throws</span><span class="def"> ParseException{
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">TheParser</span><span class="def">(</span><span class="keyw">new</span><span class="def"> java.io.</span><span class="func">StringReader</span><span class="def">(inpt)).</span><span class="func">parse_AdminState</span><span class="def">();
+    }
+
+    </span><span class="com">/** Parse an instance of AdminState from the given Stream */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> AdminState </span><span class="func">parse</span><span class="def">(java.io.InputStream inpt)
+            </span><span class="keyw">throws</span><span class="def"> ParseException{
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">TheParser</span><span class="def">(inpt).</span><span class="func">parse_AdminState</span><span class="def">();
+    }
+
+    </span><span class="com">/** Parse an instance of AdminState from the given Reader */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> AdminState </span><span class="func">parse</span><span class="def">(java.io.Reader inpt) </span><span class="keyw">throws</span><span class="def"> ParseException{
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">TheParser</span><span class="def">(inpt).</span><span class="func">parse_AdminState</span><span class="def">();
+    }
+
+    </span><span class="com">/** Field Class for AdminState.players */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">class</span><span class="def"> players </span><span class="keyw">extends</span><span class="def"> edu.neu.ccs.demeterf.control.Fields.any {
+    }
+
+    </span><span class="com">/** Field Class for AdminState.store */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">class</span><span class="def"> store </span><span class="keyw">extends</span><span class="def"> edu.neu.ccs.demeterf.control.Fields.any {
+    }
+
+    </span><span class="com">/** Field Class for AdminState.accounts */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">class</span><span class="def"> accounts </span><span class="keyw">extends</span><span class="def">
+            edu.neu.ccs.demeterf.control.Fields.any {
+    }
+
+    </span><span class="com">/** hate doing this */</span><span class="def">
+    </span><span class="com">/** Mutable state begins here */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">int</span><span class="def"> currChallengeID = </span><span class="num">500</span><span class="def">;
+
+    </span><span class="keyw">private</span><span class="def"> Map&lt;</span><span class="prim">Integer</span><span class="def">, OfferedChallenge&gt; offeredChallenges = </span><span class="keyw">new</span><span class="def"> Map&lt;</span><span class="prim">Integer</span><span class="def">, OfferedChallenge&gt;(
+            </span><span class="keyw">new</span><span class="def"> Empty&lt;Entry&lt;</span><span class="prim">Integer</span><span class="def">, OfferedChallenge&gt;&gt;());
+
+    </span><span class="keyw">private</span><span class="def"> Map&lt;</span><span class="prim">Integer</span><span class="def">, AcceptedChallenge&gt; acceptedChallenges = </span><span class="keyw">new</span><span class="def"> Map&lt;</span><span class="prim">Integer</span><span class="def">, AcceptedChallenge&gt;(
+            </span><span class="keyw">new</span><span class="def"> Empty&lt;Entry&lt;</span><span class="prim">Integer</span><span class="def">, AcceptedChallenge&gt;&gt;());
+
+    </span><span class="keyw">private</span><span class="def"> Map&lt;</span><span class="prim">Integer</span><span class="def">, ProvidedChallenge&gt; providedChallenges = </span><span class="keyw">new</span><span class="def"> Map&lt;</span><span class="prim">Integer</span><span class="def">, ProvidedChallenge&gt;(
+            </span><span class="keyw">new</span><span class="def"> Empty&lt;Entry&lt;</span><span class="prim">Integer</span><span class="def">, ProvidedChallenge&gt;&gt;());
+
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">setCurrChallengeID</span><span class="def">(</span><span class="keyw">int</span><span class="def"> currChallengeID){
+        </span><span class="keyw">this</span><span class="def">.currChallengeID = currChallengeID;
+    }
+
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">setOfferedChallenges</span><span class="def">(
+            Map&lt;</span><span class="prim">Integer</span><span class="def">, OfferedChallenge&gt; offeredChallenges){
+        </span><span class="keyw">this</span><span class="def">.offeredChallenges = offeredChallenges;
+    }
+
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">setAcceptedChallenges</span><span class="def">(
+            Map&lt;</span><span class="prim">Integer</span><span class="def">, AcceptedChallenge&gt; acceptedChallenges){
+        </span><span class="keyw">this</span><span class="def">.acceptedChallenges = acceptedChallenges;
+    }
+
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">setProvidedChallenges</span><span class="def">(
+            Map&lt;</span><span class="prim">Integer</span><span class="def">, ProvidedChallenge&gt; providedChallenges){
+        </span><span class="keyw">this</span><span class="def">.providedChallenges = providedChallenges;
+    }
+
+    </span><span class="com">/** Mutable state ends here */</span><span class="def">
+
+    AdminState </span><span class="func">applyOfferedTransaction</span><span class="def">(PlayerID pid, OfferTrans ot){
+        OfferedChallenge challenge = </span><span class="keyw">new</span><span class="def"> </span><span class="func">OfferedChallenge</span><span class="def">(currChallengeID, pid,
+                ot.pred, ot.price);
+        Map&lt;</span><span class="prim">Integer</span><span class="def">, OfferedChallenge&gt; offeredChallenges = </span><span class="keyw">this</span><span class="def">.offeredChallenges
+                .</span><span class="func">put</span><span class="def">(challenge.key, challenge);
+        PlayerStore ps = store.</span><span class="func">get</span><span class="def">(pid).</span><span class="func">addOfferedChallenge</span><span class="def">(challenge);
+        AdminState ret = </span><span class="keyw">new</span><span class="def"> </span><span class="func">AdminState</span><span class="def">(players, store.</span><span class="func">put</span><span class="def">(pid, ps), accounts);
+        ret.</span><span class="func">setCurrChallengeID</span><span class="def">(currChallengeID + </span><span class="num">1</span><span class="def">);
+        ret.</span><span class="func">setOfferedChallenges</span><span class="def">(offeredChallenges);
+        </span><span class="keyw">return</span><span class="def"> ret;
+    }
+
+    AdminState </span><span class="func">applyAcceptedTransaction</span><span class="def">(PlayerID challengee, AcceptTrans at){
+
+        </span><span class="keyw">int</span><span class="def"> challengeId = at.challengeid;
+        OfferedChallenge toBeAcceptedChallenge = offeredChallenges
+                .</span><span class="func">get</span><span class="def">(challengeId);
+        PlayerID challenger = toBeAcceptedChallenge.challenger;
+
+        AcceptedChallenge acceptedChallenge = toBeAcceptedChallenge
+                .</span><span class="func">accept</span><span class="def">(challengee);
+
+        </span><span class="com">// remove from offered challenges</span><span class="def">
+        Map&lt;</span><span class="prim">Integer</span><span class="def">, OfferedChallenge&gt; offeredChallenges = </span><span class="keyw">this</span><span class="def">.offeredChallenges
+                .</span><span class="func">remove</span><span class="def">(challengeId);
+        </span><span class="com">// add to accepted challenges</span><span class="def">
+        Map&lt;</span><span class="prim">Integer</span><span class="def">, AcceptedChallenge&gt; acceptedChallenges = </span><span class="keyw">this</span><span class="def">.acceptedChallenges
+                .</span><span class="func">put</span><span class="def">(challengeId, acceptedChallenge);
+
+        </span><span class="com">// add to challengee.accepted</span><span class="def">
+        PlayerStore challengeePS = store.</span><span class="func">get</span><span class="def">(challengee).</span><span class="func">addAcceptedChallenge</span><span class="def">(
+                acceptedChallenge);
+        </span><span class="com">// remove from challenger.offered</span><span class="def">
+        PlayerStore challengerPS = store.</span><span class="func">get</span><span class="def">(challenger)
+                .</span><span class="func">removeOfferedChallenge</span><span class="def">(toBeAcceptedChallenge);
+
+        Map&lt;PlayerID, PlayerStore&gt; newStore = store.</span><span class="func">put</span><span class="def">(challengee,
+                challengeePS).</span><span class="func">put</span><span class="def">(challenger, challengerPS);
+
+        </span><span class="keyw">double</span><span class="def"> challengeeBalance = accounts.</span><span class="func">get</span><span class="def">(challengee);
+        </span><span class="keyw">double</span><span class="def"> challengerBalance = accounts.</span><span class="func">get</span><span class="def">(challenger);
+        </span><span class="keyw">double</span><span class="def"> price = toBeAcceptedChallenge.price;
+
+        Map&lt;PlayerID, </span><span class="prim">Double</span><span class="def">&gt; newAccounts = accounts.</span><span class="func">put</span><span class="def">(challengee,
+                challengeeBalance - price).</span><span class="func">put</span><span class="def">(challenger,
+                challengerBalance + price);
+
+        </span><span class="com">// create and return new admin state</span><span class="def">
+        AdminState ret = </span><span class="keyw">new</span><span class="def"> </span><span class="func">AdminState</span><span class="def">(players, newStore, newAccounts);
+        ret.</span><span class="func">setOfferedChallenges</span><span class="def">(offeredChallenges);
+        ret.</span><span class="func">setAcceptedChallenges</span><span class="def">(acceptedChallenges);
+        </span><span class="keyw">return</span><span class="def"> ret;
+    }
+
+    </span><span class="com">// AdminState applyProvideTransaction(ProvideTrans pt){</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// int challengeId = pt.challengeid;</span><span class="def">
+    </span><span class="com">// AcceptedChallenge toBeProvidedChallenge = acceptedChallenges</span><span class="def">
+    </span><span class="com">// .get(challengeId);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// PlayerID challenger = toBeProvidedChallenge.challenger;</span><span class="def">
+    </span><span class="com">// PlayerID challengee = toBeProvidedChallenge.challengee;</span><span class="def">
+    </span><span class="com">// Problem problem = pt.inst;</span><span class="def">
+    </span><span class="com">// ProvidedChallenge providedChallenge = toBeProvidedChallenge</span><span class="def">
+    </span><span class="com">// .provide(problem);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// // remove from accepted challenges</span><span class="def">
+    </span><span class="com">// Map&lt;Integer, AcceptedChallenge&gt; acceptedChallenges =</span><span class="def">
+    </span><span class="com">// this.acceptedChallenges</span><span class="def">
+    </span><span class="com">// .remove(challengeId);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// // add to provided challenges</span><span class="def">
+    </span><span class="com">// Map&lt;Integer, ProvidedChallenge&gt; providedChallenges =</span><span class="def">
+    </span><span class="com">// this.providedChallenges</span><span class="def">
+    </span><span class="com">// .put(challengeId, providedChallenge);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// // remove from challengee.accepted</span><span class="def">
+    </span><span class="com">// PlayerStore challengeePS = store.get(challengee)</span><span class="def">
+    </span><span class="com">// .removeAcceptedChallenge(toBeProvidedChallenge);</span><span class="def">
+    </span><span class="com">// // add to challengee.provided</span><span class="def">
+    </span><span class="com">// challengeePS = challengeePS.addProvidedChallenge(providedChallenge);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// Map&lt;PlayerID, PlayerStore&gt; newStore = store.put(challengee,</span><span class="def">
+    </span><span class="com">// challengeePS);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// // create and return new admin state</span><span class="def">
+    </span><span class="com">// AdminState ret = new AdminState(players, newStore, accounts);</span><span class="def">
+    </span><span class="com">// ret.setProvidedChallenges(providedChallenges);</span><span class="def">
+    </span><span class="com">// ret.setAcceptedChallenges(acceptedChallenges);</span><span class="def">
+    </span><span class="com">// return ret;</span><span class="def">
+    </span><span class="com">// }</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// AdminState applySolvedTrans(SolveTrans st){</span><span class="def">
+    </span><span class="com">// int challengeId = st.challengeid;</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// ProvidedChallenge toBeSolvedChallenge = providedChallenges</span><span class="def">
+    </span><span class="com">// .get(challengeId);</span><span class="def">
+    </span><span class="com">// PlayerID challenger = toBeSolvedChallenge.challenger;</span><span class="def">
+    </span><span class="com">// PlayerID challengee = toBeSolvedChallenge.challengee;</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// double quality =</span><span class="def">
+    </span><span class="com">// // remove from offered challenges</span><span class="def">
+    </span><span class="com">// Map&lt;Integer, OfferedChallenge&gt; offeredChallenges = this.offeredChallenges</span><span class="def">
+    </span><span class="com">// .remove(challengeId);</span><span class="def">
+    </span><span class="com">// // add to accepted challenges</span><span class="def">
+    </span><span class="com">// Map&lt;Integer, AcceptedChallenge&gt; acceptedChallenges =</span><span class="def">
+    </span><span class="com">// this.acceptedChallenges</span><span class="def">
+    </span><span class="com">// .put(challengeId, acceptedChallenge);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// // add to challengee.accepted</span><span class="def">
+    </span><span class="com">// PlayerStore challengeePS = store.get(challengee).addAcceptedChallenge(</span><span class="def">
+    </span><span class="com">// acceptedChallenge);</span><span class="def">
+    </span><span class="com">// // remove from challenger.offered</span><span class="def">
+    </span><span class="com">// PlayerStore challengerPS = store.get(challenger)</span><span class="def">
+    </span><span class="com">// .removeOfferedChallenge(toBeAcceptedChallenge);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// Map&lt;PlayerID, PlayerStore&gt; newStore = store.put(challengee,</span><span class="def">
+    </span><span class="com">// challengeePS).put(challenger, challengerPS);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// double challengeeBalance = accounts.get(challengee);</span><span class="def">
+    </span><span class="com">// double challengerBalance = accounts.get(challenger);</span><span class="def">
+    </span><span class="com">// double price = toBeAcceptedChallenge.price;</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// Map&lt;PlayerID, Double&gt; newAccounts = accounts.put(challengee,</span><span class="def">
+    </span><span class="com">// challengeeBalance - price).put(challenger,</span><span class="def">
+    </span><span class="com">// challengerBalance + price);</span><span class="def">
+    </span><span class="com">//</span><span class="def">
+    </span><span class="com">// // create and return new admin state</span><span class="def">
+    </span><span class="com">// AdminState ret = new AdminState(players, newStore, newAccounts);</span><span class="def">
+    </span><span class="com">// ret.setOfferedChallenges(offeredChallenges);</span><span class="def">
+    </span><span class="com">// ret.setAcceptedChallenges(acceptedChallenges);</span><span class="def">
+    </span><span class="com">// return ret;</span><span class="def">
+    </span><span class="com">// }</span><span class="def">
+
+    PlayerContext </span><span class="func">getPlayerContext</span><span class="def">(Config config, PlayerID pid){
+        PlayerStore ps = store.</span><span class="func">get</span><span class="def">(pid);
+        List&lt;OfferedChallenge&gt; offeredByOthers = </span><span class="keyw">new</span><span class="def"> Empty&lt;OfferedChallenge&gt;();
+        </span><span class="keyw">for</span><span class="def"> (Entry&lt;PlayerID, PlayerStore&gt; entry : store) {
+            </span><span class="keyw">if</span><span class="def"> (!entry.key.</span><span class="func">equals</span><span class="def">(pid)) {
+                offeredByOthers = offeredByOthers.</span><span class="func">push</span><span class="def">(entry.val.offered);
+            }
+        }
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerContext</span><span class="def">(config, pid, accounts.</span><span class="func">get</span><span class="def">(pid), ps.offered,
+                offeredByOthers, ps.accepted, ps.provided);
+    }
+
+    </span><span class="com">/** Create an AdminState from the given Maps... */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> AdminState </span><span class="func">create</span><span class="def">(Map&lt;PlayerID, PlayerSpec&gt; specs,
+            Map&lt;PlayerID, PlayerStore&gt; strs, Map&lt;PlayerID, </span><span class="prim">Double</span><span class="def">&gt; acc){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">AdminState</span><span class="def">(specs, strs, acc);
+    }
+
+    </span><span class="com">/** Create the initial (empty) AdminState */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> AdminState </span><span class="func">initial</span><span class="def">(){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">initial</span><span class="def">(Map.&lt;PlayerID, PlayerSpec&gt; </span><span class="func">create</span><span class="def">());
+    }
+
+    </span><span class="com">/**
+     * Create the initial (empty) AdminState With players drawn from the given
+     * File
+     */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> AdminState </span><span class="func">initial</span><span class="def">(</span><span class="prim">String</span><span class="def"> playerFile) </span><span class="keyw">throws</span><span class="def"> ParseException,
+            java.io.IOException{
+        List&lt;PlayerSpec&gt; plyrs = PlayersFile.</span><span class="func">parse</span><span class="def">(
+                </span><span class="keyw">new</span><span class="def"> java.io.</span><span class="func">FileInputStream</span><span class="def">(playerFile)).</span><span class="func">getPlayerSpecs</span><span class="def">();
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">initial</span><span class="def">(plyrs);
+    }
+
+    </span><span class="com">/** Create the initial (empty) AdminState With the given players drawn */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> AdminState </span><span class="func">initial</span><span class="def">(List&lt;PlayerSpec&gt; plyrs){
+        Map&lt;PlayerID, PlayerSpec&gt; specs = plyrs.</span><span class="func">fold</span><span class="def">(
+                </span><span class="keyw">new</span><span class="def"> List.Fold&lt;PlayerSpec, Map&lt;PlayerID, PlayerSpec&gt;&gt;() {
+
+                    </span><span class="keyw">int</span><span class="def"> start = (</span><span class="keyw">int</span><span class="def">) (Math.</span><span class="func">random</span><span class="def">() * </span><span class="num">100</span><span class="def">);
+
+                    @Override
+                    </span><span class="keyw">public</span><span class="def"> Map&lt;PlayerID, PlayerSpec&gt; </span><span class="func">fold</span><span class="def">(PlayerSpec s,
+                            Map&lt;PlayerID, PlayerSpec&gt; m){
+                        </span><span class="keyw">return</span><span class="def"> m.</span><span class="func">put</span><span class="def">(</span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerID</span><span class="def">(start++), s);
+                    }
+                }, Map.&lt;PlayerID, PlayerSpec&gt; </span><span class="func">create</span><span class="def">());
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">initial</span><span class="def">(specs);
+    }
+
+    </span><span class="com">/** Create the initial (empty) AdminState With the given players */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> AdminState </span><span class="func">initial</span><span class="def">(Map&lt;PlayerID, PlayerSpec&gt; plyrs){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">create</span><span class="def">(plyrs, Map.&lt;PlayerID, PlayerStore&gt; </span><span class="func">create</span><span class="def">(), Map
+                .&lt;PlayerID, </span><span class="prim">Double</span><span class="def">&gt; </span><span class="func">create</span><span class="def">());
+    }
+
+    </span><span class="com">/** DGP method from Class PrintHeapToString */</span><span class="def">
+    @Override
+    </span><span class="keyw">public</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">toString</span><span class="def">(){
+        </span><span class="keyw">return</span><span class="def"> scg.gen.PrintHeapToString.</span><span class="func">PrintHeapToStringM</span><span class="def">(</span><span class="keyw">this</span><span class="def">);
+    }
+
+}
+</span></pre></body></html>

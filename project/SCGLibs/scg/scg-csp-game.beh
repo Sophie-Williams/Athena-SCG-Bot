@@ -1,0 +1,70 @@
+include "scg-game.beh";
+include "scg-admin.beh";
+
+Problem{{
+        /** Implicit Variable List */
+        public Problem(List<Clause> cs)
+        { this(setOfVars(cs).toList(), cs); }
+        /** Collect all the (distinct) Variables in a List of Clauses */
+        private static Set<Var> setOfVars(List<Clause> cs){
+            return cs.fold(new List.Fold<Clause,Set<Var>>(){
+                    public Set<Var> fold(Clause c, Set<Var> r)
+                    { return r.union(Set.create(c.getVars())); }
+                }, Set.<Var>create());
+        }
+}}
+Clause{{
+}}
+ProblemType{{
+        /** Return a random ProblemType (single relation number) */
+        public static ProblemType random(){
+            return new ProblemType(randomList(1));
+        }
+        /** Return a random List of integers in [1..255] */
+        public static List<Integer> randomList(int len){
+            if(len <= 0)return List.create();
+            return randomList(len-1).push(Util.random(254+1));
+        }
+}}
+
+
+Objective{{
+    public double calculatePayoff(double quality, double secretQuality, double price, double profitFactor){
+        double win = quality - price * secretQuality;
+        if (win >= 0) {
+            return price + win * profitFactor;
+        } else {
+            return 0;
+        }
+    }
+
+    public double value(Problem inst, Solution sol){
+        return scg.hidden.CSP.value(inst,sol);
+    }
+    
+    public double getDefaultQuality(Problem inst){
+        return scg.hidden.CSP.getDefaultQuality(inst);
+    }
+}}
+
+Predicate{{
+        public boolean valid(Problem inst, ProblemType pred){
+           // Only vlaid relation numbers are used
+           List<Integer> validRelationNumbers = pred.type;
+           for (Clause clause : inst.clauses) {
+               if (!validRelationNumbers.contains(clause.relnum)) {
+                   return false;
+               }
+           }
+           // The constraint that all variables are declared should be checked
+           // while parsing
+           for (Clause clause : inst.clauses) {
+               for (Var var : clause.vars) {
+                   if (!inst.getVars().contains(var)) {
+                       return false;
+                   }
+               }
+           }
+           return true;
+        }
+}}

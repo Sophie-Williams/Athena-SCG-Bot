@@ -1,0 +1,72 @@
+package scg.gen;
+import scg.Util;
+import scg.game.*;
+import edu.neu.ccs.demeterf.lib.*;
+
+
+PlayerID = <id> int implements Comparable(PlayerID).
+Var = <id> ident implements Comparable(Var).
+
+Solution = <assign> Map(Var,Boolean).
+Challenge = OfferedChallenge
+          | AcceptedChallenge 
+          | ProvidedChallenge
+          | SolvedChallenge *s
+          <key> int *s
+          <challenger> PlayerID *s
+          <pred> ProblemType *s
+          <price> double "]".
+         
+OfferedChallenge = "offered[".
+
+AcceptedChallenge = "accepted["
+                    <challengee> PlayerID.
+ProvidedChallenge = "provided["
+                     <challengee> PlayerID *s
+                     <instance> Problem.
+SolvedChallenge = "solved["
+                  <challengee> PlayerID *s
+                  <instance> Problem *s
+                  <solution> Solution.
+
+Transaction = OfferTrans 
+            | AcceptTrans
+            | ReofferTrans
+            | ProvideTrans
+            | SolveTrans "]".
+
+OfferTrans   = *l*t "offer[" <pred> ProblemType *s <price> double.
+AcceptTrans  = *l*t "accept[" <challengeid> int.
+ProvideTrans = *l*t "provide[" <inst> Problem *s <challengeid> int.
+SolveTrans   = *l*t "solve[" <sol> Solution *s <challengeid> int.
+ReofferTrans = *l*t "reoffer[" <challengeid> int *s <price> double.
+
+
+PlayerTrans  = *l "playertrans["
+               *l*t <id> PlayerID
+               <ts> List(Transaction) *l
+               "]".
+
+Config = "config[" *l
+            *l*t "gamekind:" *s <gamekind> String
+            *l*t "turnduration:" *s <turndur> int
+            *l*t "mindecrement:" *s <mindecr> double
+            *l*t "initacc:" *s <initacc> double
+            *l*t "objective:" *s <objective> Objective
+			*l*t "predicate:" *s <predicate> Predicate
+			*l*t "numrounds:" *s <numrounds> int
+			*l*t "profitfactor:" *s <profitFactor> double *l
+			*l*t "otrounds:" *s <otrounds> int
+         "]".
+ 
+PlayerContext = "context["
+                   *l*t <config> Config
+                   *l*t <id> PlayerID 
+                   *l*t <balance> double
+                   *l*t <currentRound> int                   
+                   *l*t "(" <ourOffered> List(OfferedChallenge) ")"
+                   *l*t "(" <theirOffered> List(OfferedChallenge) ")"
+                   *l*t "(" <accepted> List(AcceptedChallenge) ")"
+                   *l*t "(" <provided> List(ProvidedChallenge) ")" *l
+                "]" EOF.
+

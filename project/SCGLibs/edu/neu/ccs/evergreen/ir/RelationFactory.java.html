@@ -1,0 +1,248 @@
+<html><head><title>RelationFactory.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="keyw">package</span><span class="def"> edu.neu.ccs.evergreen.ir;
+</span><span class="com">/**
+ * @author mohsen
+ * The RelationFactory class provides a set of methods for creating RelationI objects according to certain criteria.
+ * Basically wraps the functionality in ReationNumberUtil and adds new functionality of bitwise operations on RelationI objects
+ * Note that the created relation numbers can be manipulated using bitwise operations
+ * provided that they share the same variables and same variable ordering
+ * Variable positions are 0 based
+ * for example:
+ * int x = 0;
+ * int y = 1;
+ * int z = 2;
+ * int w = 3;
+ * RelationI r_or_xy = RelationFactory.or(4,x,y)
+ * RelationI r_or_zw =  RelationFactory.or(4,z,w)
+ * RelationI r_or_xyzw = RelationFactory.or(r_or_xy,r_or_zw)
+ * 
+ * The relation provides:
+ * 		 or(arbitrary number of variables,
+ *       and(arbitrary number of variables,
+ *       imply (two vars)
+ *       equiv (two vars)
+ *       xor (two vars)
+ *       
+ */</span><span class="def">
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> RelationFactory {
+	</span><span class="com">/**
+	 * Given a set of variable positions, return a relation that is the or of these variables
+	 * @param rank the rank of the created relation
+	 * @param variablePositions an arbitrary number of variable positions
+	 * @return a relationI object that represents the oring of the variables at the given positions
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">or</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> ... variablePositions){
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,RelationNumberUtil.</span><span class="func">or</span><span class="def">(rank, variablePositions));
+	}
+
+	</span><span class="com">/**
+	 * Given a set of variable positions, return a relation that is the anding of these variables
+	 * @param rank the rank of the created relation
+	 * @param variablePositions an arbitrary number of variable positions
+	 * @return a RelationI object that represents the anding of the variables at the given positions
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">and</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> ... variablePositions){
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,RelationNumberUtil.</span><span class="func">and</span><span class="def">(rank, variablePositions));
+	}
+
+	</span><span class="com">/**
+	 * nMaps a number of variables in a certain relation
+	 * @param relationNumber  
+	 * @param rank the rank of the created relation
+	 * @param variablePositions an arbitrary number of variable positions
+	 * @return a RelationI object that represents the given relation with the given set of variables renamed
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">nMap</span><span class="def">(</span><span class="keyw">int</span><span class="def"> relationNumber,</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> ... variablePositions){
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,RelationNumberUtil.</span><span class="func">nMap</span><span class="def">(relationNumber,rank, variablePositions));
+	}
+	
+	</span><span class="com">/**
+	 * nMaps a number of variables in a certain relation
+	 * @param relation
+	 * @param variablePositions an arbitrary number of variable positions
+	 * @return a RelationI object that represents the given relation with the given set of variables renamed
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">nMap</span><span class="def">(RelationI relation, </span><span class="keyw">int</span><span class="def"> ... variablePositions){
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(relation.</span><span class="func">getRank</span><span class="def">(),RelationNumberUtil.</span><span class="func">nMap</span><span class="def">(relation.</span><span class="func">getRelationNumber</span><span class="def">(),relation.</span><span class="func">getRank</span><span class="def">(), variablePositions));
+	}
+	
+	</span><span class="com">/**
+	 * Given two variables x,y returns a relation that represents x==&gt;y
+	 * @param rank the rank of the created relation
+	 * @param variablePositions two variable positions
+	 * @return a RelationI object that represents the x=&gt;y where x,y are the given two variable positions
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">imply</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> ... variablePositions){
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,RelationNumberUtil.</span><span class="func">imply</span><span class="def">(rank, variablePositions));
+	}
+	
+	</span><span class="com">/**
+	 * Given two variables x,y returns a relation that represents x=y
+	 * @param rank the rank of the created relation
+	 * @param variablePositions two variable positions
+	 * @return a RelationI object that represents the x=y where x,y are the given two variable positions
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">equiv</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> ... variablePositions){
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,RelationNumberUtil.</span><span class="func">equiv</span><span class="def">(rank, variablePositions));
+	}
+	
+	</span><span class="com">/**
+	 * Given two variables x,y returns a relation that represents xor(x,y)
+	 * @param rank the rank of the created relation
+	 * @param variablePositions two variable positions
+	 * @return a RelationI object that represents the xor(x,y) where x,y are the given two variable positions
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">xor</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank, </span><span class="keyw">int</span><span class="def"> ... variablePositions){
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,RelationNumberUtil.</span><span class="func">xor</span><span class="def">(rank, variablePositions));
+	}
+
+	</span><span class="com">/**
+	 * for 1in3 use xTrueVars(3,1)
+	 * @param rank
+	 * @param numberOfTrueVars
+	 * @return a RelationI object representing the relation which is true only when the given number of vars is true
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">xTrueVars</span><span class="def">(</span><span class="keyw">int</span><span class="def"> rank,</span><span class="keyw">int</span><span class="def"> numberOfTrueVars){
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,RelationNumberUtil.</span><span class="func">xTrueVars</span><span class="def">(rank, numberOfTrueVars));
+	}
+
+	</span><span class="com">/**
+	 * @param relations
+	 * @return RelationI object whose relationNumber is the bitwise or of the given set of relations
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">or</span><span class="def">(RelationI ... relations){
+		</span><span class="keyw">if</span><span class="def">(relations.length==</span><span class="num">0</span><span class="def">) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"or Must have at least one argument"</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> rank = relations[</span><span class="num">0</span><span class="def">].</span><span class="func">getRank</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> relationNumber = </span><span class="num">0</span><span class="def">;
+		</span><span class="keyw">for</span><span class="def"> (RelationI relation : relations) {
+			</span><span class="keyw">if</span><span class="def">(relation.</span><span class="func">getRank</span><span class="def">()!=rank) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"All relations must be of the same rank"</span><span class="def">);
+			relationNumber|=relation.</span><span class="func">getRelationNumber</span><span class="def">();
+		}
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,relationNumber);
+	}
+	
+	</span><span class="com">/**
+	 * @param relations
+	 * @return RelationI object whose relationNumber is the bitwise and of the given set of relations
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">and</span><span class="def">(RelationI ... relations){
+		</span><span class="keyw">if</span><span class="def">(relations.length==</span><span class="num">0</span><span class="def">) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"and Must have at least one argument"</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> rank = relations[</span><span class="num">0</span><span class="def">].</span><span class="func">getRank</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> relationNumber = RelationCore.</span><span class="func">getMask</span><span class="def">(rank);
+		</span><span class="keyw">for</span><span class="def"> (RelationI relation : relations) {
+			</span><span class="keyw">if</span><span class="def">(relation.</span><span class="func">getRank</span><span class="def">()!=rank) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"All relations must be of the same rank"</span><span class="def">);
+			relationNumber&=relation.</span><span class="func">getRelationNumber</span><span class="def">();
+		}
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,relationNumber);
+	}
+	
+	</span><span class="com">/**
+	 * @param relation
+	 * @return RelationI object whose relationNumber is the bitwise not of the given relation
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">not</span><span class="def">(RelationI relation){
+		</span><span class="keyw">if</span><span class="def">(</span><span class="keyw">null</span><span class="def">==relation) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"argument relation cannot be null"</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> r = relation.</span><span class="func">getRelationNumber</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> rank = relation.</span><span class="func">getRank</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> relationNumber = (~r)&RelationCore.</span><span class="func">getMask</span><span class="def">(rank);
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,relationNumber);		
+	}
+
+	</span><span class="com">/**
+	 * @param relation1
+	 * @param relation2
+	 * @return RelationI object whose relationNumber is the bitwise xor of the given two relations
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">xor</span><span class="def">(RelationI relation1,RelationI relation2){
+		</span><span class="keyw">if</span><span class="def">((</span><span class="keyw">null</span><span class="def">==relation1)||(</span><span class="keyw">null</span><span class="def">==relation2)) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"argument relation cannot be null"</span><span class="def">);
+		</span><span class="keyw">if</span><span class="def">(relation1.</span><span class="func">getRank</span><span class="def">()!=relation2.</span><span class="func">getRank</span><span class="def">()) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"All relations must be of the same rank"</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> r1 = relation1.</span><span class="func">getRelationNumber</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> r2 = relation2.</span><span class="func">getRelationNumber</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> rank = relation1.</span><span class="func">getRank</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> relationNumber = (r1^r2)&RelationCore.</span><span class="func">getMask</span><span class="def">(rank);
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,relationNumber);		
+	}
+
+	</span><span class="com">/**
+	 * @param relation1
+	 * @param relation2
+	 * @return RelationI object whose relationNumber is the bitwise equiv. of the given two relations
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">equiv</span><span class="def">(RelationI relation1,RelationI relation2){
+		</span><span class="keyw">if</span><span class="def">((</span><span class="keyw">null</span><span class="def">==relation1)||(</span><span class="keyw">null</span><span class="def">==relation2)) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"argument relation cannot be null"</span><span class="def">);
+		</span><span class="keyw">if</span><span class="def">(relation1.</span><span class="func">getRank</span><span class="def">()!=relation2.</span><span class="func">getRank</span><span class="def">()) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"All relations must be of the same rank"</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> r1 = relation1.</span><span class="func">getRelationNumber</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> r2 = relation2.</span><span class="func">getRelationNumber</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> rank = relation1.</span><span class="func">getRank</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> relationNumber = (~(r1^r2))&RelationCore.</span><span class="func">getMask</span><span class="def">(rank);
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,relationNumber);		
+	}
+
+	</span><span class="com">/**
+	 * @param relation1
+	 * @param relation2
+	 * @return RelationI object whose relationNumber is the bitwise implication of the given two relations
+	 */</span><span class="def">
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> RelationI </span><span class="func">imply</span><span class="def">(RelationI relation1,RelationI relation2){
+		</span><span class="keyw">if</span><span class="def">((</span><span class="keyw">null</span><span class="def">==relation1)||(</span><span class="keyw">null</span><span class="def">==relation2)) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"argument relation cannot be null"</span><span class="def">);
+		</span><span class="keyw">if</span><span class="def">(relation1.</span><span class="func">getRank</span><span class="def">()!=relation2.</span><span class="func">getRank</span><span class="def">()) </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">IllegalArgumentException</span><span class="def">(</span><span class="str">"All relations must be of the same rank"</span><span class="def">);
+		</span><span class="keyw">int</span><span class="def"> r1 = relation1.</span><span class="func">getRelationNumber</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> r2 = relation2.</span><span class="func">getRelationNumber</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> rank = relation1.</span><span class="func">getRank</span><span class="def">();
+		</span><span class="keyw">int</span><span class="def"> relationNumber = (~r1|r2)&RelationCore.</span><span class="func">getMask</span><span class="def">(rank);
+		</span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Relation</span><span class="def">(rank,relationNumber);
+	}	
+	
+	</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">main</span><span class="def">(</span><span class="prim">String</span><span class="def">[] args){
+		RelationI r1 = RelationFactory.</span><span class="func">xTrueVars</span><span class="def">(</span><span class="num">3</span><span class="def">, </span><span class="num">1</span><span class="def">);
+		RelationI r2 = RelationFactory.</span><span class="func">xTrueVars</span><span class="def">(</span><span class="num">3</span><span class="def">, </span><span class="num">1</span><span class="def">);
+		RelationI rand = RelationFactory.</span><span class="func">and</span><span class="def">(r1,r2);
+		RelationI ror = RelationFactory.</span><span class="func">or</span><span class="def">(r1,r2);
+		RelationI rxor = RelationFactory.</span><span class="func">xor</span><span class="def">(r1,r2);
+		RelationI requiv = RelationFactory.</span><span class="func">equiv</span><span class="def">(r1,r2);
+		RelationI rimply = RelationFactory.</span><span class="func">imply</span><span class="def">(r1,r2);
+		RelationI rnot = RelationFactory.</span><span class="func">not</span><span class="def">(r1);
+		RelationI rnmap = RelationFactory.</span><span class="func">nMap</span><span class="def">(r1, </span><span class="num">0</span><span class="def">,</span><span class="num">1</span><span class="def">,</span><span class="num">2</span><span class="def">);
+		RelationI rnmap2 = RelationFactory.</span><span class="func">nMap</span><span class="def">(r1.</span><span class="func">getRelationNumber</span><span class="def">(),r1.</span><span class="func">getRank</span><span class="def">(), </span><span class="num">0</span><span class="def">,</span><span class="num">1</span><span class="def">,</span><span class="num">2</span><span class="def">);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"r1: "</span><span class="def">+r1);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"r2: "</span><span class="def">+r2);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"rand: "</span><span class="def">+rand);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"ror: "</span><span class="def">+ror);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"rxor: "</span><span class="def">+rxor);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"requiv: "</span><span class="def">+requiv);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"rimply: "</span><span class="def">+rimply);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"rnot: "</span><span class="def">+rnot);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"rnmap:"</span><span class="def">+rnmap);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"============="</span><span class="def">);
+		
+		RelationI andr = RelationFactory.</span><span class="func">and</span><span class="def">(</span><span class="num">3</span><span class="def">, </span><span class="num">0</span><span class="def">,</span><span class="num">1</span><span class="def">,</span><span class="num">2</span><span class="def">);
+		RelationI orr = RelationFactory.</span><span class="func">or</span><span class="def">(</span><span class="num">3</span><span class="def">, </span><span class="num">0</span><span class="def">,</span><span class="num">1</span><span class="def">,</span><span class="num">2</span><span class="def">);
+		RelationI implyr = RelationFactory.</span><span class="func">imply</span><span class="def">(</span><span class="num">3</span><span class="def">,</span><span class="num">2</span><span class="def">,</span><span class="num">1</span><span class="def">);
+		RelationI equivr = RelationFactory.</span><span class="func">equiv</span><span class="def">(</span><span class="num">3</span><span class="def">,</span><span class="num">2</span><span class="def">,</span><span class="num">1</span><span class="def">);
+		RelationI xorr = RelationFactory.</span><span class="func">xor</span><span class="def">(</span><span class="num">3</span><span class="def">,</span><span class="num">2</span><span class="def">,</span><span class="num">1</span><span class="def">);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"andr: "</span><span class="def">+andr);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"orr: "</span><span class="def">+orr);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"xorr: "</span><span class="def">+xorr);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"equivr: "</span><span class="def">+equivr);
+		System.out.</span><span class="func">println</span><span class="def">(</span><span class="str">"implyr: "</span><span class="def">+implyr);
+		
+	}
+}
+</span></pre></body></html>

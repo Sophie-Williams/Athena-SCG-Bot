@@ -1,0 +1,25 @@
+
+// Build with (after `mkdir gen'):
+//   java demeterf scg-admin.cd scg-admin.beh ./gen --dgp:PrintHeapToString --build
+package scg.gen;
+import java.io.*;
+import edu.neu.ccs.demeterf.lib.*;
+
+
+PlayerSpec = "playerspec[" <name> String *s <address> String *s <port> int "]".
+
+// For Parsing the PlayerSpecs/Passwords
+PlayersFile = *s <players> List(PlayerSpec) EOF.
+PasswordEntry = "passwd[" *s <name> String *s <passhash> String *s "]" *l.
+PasswordFile = <passwds> List(PasswordEntry) EOF.
+
+// Tracking Player/Teams
+TeamSpec = "team[" <name> String *s <passhash> String *s <players> List(String) "]" *l.
+TeamFile = *s <teams> List(TeamSpec) EOF.
+
+// History
+History = <header> Header *l*l <rounds> List(Round).
+Header =  <players> Map(PlayerID, PlayerSpec).
+Round = "round[" <num> int *l*t <trans> List(Event)"]".
+Event = PlayerTrans | PlayerKickedEvent *l.
+PlayerKickedEvent = *l "kicked[" <spec> PlayerSpec *s <msg> String *s <time> String "]".

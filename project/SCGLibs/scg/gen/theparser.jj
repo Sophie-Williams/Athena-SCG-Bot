@@ -1,0 +1,937 @@
+
+// ** This class was generated with DemFGen (vers:09/12/2009)
+
+options{ STATIC = false;  }
+PARSER_BEGIN(TheParser)
+package scg.gen;
+
+import java.io.*;
+import edu.neu.ccs.demeterf.lib.*;
+import scg.Util;
+import scg.game.*;
+import edu.neu.ccs.demeterf.lib.*;
+import edu.neu.ccs.demeterf.lib.*;
+import java.io.*;
+import edu.neu.ccs.demeterf.lib.*;
+import scg.Util;
+import scg.game.*;
+import edu.neu.ccs.demeterf.lib.*;
+import edu.neu.ccs.demeterf.lib.*;
+import edu.neu.ccs.evergreen.ir.RelationCore;
+import edu.neu.ccs.demeterf.control.Fields;
+import edu.neu.ccs.demeterf.lib.ident;
+import edu.neu.ccs.demeterf.lib.verbatim;
+
+  class TheParser{
+
+   public static String unescape(String str){
+      String retval = "";
+      int index = 0;
+      char ch, ch1;
+      int ordinal = 0;
+      while (index < str.length()) {
+         if(str.charAt(index) != '\\') { retval += str.charAt(index++); continue; }
+         ch = str.charAt(++index);
+         if(ch == 'b') { retval += '\b'; index++; continue; }
+         if(ch == 't') { retval += '\t'; index++; continue; }
+         if(ch == 'n') { retval += '\n'; index++; continue; }
+         if(ch == 'f') { retval += '\f'; index++; continue; }
+         if(ch == 'r') { retval += '\r'; index++; continue; }
+         if(ch == '"') { retval += '\"'; index++; continue; }
+         if(ch == '\'') { retval += '\''; index++; continue; }
+         if(ch == '\\') { retval += '\\'; index++; continue; }
+         if(ch >= '0' && ch <= '7'){
+            ordinal = ((int)ch) - ((int)'0'); index++;
+            ch1 = str.charAt(index);
+            if(ch1 >= '0' && ch1 <= '7'){
+               ordinal = ordinal*8 + ((int)ch1) - ((int)'0'); index++;
+               ch1 = str.charAt(index);
+               if(ch <= '3' && ch1 >= '0' && ch1 <= '7'){
+                  ordinal = ordinal*8 + ((int)ch1) - ((int)'0'); index++;
+               }
+            }
+            retval += (char)ordinal;
+            continue;
+         }
+         if(ch == 'u'){
+            ordinal = 0;
+            for(int i = 0; i < 4; i++){
+               index++; ch = str.charAt(index);
+               ordinal = ordinal*16+hexval(ch);
+            }
+            index++;
+            retval += (char)ordinal;
+            continue;
+         }
+      }
+      return retval;
+   }
+   static int hexval(char c){
+      int r = "0123456789ABCDEF".indexOf(Character.toUpperCase(c));
+      if(r >= 0)return r;
+      throw new RuntimeException(" ** Bad Escaped Character");
+   }
+  }
+PARSER_END(TheParser)
+
+byte parse_byte():{ int i; }{
+    i = parse_int() { return (byte)i; }
+}
+Byte parse_Byte():{ byte b; }{
+    b = parse_byte() { return b; }
+}
+short parse_short():{ int i; }{
+    i = parse_int() { return (short)i; }
+}
+Short parse_Short():{ short s; }{
+    s = parse_short() { return s; }
+}
+int parse_int():{ Token t; }{
+    t = <INT>
+    { if(t.image.length() > 1 && Character.toLowerCase(t.image.charAt(1)) == 'x')
+          return Integer.parseInt(t.image.substring(2), 16);
+      return Integer.parseInt(t.image); }
+}
+Integer parse_Integer():{ int i; }{
+    i = parse_int() { return i; }
+}
+long parse_long():{ Token t; }{
+    t = <INT>
+    { if(t.image.length() > 1 && Character.toLowerCase(t.image.charAt(1)) == 'x')
+          return Long.parseLong(t.image.substring(2), 16);
+    return Long.parseLong(t.image); }
+}
+Long parse_Long():{ long l; }{
+    l = parse_long() { return l; }
+}
+double parse_double():{ Token t; }{
+    t = <DOUBLE>
+    { return Double.parseDouble(t.image); }
+}
+Double parse_Double():{ double d; }{
+    d = parse_double() { return d; }
+}
+float parse_float():{ Token t; }{
+    t = <DOUBLE>
+    { return Float.parseFloat(t.image); }
+}
+Float parse_Float():{ float f; }{
+    f = parse_float() { return f; }
+}
+String parse_String():{ Token t; }{
+    t = <STRING>
+    { return unescape(t.image.substring(1,t.image.length()-1)); }
+}
+boolean parse_boolean():{ Token t; }{
+    t = <TRUE> { return true; } |
+    t = <FALSE> { return false; }
+}
+Boolean parse_Boolean():{ boolean b; }{
+    b = parse_boolean() { return b; }
+}
+char parse_char():{ Token t; }{
+    t = <CHAR>
+    { return unescape(t.image.substring(1,t.image.length()-1)).charAt(0); }
+}
+Character parse_Character():{ char c; }{
+    c = parse_char() { return c; }
+}
+ident parse_ident():{ Token t; }{
+    t = <IDENT>
+    { return new ident(t.image); }
+}
+verbatim parse_verbatim():{ Token t; }{
+    t = <TEXT>
+    { return new verbatim(t.image.substring(2,t.image.length()-2)); }
+}
+
+public Problem parse_Problem():{
+     List<Var> vars;
+     List<Clause> clauses;
+}{
+    vars = parse_List$Var$()
+    clauses = parse_List$Clause$()
+    { return new Problem(vars,clauses); }
+}
+
+public Clause parse_Clause():{
+     int relnum;
+     List<Var> vars;
+}{
+    "("
+    relnum = parse_int()
+    vars = parse_List$Var$()
+    ")"
+    { return new Clause(relnum,vars); }
+}
+
+public ProblemType parse_ProblemType():{
+     List<Integer> type;
+}{
+    "("
+    type = parse_List$Integer$()
+    ")"
+    { return new ProblemType(type); }
+}
+
+public Objective parse_Objective():{
+}{
+    "[]"
+    { return new Objective(); }
+}
+
+public Predicate parse_Predicate():{
+}{
+    "[]"
+    { return new Predicate(); }
+}
+
+
+
+
+
+
+
+
+public RBColor parse_RBColor():{
+    RBColor sup = null;
+}{
+(   sup = parse_RED() { return sup; } | 
+    sup = parse_BLACK() { return sup; } )
+}
+
+public RED parse_RED():{
+}{
+    "red"
+    { return new RED(); }
+}
+
+public BLACK parse_BLACK():{
+}{
+    "black"
+    { return new BLACK(); }
+}
+
+
+
+
+
+
+
+
+public PlayerID parse_PlayerID():{
+     int id;
+}{
+    id = parse_int()
+    { return new PlayerID(id); }
+}
+
+public Var parse_Var():{
+     ident id;
+}{
+    id = parse_ident()
+    { return new Var(id); }
+}
+
+public Solution parse_Solution():{
+     Map<Var,Boolean> assign;
+}{
+    assign = parse_Map$Var$Boolean$()
+    { return new Solution(assign); }
+}
+
+public Challenge parse_Challenge():{
+    Challenge sup = null;
+}{
+(   sup = parse_OfferedChallenge() { return sup; } | 
+    sup = parse_AcceptedChallenge() { return sup; } | 
+    sup = parse_ProvidedChallenge() { return sup; } | 
+    sup = parse_SolvedChallenge() { return sup; } )
+}
+
+public OfferedChallenge parse_OfferedChallenge():{
+     int key;
+     PlayerID challenger;
+     ProblemType pred;
+     double price;
+}{
+    "offered["
+    key = parse_int()
+    challenger = parse_PlayerID()
+    pred = parse_ProblemType()
+    price = parse_double()
+    "]"
+    { return new OfferedChallenge(key,challenger,pred,price); }
+}
+
+public AcceptedChallenge parse_AcceptedChallenge():{
+     PlayerID challengee;
+     int key;
+     PlayerID challenger;
+     ProblemType pred;
+     double price;
+}{
+    "accepted["
+    challengee = parse_PlayerID()
+    key = parse_int()
+    challenger = parse_PlayerID()
+    pred = parse_ProblemType()
+    price = parse_double()
+    "]"
+    { return new AcceptedChallenge(challengee,key,challenger,pred,price); }
+}
+
+public ProvidedChallenge parse_ProvidedChallenge():{
+     PlayerID challengee;
+     Problem instance;
+     int key;
+     PlayerID challenger;
+     ProblemType pred;
+     double price;
+}{
+    "provided["
+    challengee = parse_PlayerID()
+    instance = parse_Problem()
+    key = parse_int()
+    challenger = parse_PlayerID()
+    pred = parse_ProblemType()
+    price = parse_double()
+    "]"
+    { return new ProvidedChallenge(challengee,instance,key,challenger,pred,price); }
+}
+
+public SolvedChallenge parse_SolvedChallenge():{
+     PlayerID challengee;
+     Problem instance;
+     Solution solution;
+     int key;
+     PlayerID challenger;
+     ProblemType pred;
+     double price;
+}{
+    "solved["
+    challengee = parse_PlayerID()
+    instance = parse_Problem()
+    solution = parse_Solution()
+    key = parse_int()
+    challenger = parse_PlayerID()
+    pred = parse_ProblemType()
+    price = parse_double()
+    "]"
+    { return new SolvedChallenge(challengee,instance,solution,key,challenger,pred,price); }
+}
+
+public Transaction parse_Transaction():{
+    Transaction sup = null;
+}{
+(   sup = parse_OfferTrans() { return sup; } | 
+    sup = parse_AcceptTrans() { return sup; } | 
+    sup = parse_ReofferTrans() { return sup; } | 
+    sup = parse_ProvideTrans() { return sup; } | 
+    sup = parse_SolveTrans() { return sup; } )
+}
+
+public OfferTrans parse_OfferTrans():{
+     ProblemType pred;
+     double price;
+}{
+    "offer["
+    pred = parse_ProblemType()
+    price = parse_double()
+    "]"
+    { return new OfferTrans(pred,price); }
+}
+
+public AcceptTrans parse_AcceptTrans():{
+     int challengeid;
+}{
+    "accept["
+    challengeid = parse_int()
+    "]"
+    { return new AcceptTrans(challengeid); }
+}
+
+public ProvideTrans parse_ProvideTrans():{
+     Problem inst;
+     int challengeid;
+}{
+    "provide["
+    inst = parse_Problem()
+    challengeid = parse_int()
+    "]"
+    { return new ProvideTrans(inst,challengeid); }
+}
+
+public SolveTrans parse_SolveTrans():{
+     Solution sol;
+     int challengeid;
+}{
+    "solve["
+    sol = parse_Solution()
+    challengeid = parse_int()
+    "]"
+    { return new SolveTrans(sol,challengeid); }
+}
+
+public ReofferTrans parse_ReofferTrans():{
+     int challengeid;
+     double price;
+}{
+    "reoffer["
+    challengeid = parse_int()
+    price = parse_double()
+    "]"
+    { return new ReofferTrans(challengeid,price); }
+}
+
+public PlayerTrans parse_PlayerTrans():{
+     PlayerID id;
+     List<Transaction> ts;
+}{
+    "playertrans["
+    id = parse_PlayerID()
+    ts = parse_List$Transaction$()
+    "]"
+    { return new PlayerTrans(id,ts); }
+}
+
+public Config parse_Config():{
+     String gamekind;
+     int turndur;
+     double mindecr;
+     double initacc;
+     Objective objective;
+     Predicate predicate;
+     int numrounds;
+     double profitFactor;
+     int otrounds;
+}{
+    "config["
+    "gamekind:"
+    gamekind = parse_String()
+    "turnduration:"
+    turndur = parse_int()
+    "mindecrement:"
+    mindecr = parse_double()
+    "initacc:"
+    initacc = parse_double()
+    "objective:"
+    objective = parse_Objective()
+    "predicate:"
+    predicate = parse_Predicate()
+    "numrounds:"
+    numrounds = parse_int()
+    "profitfactor:"
+    profitFactor = parse_double()
+    "otrounds:"
+    otrounds = parse_int()
+    "]"
+    { return new Config(gamekind,turndur,mindecr,initacc,objective,predicate,numrounds,profitFactor,otrounds); }
+}
+
+public PlayerContext parse_PlayerContext():{
+     Config config;
+     PlayerID id;
+     double balance;
+     int currentRound;
+     List<OfferedChallenge> ourOffered;
+     List<OfferedChallenge> theirOffered;
+     List<AcceptedChallenge> accepted;
+     List<ProvidedChallenge> provided;
+}{
+    "context["
+    config = parse_Config()
+    id = parse_PlayerID()
+    balance = parse_double()
+    currentRound = parse_int()
+    "("
+    ourOffered = parse_List$OfferedChallenge$()
+    ")"
+    "("
+    theirOffered = parse_List$OfferedChallenge$()
+    ")"
+    "("
+    accepted = parse_List$AcceptedChallenge$()
+    ")"
+    "("
+    provided = parse_List$ProvidedChallenge$()
+    ")"
+    "]"
+    <EOF>
+    { return new PlayerContext(config,id,balance,currentRound,ourOffered,theirOffered,accepted,provided); }
+}
+
+public PlayerSpec parse_PlayerSpec():{
+     String name;
+     String address;
+     int port;
+}{
+    "playerspec["
+    name = parse_String()
+    address = parse_String()
+    port = parse_int()
+    "]"
+    { return new PlayerSpec(name,address,port); }
+}
+
+public PlayersFile parse_PlayersFile():{
+     List<PlayerSpec> players;
+}{
+    players = parse_List$PlayerSpec$()
+    <EOF>
+    { return new PlayersFile(players); }
+}
+
+public PasswordEntry parse_PasswordEntry():{
+     String name;
+     String passhash;
+}{
+    "passwd["
+    name = parse_String()
+    passhash = parse_String()
+    "]"
+    { return new PasswordEntry(name,passhash); }
+}
+
+public PasswordFile parse_PasswordFile():{
+     List<PasswordEntry> passwds;
+}{
+    passwds = parse_List$PasswordEntry$()
+    <EOF>
+    { return new PasswordFile(passwds); }
+}
+
+public TeamSpec parse_TeamSpec():{
+     String name;
+     String passhash;
+     List<String> players;
+}{
+    "team["
+    name = parse_String()
+    passhash = parse_String()
+    players = parse_List$String$()
+    "]"
+    { return new TeamSpec(name,passhash,players); }
+}
+
+public TeamFile parse_TeamFile():{
+     List<TeamSpec> teams;
+}{
+    teams = parse_List$TeamSpec$()
+    <EOF>
+    { return new TeamFile(teams); }
+}
+
+public History parse_History():{
+     Header header;
+     List<Round> rounds;
+}{
+    header = parse_Header()
+    rounds = parse_List$Round$()
+    { return new History(header,rounds); }
+}
+
+public Header parse_Header():{
+     Map<PlayerID,PlayerSpec> players;
+}{
+    players = parse_Map$PlayerID$PlayerSpec$()
+    { return new Header(players); }
+}
+
+public Round parse_Round():{
+     int num;
+     List<Event> trans;
+}{
+    "round["
+    num = parse_int()
+    trans = parse_List$Event$()
+    "]"
+    { return new Round(num,trans); }
+}
+
+public Event parse_Event():{
+    Event sup = null;
+}{
+(   sup = parse_PlayerTrans() { return sup; } | 
+    sup = parse_PlayerKickedEvent() { return sup; } )
+}
+
+public PlayerKickedEvent parse_PlayerKickedEvent():{
+     PlayerSpec spec;
+     String msg;
+     String time;
+}{
+    "kicked["
+    spec = parse_PlayerSpec()
+    msg = parse_String()
+    time = parse_String()
+    "]"
+    { return new PlayerKickedEvent(spec,msg,time); }
+}
+
+public List<Event> parse_List$Event$():{
+    List<Event> sup = null;
+}{
+(   sup = parse_Cons$Event$() { return sup; } | 
+    sup = parse_Empty$Event$() { return sup; } )
+}
+public Empty<Event> parse_Empty$Event$():{
+}{
+
+    { return new Empty<Event>(); }
+}
+public Cons<Event> parse_Cons$Event$():{
+     Event first;
+     List<Event> rest;
+}{
+    first = parse_Event()
+    rest = parse_List$Event$()
+    { return new Cons<Event>(first,rest); }
+}
+public Map<PlayerID,PlayerSpec> parse_Map$PlayerID$PlayerSpec$():{
+     RBTree<Entry<PlayerID,PlayerSpec>> tree;
+}{
+    "["
+    tree = parse_RBTree$Entry$PlayerID$PlayerSpec$$()
+    "]"
+    { return new Map<PlayerID,PlayerSpec>(tree); }
+}
+public RBTree<Entry<PlayerID,PlayerSpec>> parse_RBTree$Entry$PlayerID$PlayerSpec$$():{
+    RBTree<Entry<PlayerID,PlayerSpec>> sup = null;
+}{
+(   sup = parse_RBNode$Entry$PlayerID$PlayerSpec$$() { return sup; } | 
+    sup = parse_RBLeaf$Entry$PlayerID$PlayerSpec$$() { return sup; } )
+}
+public RBLeaf<Entry<PlayerID,PlayerSpec>> parse_RBLeaf$Entry$PlayerID$PlayerSpec$$():{
+}{
+
+    { return new RBLeaf<Entry<PlayerID,PlayerSpec>>(); }
+}
+public RBNode<Entry<PlayerID,PlayerSpec>> parse_RBNode$Entry$PlayerID$PlayerSpec$$():{
+     RBColor color;
+     Entry<PlayerID,PlayerSpec> data;
+     RBTree<Entry<PlayerID,PlayerSpec>> left;
+     RBTree<Entry<PlayerID,PlayerSpec>> right;
+}{
+    "(node"
+    color = parse_RBColor()
+    data = parse_Entry$PlayerID$PlayerSpec$()
+    left = parse_RBTree$Entry$PlayerID$PlayerSpec$$()
+    right = parse_RBTree$Entry$PlayerID$PlayerSpec$$()
+    ")"
+    { return new RBNode<Entry<PlayerID,PlayerSpec>>(color,data,left,right); }
+}
+public Entry<PlayerID,PlayerSpec> parse_Entry$PlayerID$PlayerSpec$():{
+     PlayerID key;
+     PlayerSpec val;
+}{
+    "("
+    key = parse_PlayerID()
+    "->"
+    val = parse_PlayerSpec()
+    ")"
+    { return new Entry<PlayerID,PlayerSpec>(key,val); }
+}
+public List<Round> parse_List$Round$():{
+    List<Round> sup = null;
+}{
+(   sup = parse_Cons$Round$() { return sup; } | 
+    sup = parse_Empty$Round$() { return sup; } )
+}
+public Empty<Round> parse_Empty$Round$():{
+}{
+
+    { return new Empty<Round>(); }
+}
+public Cons<Round> parse_Cons$Round$():{
+     Round first;
+     List<Round> rest;
+}{
+    first = parse_Round()
+    rest = parse_List$Round$()
+    { return new Cons<Round>(first,rest); }
+}
+public List<TeamSpec> parse_List$TeamSpec$():{
+    List<TeamSpec> sup = null;
+}{
+(   sup = parse_Cons$TeamSpec$() { return sup; } | 
+    sup = parse_Empty$TeamSpec$() { return sup; } )
+}
+public Empty<TeamSpec> parse_Empty$TeamSpec$():{
+}{
+
+    { return new Empty<TeamSpec>(); }
+}
+public Cons<TeamSpec> parse_Cons$TeamSpec$():{
+     TeamSpec first;
+     List<TeamSpec> rest;
+}{
+    first = parse_TeamSpec()
+    rest = parse_List$TeamSpec$()
+    { return new Cons<TeamSpec>(first,rest); }
+}
+public List<String> parse_List$String$():{
+    List<String> sup = null;
+}{
+(   sup = parse_Cons$String$() { return sup; } | 
+    sup = parse_Empty$String$() { return sup; } )
+}
+public Empty<String> parse_Empty$String$():{
+}{
+
+    { return new Empty<String>(); }
+}
+public Cons<String> parse_Cons$String$():{
+     String first;
+     List<String> rest;
+}{
+    first = parse_String()
+    rest = parse_List$String$()
+    { return new Cons<String>(first,rest); }
+}
+public List<PasswordEntry> parse_List$PasswordEntry$():{
+    List<PasswordEntry> sup = null;
+}{
+(   sup = parse_Cons$PasswordEntry$() { return sup; } | 
+    sup = parse_Empty$PasswordEntry$() { return sup; } )
+}
+public Empty<PasswordEntry> parse_Empty$PasswordEntry$():{
+}{
+
+    { return new Empty<PasswordEntry>(); }
+}
+public Cons<PasswordEntry> parse_Cons$PasswordEntry$():{
+     PasswordEntry first;
+     List<PasswordEntry> rest;
+}{
+    first = parse_PasswordEntry()
+    rest = parse_List$PasswordEntry$()
+    { return new Cons<PasswordEntry>(first,rest); }
+}
+public List<PlayerSpec> parse_List$PlayerSpec$():{
+    List<PlayerSpec> sup = null;
+}{
+(   sup = parse_Cons$PlayerSpec$() { return sup; } | 
+    sup = parse_Empty$PlayerSpec$() { return sup; } )
+}
+public Empty<PlayerSpec> parse_Empty$PlayerSpec$():{
+}{
+
+    { return new Empty<PlayerSpec>(); }
+}
+public Cons<PlayerSpec> parse_Cons$PlayerSpec$():{
+     PlayerSpec first;
+     List<PlayerSpec> rest;
+}{
+    first = parse_PlayerSpec()
+    rest = parse_List$PlayerSpec$()
+    { return new Cons<PlayerSpec>(first,rest); }
+}
+public List<ProvidedChallenge> parse_List$ProvidedChallenge$():{
+    List<ProvidedChallenge> sup = null;
+}{
+(   sup = parse_Cons$ProvidedChallenge$() { return sup; } | 
+    sup = parse_Empty$ProvidedChallenge$() { return sup; } )
+}
+public Empty<ProvidedChallenge> parse_Empty$ProvidedChallenge$():{
+}{
+
+    { return new Empty<ProvidedChallenge>(); }
+}
+public Cons<ProvidedChallenge> parse_Cons$ProvidedChallenge$():{
+     ProvidedChallenge first;
+     List<ProvidedChallenge> rest;
+}{
+    first = parse_ProvidedChallenge()
+    rest = parse_List$ProvidedChallenge$()
+    { return new Cons<ProvidedChallenge>(first,rest); }
+}
+public List<AcceptedChallenge> parse_List$AcceptedChallenge$():{
+    List<AcceptedChallenge> sup = null;
+}{
+(   sup = parse_Cons$AcceptedChallenge$() { return sup; } | 
+    sup = parse_Empty$AcceptedChallenge$() { return sup; } )
+}
+public Empty<AcceptedChallenge> parse_Empty$AcceptedChallenge$():{
+}{
+
+    { return new Empty<AcceptedChallenge>(); }
+}
+public Cons<AcceptedChallenge> parse_Cons$AcceptedChallenge$():{
+     AcceptedChallenge first;
+     List<AcceptedChallenge> rest;
+}{
+    first = parse_AcceptedChallenge()
+    rest = parse_List$AcceptedChallenge$()
+    { return new Cons<AcceptedChallenge>(first,rest); }
+}
+public List<OfferedChallenge> parse_List$OfferedChallenge$():{
+    List<OfferedChallenge> sup = null;
+}{
+(   sup = parse_Cons$OfferedChallenge$() { return sup; } | 
+    sup = parse_Empty$OfferedChallenge$() { return sup; } )
+}
+public Empty<OfferedChallenge> parse_Empty$OfferedChallenge$():{
+}{
+
+    { return new Empty<OfferedChallenge>(); }
+}
+public Cons<OfferedChallenge> parse_Cons$OfferedChallenge$():{
+     OfferedChallenge first;
+     List<OfferedChallenge> rest;
+}{
+    first = parse_OfferedChallenge()
+    rest = parse_List$OfferedChallenge$()
+    { return new Cons<OfferedChallenge>(first,rest); }
+}
+public List<Transaction> parse_List$Transaction$():{
+    List<Transaction> sup = null;
+}{
+(   sup = parse_Cons$Transaction$() { return sup; } | 
+    sup = parse_Empty$Transaction$() { return sup; } )
+}
+public Empty<Transaction> parse_Empty$Transaction$():{
+}{
+
+    { return new Empty<Transaction>(); }
+}
+public Cons<Transaction> parse_Cons$Transaction$():{
+     Transaction first;
+     List<Transaction> rest;
+}{
+    first = parse_Transaction()
+    rest = parse_List$Transaction$()
+    { return new Cons<Transaction>(first,rest); }
+}
+public Map<Var,Boolean> parse_Map$Var$Boolean$():{
+     RBTree<Entry<Var,Boolean>> tree;
+}{
+    "["
+    tree = parse_RBTree$Entry$Var$Boolean$$()
+    "]"
+    { return new Map<Var,Boolean>(tree); }
+}
+public RBTree<Entry<Var,Boolean>> parse_RBTree$Entry$Var$Boolean$$():{
+    RBTree<Entry<Var,Boolean>> sup = null;
+}{
+(   sup = parse_RBNode$Entry$Var$Boolean$$() { return sup; } | 
+    sup = parse_RBLeaf$Entry$Var$Boolean$$() { return sup; } )
+}
+public RBLeaf<Entry<Var,Boolean>> parse_RBLeaf$Entry$Var$Boolean$$():{
+}{
+
+    { return new RBLeaf<Entry<Var,Boolean>>(); }
+}
+public RBNode<Entry<Var,Boolean>> parse_RBNode$Entry$Var$Boolean$$():{
+     RBColor color;
+     Entry<Var,Boolean> data;
+     RBTree<Entry<Var,Boolean>> left;
+     RBTree<Entry<Var,Boolean>> right;
+}{
+    "(node"
+    color = parse_RBColor()
+    data = parse_Entry$Var$Boolean$()
+    left = parse_RBTree$Entry$Var$Boolean$$()
+    right = parse_RBTree$Entry$Var$Boolean$$()
+    ")"
+    { return new RBNode<Entry<Var,Boolean>>(color,data,left,right); }
+}
+public Entry<Var,Boolean> parse_Entry$Var$Boolean$():{
+     Var key;
+     Boolean val;
+}{
+    "("
+    key = parse_Var()
+    "->"
+    val = parse_Boolean()
+    ")"
+    { return new Entry<Var,Boolean>(key,val); }
+}
+public List<Integer> parse_List$Integer$():{
+    List<Integer> sup = null;
+}{
+(   sup = parse_Cons$Integer$() { return sup; } | 
+    sup = parse_Empty$Integer$() { return sup; } )
+}
+public Empty<Integer> parse_Empty$Integer$():{
+}{
+
+    { return new Empty<Integer>(); }
+}
+public Cons<Integer> parse_Cons$Integer$():{
+     Integer first;
+     List<Integer> rest;
+}{
+    first = parse_Integer()
+    rest = parse_List$Integer$()
+    { return new Cons<Integer>(first,rest); }
+}
+public List<Var> parse_List$Var$():{
+    List<Var> sup = null;
+}{
+(   sup = parse_Cons$Var$() { return sup; } | 
+    sup = parse_Empty$Var$() { return sup; } )
+}
+public Empty<Var> parse_Empty$Var$():{
+}{
+
+    { return new Empty<Var>(); }
+}
+public Cons<Var> parse_Cons$Var$():{
+     Var first;
+     List<Var> rest;
+}{
+    first = parse_Var()
+    rest = parse_List$Var$()
+    { return new Cons<Var>(first,rest); }
+}
+public List<Clause> parse_List$Clause$():{
+    List<Clause> sup = null;
+}{
+(   sup = parse_Cons$Clause$() { return sup; } | 
+    sup = parse_Empty$Clause$() { return sup; } )
+}
+public Empty<Clause> parse_Empty$Clause$():{
+}{
+
+    { return new Empty<Clause>(); }
+}
+public Cons<Clause> parse_Cons$Clause$():{
+     Clause first;
+     List<Clause> rest;
+}{
+    first = parse_Clause()
+    rest = parse_List$Clause$()
+    { return new Cons<Clause>(first,rest); }
+}
+SKIP : { " " | "\t" | "\n" | "\r" | "\r\n" }
+SKIP : { < "//" (~["\n","\r"])* ("\n"|"\r\n") >
+       | < "/*" (~["*"])* "*" (~["/"] (~["*"])* "*")* "/" > }
+TOKEN: { < TRUE : "true" >
+       | < FALSE : "false" > }
+TOKEN: { < INT : ("+" | "-")? ( (["0"-"9"])+ 
+                                  | ("0" ["x","X"]) (["0"-"9","a"-"f","A"-"F"])+ ) >
+       | < DOUBLE : ("-")?(["0"-"9"])+ "." (["0"-"9"])+ (<EXPON>)?
+                            | "." (["0"-"9"])+  (<EXPON>)? >
+       | < #EXPON: ["e","E"] (["+","-"])? (["0"-"9"])+ > }
+TOKEN: { < CHAR: "\'" 
+              ( (~["\'","\\","\n","\r"]) | 
+                ("\\" ( ["n","t","b","r","f","\\","\'","\""] |
+                            ["0"-"7"] ( ["0"-"7"] )? |
+                            ["0"-"3"] ["0"-"7"] ["0"-"7"] ) ) )
+              "\'" >
+       | < STRING :
+              "\""
+              (   (~["\"","\\","\n","\r"])
+                | ("\\"
+                    ( ["n","t","b","r","f","\\","'","\""]
+                    | ["0"-"7"] ( ["0"-"7"] )?
+                    | ["0"-"3"] ["0"-"7"] ["0"-"7"]
+                    )
+                  )
+              )*
+              "\"" >
+       | < TEXT : ( "{{" (~["}"])* ( "}" ~["}"] (~["}"])* )* "}}" ) >
+       | < IDENT : ["a"-"z","A"-"Z","$","_"]
+                   (["a"-"z","A"-"Z","0"-"9","_","$"])* > }
+

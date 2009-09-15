@@ -1,0 +1,37 @@
+<html><head><title>Constants.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="keyw">package</span><span class="def"> scg;
+
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">interface</span><span class="def"> Constants{
+    </span><span class="com">/** Path the RegServer Listens On */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> REG_PATH_ENTRY = </span><span class="str">"/register"</span><span class="def">;
+    </span><span class="com">/** Path the Player Listens On */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> PLAYER_PATH_ENTRY = </span><span class="str">"/player"</span><span class="def">;
+    </span><span class="com">/** Registration Listening (incoming) Port */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> REG_PORT = </span><span class="num">7000</span><span class="def">;
+    </span><span class="com">/** Used for automatic Player Address Registration, Pulled from the Socket
+     *    over which registration is done. */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> REG_AUTO = </span><span class="str">"auto"</span><span class="def">;
+    </span><span class="com">/** Hashed Passwords File */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> PASS_FILE = </span><span class="str">"files/passwords.pwd"</span><span class="def">;
+    </span><span class="com">/** Password Argument Name */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> PASS_URL_ARG = </span><span class="str">"password"</span><span class="def">;
+
+}
+</span></pre></body></html>

@@ -1,0 +1,14 @@
+
+include "lib.java.cd";
+include "scg-game.cd";
+include "scg-admin.cd";
+package scg.gen;
+
+import edu.neu.ccs.evergreen.ir.RelationCore;
+
+// Parameters to fill
+Problem =  <vars> List(Var) *s <clauses> List(Clause).
+Clause = "(" <relnum> int *s <vars> List(Var) ")".
+ProblemType = "(" <type> List(Integer) ")".
+Objective ="[]".
+Predicate = "[]".

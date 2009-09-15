@@ -1,0 +1,187 @@
+<html><head><title>Util.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="keyw">package</span><span class="def"> scg;
+
+</span><span class="keyw">import</span><span class="def"> java.security.MessageDigest;
+</span><span class="keyw">import</span><span class="def"> java.security.NoSuchAlgorithmException;
+</span><span class="keyw">import</span><span class="def"> java.text.DateFormat;
+</span><span class="keyw">import</span><span class="def"> java.text.DecimalFormat;
+</span><span class="keyw">import</span><span class="def"> java.util.Calendar;
+</span><span class="keyw">import</span><span class="def"> java.util.Date;
+</span><span class="keyw">import</span><span class="def"> java.util.GregorianCalendar;
+</span><span class="keyw">import</span><span class="def"> java.util.Random;
+</span><span class="keyw">import</span><span class="def"> java.util.TimeZone;
+
+</span><span class="com">/** Various Common utility functions */</span><span class="def">
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> Util {
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">double</span><span class="def"> DELTA = </span><span class="num">0</span><span class="def">.</span><span class="num">0001</span><span class="def">;
+    </span><span class="keyw">static</span><span class="def"> DecimalFormat form = </span><span class="keyw">new</span><span class="def"> </span><span class="func">DecimalFormat</span><span class="def">(</span><span class="str">"0.000"</span><span class="def">);
+
+    </span><span class="com">/** returns true if the first double is less than the second */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">boolean</span><span class="def"> </span><span class="func">lessThan</span><span class="def">(</span><span class="keyw">double</span><span class="def"> dec, </span><span class="keyw">double</span><span class="def"> mindec){
+        </span><span class="keyw">return</span><span class="def"> dec + DELTA &lt; mindec;
+    }
+
+    </span><span class="com">/** Format a double for three decimal places */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">format</span><span class="def">(</span><span class="keyw">double</span><span class="def"> d){
+        </span><span class="keyw">return</span><span class="def"> form.</span><span class="func">format</span><span class="def">(d);
+    }
+
+    </span><span class="com">/** Create a span that is a given color */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">color</span><span class="def">(</span><span class="prim">String</span><span class="def"> s, </span><span class="prim">String</span><span class="def"> color){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">tag</span><span class="def">(s, </span><span class="str">"span"</span><span class="def">, </span><span class="str">"style=\"color:"</span><span class="def"> + color + </span><span class="str">"\""</span><span class="def">);
+    }
+
+    </span><span class="com">/** Add an HTML tag to some text */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">tag</span><span class="def">(</span><span class="prim">String</span><span class="def"> s, </span><span class="prim">String</span><span class="def"> with){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">tag</span><span class="def">(s, with, </span><span class="str">""</span><span class="def">);
+    }
+
+    </span><span class="com">/** Add an HTML tag to some text with extra attributes */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">tag</span><span class="def">(</span><span class="prim">String</span><span class="def"> s, </span><span class="prim">String</span><span class="def"> with, </span><span class="prim">String</span><span class="def"> attrs){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="str">"&lt;"</span><span class="def"> + with + </span><span class="str">" "</span><span class="def"> + attrs + </span><span class="str">"&gt;"</span><span class="def"> + s + </span><span class="str">"&lt;/"</span><span class="def"> + with + </span><span class="str">"&gt;"</span><span class="def">;
+    }
+
+    </span><span class="keyw">static</span><span class="def"> Random rand = </span><span class="keyw">new</span><span class="def"> </span><span class="func">Random</span><span class="def">();
+
+    </span><span class="com">/** Random Double between 0..1 */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">double</span><span class="def"> </span><span class="func">random</span><span class="def">(){
+        </span><span class="keyw">return</span><span class="def"> rand.</span><span class="func">nextDouble</span><span class="def">();
+    }
+
+    </span><span class="com">/** Random Integer between 0..(bound-1) */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">random</span><span class="def">(</span><span class="keyw">int</span><span class="def"> bound){
+        </span><span class="keyw">return</span><span class="def"> rand.</span><span class="func">nextInt</span><span class="def">(bound);
+    }
+
+    </span><span class="com">/** Random coin flip of the given bias */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">boolean</span><span class="def"> </span><span class="func">coinFlip</span><span class="def">(</span><span class="keyw">double</span><span class="def"> bias){
+        </span><span class="keyw">return</span><span class="def"> Util.</span><span class="func">random</span><span class="def">() &lt; bias;
+    }
+
+    </span><span class="com">/** Random coin flip, bias of 0.5 */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">boolean</span><span class="def"> </span><span class="func">coinFlip</span><span class="def">(){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">coinFlip</span><span class="def">(</span><span class="num">0</span><span class="def">.</span><span class="num">5</span><span class="def">);
+    }
+
+    </span><span class="com">/** Date Format for parsing Dates */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> DateFormat DATEFMT = DateFormat.</span><span class="func">getDateTimeInstance</span><span class="def">(DateFormat.SHORT, DateFormat.LONG);
+    </span><span class="com">/** Set the current Time Zone for Date Parsing */</span><span class="def">
+    </span><span class="keyw">static</span><span class="def"> {
+        DATEFMT.</span><span class="func">setTimeZone</span><span class="def">(TimeZone.</span><span class="func">getTimeZone</span><span class="def">(</span><span class="str">"EST5EDT"</span><span class="def">));
+        </span><span class="com">// DateFmt.setTimeZone(TimeZone.getTimeZone("EST"));</span><span class="def">
+    }
+
+    </span><span class="com">/** Get the current Date/Time */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> Date </span><span class="func">now</span><span class="def">(){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">Date</span><span class="def">();
+    }
+
+    </span><span class="com">/** Parse a Date from the given String */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> Date </span><span class="func">parseDate</span><span class="def">(</span><span class="prim">String</span><span class="def"> date) </span><span class="keyw">throws</span><span class="def"> java.text.ParseException{
+        </span><span class="keyw">return</span><span class="def"> DATEFMT.</span><span class="func">parse</span><span class="def">(date);
+    }
+
+    </span><span class="com">/** Print a Date in Shortened Format */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">printDate</span><span class="def">(Date date){
+        </span><span class="keyw">return</span><span class="def"> DATEFMT.</span><span class="func">format</span><span class="def">(date);
+    }
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">getFileNameSafeDate</span><span class="def">(Date date){
+        Calendar c = </span><span class="keyw">new</span><span class="def"> </span><span class="func">GregorianCalendar</span><span class="def">();
+        c.</span><span class="func">setTime</span><span class="def">(date);
+        </span><span class="keyw">return</span><span class="def"> </span><span class="str">"_"</span><span class="def"> + c.</span><span class="func">get</span><span class="def">(Calendar.YEAR) + </span><span class="str">"_"</span><span class="def"> + (c.</span><span class="func">get</span><span class="def">(Calendar.MONTH) + </span><span class="num">1</span><span class="def">) + </span><span class="str">"_"</span><span class="def"> + c.</span><span class="func">get</span><span class="def">(Calendar.DAY_OF_MONTH)
+                + </span><span class="str">"_"</span><span class="def"> + c.</span><span class="func">get</span><span class="def">(Calendar.HOUR_OF_DAY) + </span><span class="str">"_"</span><span class="def"> + c.</span><span class="func">get</span><span class="def">(Calendar.MINUTE) + c.</span><span class="func">get</span><span class="def">(Calendar.SECOND);
+    }
+
+    </span><span class="com">/** Is the first Date after the Second Date? */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">boolean</span><span class="def"> </span><span class="func">after</span><span class="def">(Date d1, Date d2){
+        </span><span class="keyw">return</span><span class="def"> d1.</span><span class="func">compareTo</span><span class="def">(d2) &gt; </span><span class="num">0</span><span class="def">;
+    }
+
+    </span><span class="com">/** Get a Semi-unique Log file name */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">logFileName</span><span class="def">(</span><span class="prim">String</span><span class="def"> prefix){
+        </span><span class="keyw">return</span><span class="def"> prefix + </span><span class="str">"_"</span><span class="def"> + System.</span><span class="func">currentTimeMillis</span><span class="def">() / </span><span class="num">1000</span><span class="def"> + </span><span class="str">".log"</span><span class="def">;
+    }
+
+    </span><span class="com">/** Hex digits for output */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="prim">String</span><span class="def"> HEX = </span><span class="str">"0123456789ABCDEF"</span><span class="def">;
+    </span><span class="com">/** Default Hashed Length */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> DEFAULT_LEN = </span><span class="num">16</span><span class="def">;
+    </span><span class="com">/** Hash implementation */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">static</span><span class="def"> MessageDigest hasher;
+    </span><span class="keyw">static</span><span class="def"> {
+        </span><span class="keyw">try</span><span class="def"> {
+            hasher = MessageDigest.</span><span class="func">getInstance</span><span class="def">(</span><span class="str">"MD5"</span><span class="def">);
+        } </span><span class="keyw">catch</span><span class="def"> (NoSuchAlgorithmException e) { </span><span class="com">/* Serious Problems */</span><span class="def">
+        }
+    }
+
+    </span><span class="com">/** Encrypt a given Password (consistently) */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">encrypt</span><span class="def">(</span><span class="prim">String</span><span class="def"> s){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">encrypt</span><span class="def">(s, DEFAULT_LEN);
+    }
+
+    </span><span class="com">/** Encrypt a given Password (consistently) */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">encrypt</span><span class="def">(</span><span class="prim">String</span><span class="def"> s, </span><span class="keyw">int</span><span class="def"> finalLen){
+        </span><span class="keyw">synchronized</span><span class="def"> (hasher) {
+            hasher.</span><span class="func">reset</span><span class="def">();
+            hasher.</span><span class="func">update</span><span class="def">(s.</span><span class="func">getBytes</span><span class="def">());
+            byte[] bytes = hasher.</span><span class="func">digest</span><span class="def">();
+            </span><span class="prim">String</span><span class="def"> ret = </span><span class="str">""</span><span class="def">;
+            </span><span class="keyw">for</span><span class="def"> (</span><span class="keyw">int</span><span class="def"> i = </span><span class="num">0</span><span class="def">; i &lt; bytes.length && i &lt; finalLen / </span><span class="num">2</span><span class="def">; i++) {
+                ret += </span><span class="str">""</span><span class="def"> + HEX.</span><span class="func">charAt</span><span class="def">(bytes[i] &gt;&gt; </span><span class="num">4</span><span class="def"> & </span><span class="num">0xF</span><span class="def">) + HEX.</span><span class="func">charAt</span><span class="def">(bytes[i] & </span><span class="num">0xF</span><span class="def">);
+            }
+            </span><span class="keyw">return</span><span class="def"> ret;
+        }
+    }
+
+    </span><span class="com">/** Decode an encoded URL */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">decodeURL</span><span class="def">(</span><span class="prim">String</span><span class="def"> url){
+        </span><span class="keyw">return</span><span class="def"> </span><span class="func">decodeURL</span><span class="def">(url, </span><span class="str">"UTF-8"</span><span class="def">);
+    }
+
+    </span><span class="com">/** Decode an encoded URL */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">decodeURL</span><span class="def">(</span><span class="prim">String</span><span class="def"> url, </span><span class="prim">String</span><span class="def"> enc){
+        </span><span class="keyw">try</span><span class="def"> {
+            </span><span class="keyw">return</span><span class="def"> java.net.URLDecoder.</span><span class="func">decode</span><span class="def">(url, enc);
+        } </span><span class="keyw">catch</span><span class="def"> (Exception e) {
+            </span><span class="keyw">throw</span><span class="def"> </span><span class="keyw">new</span><span class="def"> </span><span class="func">RuntimeException</span><span class="def">(e);
+        }
+    }
+
+    </span><span class="com">/** How long to wait before re-checking */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> TIMEOUT = </span><span class="num">5</span><span class="def">;
+
+    </span><span class="com">/** Wait until the given Date */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">waitUntil</span><span class="def">(Date when){
+        </span><span class="keyw">while</span><span class="def"> (when.</span><span class="func">compareTo</span><span class="def">(</span><span class="func">now</span><span class="def">()) &gt; </span><span class="num">0</span><span class="def">) {
+            </span><span class="keyw">try</span><span class="def"> {
+                Thread.</span><span class="func">sleep</span><span class="def">(</span><span class="num">1000</span><span class="def"> * TIMEOUT);
+            } </span><span class="keyw">catch</span><span class="def"> (InterruptedException ie) {
+            }
+        }
+    }
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> &lt;E&gt; edu.neu.ccs.demeterf.lib.List&lt;E&gt; </span><span class="func">toDemF</span><span class="def">(Iterable&lt;E&gt; orig){
+        </span><span class="keyw">return</span><span class="def"> edu.neu.ccs.demeterf.lib.List.</span><span class="func">create</span><span class="def">(orig);
+    }
+}
+</span></pre></body></html>

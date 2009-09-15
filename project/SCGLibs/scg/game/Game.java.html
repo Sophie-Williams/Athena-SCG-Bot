@@ -1,0 +1,376 @@
+<html><head><title>Game.java</title></head>
+<!-- HTMLized with the Beditor
+     *c* Bryan Chadwick, 2003 -->
+<style type='text/css'><!--
+   .def{ color: #000000; }
+   .grade{
+      border: solid #FF0000 1px;
+      background-color: #FFFF60;
+   }
+   .gcom{ font-weight: bold; background-color: #FFC0C0; }
+   .com{ font-style: italic; color: #880000; }
+   .keyw{ font-weight: bold; color: #000088; }
+   .num{ color: #00AA00; }
+   .func{ color: #BB7733; }
+   .str{ color: #CC00AB; }
+   .prim{ color: #0000FF; }
+--></style>
+<body><pre><span class="def">
+</span><span class="com">// ** This class was generated with DemFGen (vers:06/04/2009)</span><span class="def">
+
+</span><span class="keyw">package</span><span class="def"> scg.game;
+
+</span><span class="keyw">import</span><span class="def"> java.io.IOException;
+</span><span class="keyw">import</span><span class="def"> java.util.ArrayList;
+</span><span class="keyw">import</span><span class="def"> java.util.Arrays;
+</span><span class="keyw">import</span><span class="def"> java.util.HashMap;
+</span><span class="keyw">import</span><span class="def"> java.util.List;
+</span><span class="keyw">import</span><span class="def"> java.util.Map;
+</span><span class="keyw">import</span><span class="def"> java.util.Map.Entry;
+
+</span><span class="keyw">import</span><span class="def"> scg.Util;
+</span><span class="keyw">import</span><span class="def"> scg.gen.AcceptTrans;
+</span><span class="keyw">import</span><span class="def"> scg.gen.AcceptedChallenge;
+</span><span class="keyw">import</span><span class="def"> scg.gen.Challenge;
+</span><span class="keyw">import</span><span class="def"> scg.gen.Config;
+</span><span class="keyw">import</span><span class="def"> scg.gen.OfferTrans;
+</span><span class="keyw">import</span><span class="def"> scg.gen.OfferedChallenge;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PlayerContext;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PlayerID;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PlayerKickedEvent;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PlayerSpec;
+</span><span class="keyw">import</span><span class="def"> scg.gen.PlayerTrans;
+</span><span class="keyw">import</span><span class="def"> scg.gen.Problem;
+</span><span class="keyw">import</span><span class="def"> scg.gen.ProvideTrans;
+</span><span class="keyw">import</span><span class="def"> scg.gen.ProvidedChallenge;
+</span><span class="keyw">import</span><span class="def"> scg.gen.ReofferTrans;
+</span><span class="keyw">import</span><span class="def"> scg.gen.Solution;
+</span><span class="keyw">import</span><span class="def"> scg.gen.SolveTrans;
+
+</span><span class="com">/**
+ * 
+ * 
+ * Representation of AdminState
+ * 
+ * Constructed with: a set of playerSpecs, a configuration object holding all
+ * configuration parameters such as: initial account balance, min decrement (for
+ * reoffering)
+ * 
+ * Can be turned to a string but not necessarily parsed.
+ * 
+ * Can be queried for: the context for a specific player. spec of a specific
+ * player. All players.
+ * 
+ * Provide methods for installing different player transactions.
+ * 
+ * 
+ */</span><span class="def">
+</span><span class="keyw">public</span><span class="def"> </span><span class="keyw">class</span><span class="def"> Game </span><span class="keyw">implements</span><span class="def"> GameI {
+
+    </span><span class="com">/** Associates player specs to player id's */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">static</span><span class="def"> </span><span class="keyw">class</span><span class="def"> Player {
+
+        </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> </span><span class="keyw">int</span><span class="def"> id;
+        </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> PlayerProxyI proxy;
+
+        </span><span class="keyw">public</span><span class="def"> </span><span class="func">Player</span><span class="def">(</span><span class="keyw">int</span><span class="def"> id, PlayerProxyI proxy) {
+            </span><span class="keyw">this</span><span class="def">.id = id;
+            </span><span class="keyw">this</span><span class="def">.proxy = proxy;
+        }
+
+        </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">int</span><span class="def"> </span><span class="func">getId</span><span class="def">(){
+            </span><span class="keyw">return</span><span class="def"> id;
+        }
+
+        </span><span class="keyw">public</span><span class="def"> PlayerSpec </span><span class="func">getSpec</span><span class="def">(){
+            </span><span class="keyw">return</span><span class="def"> proxy.</span><span class="func">getSpec</span><span class="def">();
+        }
+
+        </span><span class="keyw">public</span><span class="def"> PlayerTrans </span><span class="func">takeTurn</span><span class="def">(PlayerContext currentPlayerContext) </span><span class="keyw">throws</span><span class="def"> Exception{
+            </span><span class="keyw">return</span><span class="def"> proxy.</span><span class="func">takeTurn</span><span class="def">(currentPlayerContext);
+        }
+    }
+
+    </span><span class="com">/** Associates player id's to their state in the game */</span><span class="def">
+    </span><span class="keyw">class</span><span class="def"> PlayerStore {
+
+        </span><span class="keyw">double</span><span class="def"> account;
+        </span><span class="keyw">boolean</span><span class="def"> kicked = </span><span class="keyw">false</span><span class="def">;
+
+        </span><span class="com">/**
+         * Challenges offered by the player The player shouldn't offer/reoffer
+         * these.
+         */</span><span class="def">
+        Map&lt;</span><span class="prim">Integer</span><span class="def">, OfferedChallenge&gt; offeredChallenges = </span><span class="keyw">new</span><span class="def"> HashMap&lt;</span><span class="prim">Integer</span><span class="def">, OfferedChallenge&gt;();
+        </span><span class="com">/**
+         * Challenges offered by the player and accepted by other player The
+         * player has to provide these.
+         */</span><span class="def">
+        Map&lt;</span><span class="prim">Integer</span><span class="def">, AcceptedChallenge&gt; acceptedChallenges = </span><span class="keyw">new</span><span class="def"> HashMap&lt;</span><span class="prim">Integer</span><span class="def">, AcceptedChallenge&gt;();
+        </span><span class="com">/**
+         * Challenges provided for the player The player should solve these
+         */</span><span class="def">
+        Map&lt;</span><span class="prim">Integer</span><span class="def">, ProvidedChallenge&gt; providedChallenges = </span><span class="keyw">new</span><span class="def"> HashMap&lt;</span><span class="prim">Integer</span><span class="def">, ProvidedChallenge&gt;();
+
+        </span><span class="keyw">public</span><span class="def"> </span><span class="func">PlayerStore</span><span class="def">(</span><span class="keyw">double</span><span class="def"> account) {
+            </span><span class="keyw">this</span><span class="def">.account = account;
+        }
+    }
+
+    </span><span class="keyw">private</span><span class="def"> edu.neu.ccs.demeterf.lib.List&lt;Player&gt; players = edu.neu.ccs.demeterf.lib.List.&lt;Player&gt; </span><span class="func">create</span><span class="def">();
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Map&lt;</span><span class="prim">Integer</span><span class="def">, PlayerStore&gt; playersStores = </span><span class="keyw">new</span><span class="def"> HashMap&lt;</span><span class="prim">Integer</span><span class="def">, PlayerStore&gt;();
+
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Map&lt;</span><span class="prim">Integer</span><span class="def">, </span><span class="prim">Integer</span><span class="def">&gt; challengeOfferer = </span><span class="keyw">new</span><span class="def"> HashMap&lt;</span><span class="prim">Integer</span><span class="def">, </span><span class="prim">Integer</span><span class="def">&gt;();
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">final</span><span class="def"> Config config;
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="func">Game</span><span class="def">(Config config, PlayerProxyI... playerProxies) {
+        </span><span class="keyw">this</span><span class="def">(config, Arrays.</span><span class="func">asList</span><span class="def">(playerProxies));
+    }
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="func">Game</span><span class="def">(Config config, List&lt;? </span><span class="keyw">extends</span><span class="def"> PlayerProxyI&gt; playerProxies) {
+        </span><span class="keyw">this</span><span class="def">.config = config;
+        </span><span class="keyw">for</span><span class="def"> (PlayerProxyI playerProxy : playerProxies) {
+            </span><span class="keyw">int</span><span class="def"> pid = config.</span><span class="func">createPlayerID</span><span class="def">();
+            </span><span class="keyw">this</span><span class="def">.playersStores.</span><span class="func">put</span><span class="def">(pid, </span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerStore</span><span class="def">(config.</span><span class="func">getInitacc</span><span class="def">()));
+            </span><span class="keyw">this</span><span class="def">.players = </span><span class="keyw">this</span><span class="def">.players.</span><span class="func">push</span><span class="def">(</span><span class="keyw">new</span><span class="def"> </span><span class="func">Player</span><span class="def">(pid, playerProxy));
+        }
+    }
+
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">start</span><span class="def">(HistoryFile history) </span><span class="keyw">throws</span><span class="def"> IOException{
+        </span><span class="keyw">int</span><span class="def"> numPlayers = players.</span><span class="func">length</span><span class="def">();
+        history.</span><span class="func">header</span><span class="def">(players);
+        </span><span class="keyw">for</span><span class="def"> (</span><span class="keyw">int</span><span class="def"> round = </span><span class="num">1</span><span class="def">; round &lt;= config.</span><span class="func">getNumrounds</span><span class="def">() + config.</span><span class="func">getOtrounds</span><span class="def">() && numPlayers &gt; </span><span class="num">1</span><span class="def">; round++) {
+            history.</span><span class="func">startRound</span><span class="def">(round);
+            </span><span class="keyw">for</span><span class="def"> (Player currentPlayer : players) {
+                PlayerStore currentPlayerStore = playersStores.</span><span class="func">get</span><span class="def">(currentPlayer.id);
+                </span><span class="keyw">if</span><span class="def"> (currentPlayerStore.kicked) {
+                    </span><span class="keyw">continue</span><span class="def">;
+                }
+                </span><span class="keyw">int</span><span class="def"> currentPlayerID = currentPlayer.</span><span class="func">getId</span><span class="def">();
+                PlayerSpec currentPlayerSpec = currentPlayer.</span><span class="func">getSpec</span><span class="def">();
+                PlayerContext currentPlayerContext = </span><span class="func">getPlayerContext</span><span class="def">(currentPlayerID, round);
+                </span><span class="keyw">try</span><span class="def"> {
+                    PlayerTrans trans = currentPlayer.</span><span class="func">takeTurn</span><span class="def">(currentPlayerContext);
+                    currentPlayerContext.</span><span class="func">isLegal</span><span class="def">(trans);
+                    trans.</span><span class="func">applyTransactions</span><span class="def">(</span><span class="keyw">this</span><span class="def">, config.</span><span class="func">isOverTime</span><span class="def">(round));
+                    history.</span><span class="func">recordEvent</span><span class="def">(currentPlayerID, trans);
+                } </span><span class="keyw">catch</span><span class="def"> (Exception ex) {
+                    </span><span class="func">kick</span><span class="def">(currentPlayerID);
+                    ex.</span><span class="func">printStackTrace</span><span class="def">();
+                    history.</span><span class="func">recordEvent</span><span class="def">(currentPlayerID, </span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerKickedEvent</span><span class="def">(currentPlayerSpec, </span><span class="str">""</span><span class="def"> + ex.</span><span class="func">getMessage</span><span class="def">(),
+                            Util.</span><span class="func">printDate</span><span class="def">(Util.</span><span class="func">now</span><span class="def">())));
+                    </span><span class="keyw">if</span><span class="def"> (--numPlayers &lt;= </span><span class="num">1</span><span class="def">) {
+                        </span><span class="keyw">break</span><span class="def">;
+                    }
+                }
+            }
+            history.</span><span class="func">flushRound</span><span class="def">();
+        }
+        history.</span><span class="func">footer</span><span class="def">(</span><span class="func">getPlayersState</span><span class="def">());
+    }
+
+    </span><span class="com">// All challenges where the kicked player is the challenger must be</span><span class="def">
+    </span><span class="com">// refunded.</span><span class="def">
+    </span><span class="com">// All challenges where the kicked player is the challengee are just dropped</span><span class="def">
+    </span><span class="com">// without refund.</span><span class="def">
+    </span><span class="com">// player is removed from current players list.</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">kick</span><span class="def">(</span><span class="keyw">int</span><span class="def"> playerID){
+        </span><span class="keyw">for</span><span class="def"> (Entry&lt;</span><span class="prim">Integer</span><span class="def">, PlayerStore&gt; player : playersStores.</span><span class="func">entrySet</span><span class="def">()) {
+            </span><span class="com">// challenges kicked player accepted from other players</span><span class="def">
+            PlayerStore playerStore = player.</span><span class="func">getValue</span><span class="def">();
+            </span><span class="keyw">for</span><span class="def"> (AcceptedChallenge challenge : playerStore.acceptedChallenges.</span><span class="func">values</span><span class="def">()) {
+                </span><span class="keyw">if</span><span class="def"> (challenge.</span><span class="func">getChallengee</span><span class="def">().</span><span class="func">getId</span><span class="def">() == playerID) {
+                    playerStore.acceptedChallenges.</span><span class="func">remove</span><span class="def">(challenge);
+                    </span><span class="com">// no refund</span><span class="def">
+                }
+            }
+            </span><span class="com">// challenges kicked player provided to other players</span><span class="def">
+            </span><span class="keyw">for</span><span class="def"> (Challenge challenge : playerStore.providedChallenges.</span><span class="func">values</span><span class="def">()) {
+                </span><span class="keyw">if</span><span class="def"> (challenge.</span><span class="func">getChallenger</span><span class="def">().</span><span class="func">getId</span><span class="def">() == playerID) {
+                    playerStore.providedChallenges.</span><span class="func">remove</span><span class="def">(challenge);
+                    </span><span class="com">// refund</span><span class="def">
+                    </span><span class="func">transferMoney</span><span class="def">(playerID, player.</span><span class="func">getKey</span><span class="def">(), challenge.</span><span class="func">getPrice</span><span class="def">());
+                }
+            }
+            </span><span class="keyw">if</span><span class="def"> (player.</span><span class="func">getKey</span><span class="def">() == playerID) {
+                </span><span class="com">// challenges other players accepted from the kicked player</span><span class="def">
+                </span><span class="keyw">for</span><span class="def"> (AcceptedChallenge challenge : player.</span><span class="func">getValue</span><span class="def">().acceptedChallenges.</span><span class="func">values</span><span class="def">()) {
+                    </span><span class="com">// refund</span><span class="def">
+                    </span><span class="func">transferMoney</span><span class="def">(playerID, challenge.</span><span class="func">getChallenger</span><span class="def">().</span><span class="func">getId</span><span class="def">(), challenge.</span><span class="func">getPrice</span><span class="def">());
+                }
+                player.</span><span class="func">getValue</span><span class="def">().acceptedChallenges.</span><span class="func">clear</span><span class="def">();
+                </span><span class="com">// challenges other players provided for the kicked player</span><span class="def">
+                player.</span><span class="func">getValue</span><span class="def">().providedChallenges.</span><span class="func">clear</span><span class="def">();
+                </span><span class="com">// All challenges offered by the kicked player but never</span><span class="def">
+                </span><span class="com">// accepted</span><span class="def">
+                player.</span><span class="func">getValue</span><span class="def">().offeredChallenges.</span><span class="func">clear</span><span class="def">();
+                </span><span class="com">// player is added to the kicked players list.</span><span class="def">
+                player.</span><span class="func">getValue</span><span class="def">().kicked = </span><span class="keyw">true</span><span class="def">;
+            }
+        }
+    }
+
+    </span><span class="keyw">public</span><span class="def"> edu.neu.ccs.demeterf.lib.List&lt;edu.neu.ccs.demeterf.lib.Entry&lt;PlayerSpec, PlayerStore&gt;&gt; </span><span class="func">getPlayersState</span><span class="def">(){
+        edu.neu.ccs.demeterf.lib.List&lt;edu.neu.ccs.demeterf.lib.Entry&lt;PlayerSpec, PlayerStore&gt;&gt; playersState = edu.neu.ccs.demeterf.lib.List
+                .&lt;edu.neu.ccs.demeterf.lib.Entry&lt;PlayerSpec, PlayerStore&gt;&gt; </span><span class="func">create</span><span class="def">();
+        </span><span class="keyw">for</span><span class="def"> (Player player : players) {
+            PlayerStore store = playersStores.</span><span class="func">get</span><span class="def">(player.id);
+            playersState = playersState.</span><span class="func">push</span><span class="def">(</span><span class="keyw">new</span><span class="def"> edu.neu.ccs.demeterf.lib.Entry&lt;PlayerSpec, PlayerStore&gt;(player
+                    .</span><span class="func">getSpec</span><span class="def">(), store));
+        }
+        </span><span class="keyw">return</span><span class="def"> playersState;
+    }
+
+    </span><span class="keyw">public</span><span class="def"> edu.neu.ccs.demeterf.lib.List&lt;Player&gt; </span><span class="func">getPlayersTable</span><span class="def">(){
+        </span><span class="keyw">return</span><span class="def"> players;
+    }
+
+    </span><span class="com">/** Retrieve the player context for the current game */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> PlayerContext </span><span class="func">getPlayerContext</span><span class="def">(</span><span class="keyw">int</span><span class="def"> playerID, </span><span class="keyw">int</span><span class="def"> currentRound){
+        PlayerStore store = playersStores.</span><span class="func">get</span><span class="def">(playerID);
+        List&lt;OfferedChallenge&gt; otherOffered = </span><span class="func">getOtherOffers</span><span class="def">(playerID);
+
+        PlayerContext playerContext = </span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerContext</span><span class="def">(config, </span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerID</span><span class="def">(playerID), store.account, currentRound,
+                Util.</span><span class="func">toDemF</span><span class="def">(store.offeredChallenges.</span><span class="func">values</span><span class="def">()), Util.</span><span class="func">toDemF</span><span class="def">(otherOffered), Util
+                        .</span><span class="func">toDemF</span><span class="def">(store.acceptedChallenges.</span><span class="func">values</span><span class="def">()), Util.</span><span class="func">toDemF</span><span class="def">(store.providedChallenges.</span><span class="func">values</span><span class="def">()));
+
+        </span><span class="keyw">return</span><span class="def"> playerContext;
+
+    }
+
+    </span><span class="com">/** Collect offers made by other players */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> List&lt;OfferedChallenge&gt; </span><span class="func">getOtherOffers</span><span class="def">(</span><span class="keyw">int</span><span class="def"> playerID){
+        List&lt;OfferedChallenge&gt; otherOffered = </span><span class="keyw">new</span><span class="def"> ArrayList&lt;OfferedChallenge&gt;();
+        </span><span class="keyw">for</span><span class="def"> (Entry&lt;</span><span class="prim">Integer</span><span class="def">, PlayerStore&gt; player : playersStores.</span><span class="func">entrySet</span><span class="def">()) {
+            </span><span class="keyw">if</span><span class="def"> (player.</span><span class="func">getKey</span><span class="def">() != playerID) {
+                PlayerStore playerStore = player.</span><span class="func">getValue</span><span class="def">();
+                otherOffered.</span><span class="func">addAll</span><span class="def">(playerStore.offeredChallenges.</span><span class="func">values</span><span class="def">());
+            }
+        }
+        </span><span class="keyw">return</span><span class="def"> otherOffered;
+    }
+
+    </span><span class="com">/**
+     * 
+     * Transfer money between the accounts of two players
+     * 
+     */</span><span class="def">
+    </span><span class="keyw">private</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">transferMoney</span><span class="def">(</span><span class="keyw">int</span><span class="def"> from, </span><span class="keyw">int</span><span class="def"> to, </span><span class="keyw">double</span><span class="def"> amt){
+        playersStores.</span><span class="func">get</span><span class="def">(from).account -= amt;
+        playersStores.</span><span class="func">get</span><span class="def">(to).account += amt;
+    }
+
+    </span><span class="com">/**
+     * 
+     * Ad-hoc polymorphic install transaction methods for all transaction types
+     * 
+     */</span><span class="def">
+
+    </span><span class="com">/**
+     * 
+     * Handle an offered challenge transaction
+     * 
+     */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">installTransaction</span><span class="def">(</span><span class="keyw">int</span><span class="def"> challengerID, OfferTrans ot){
+        OfferedChallenge challenge = </span><span class="keyw">new</span><span class="def"> </span><span class="func">OfferedChallenge</span><span class="def">(config.</span><span class="func">createChallengeID</span><span class="def">(), </span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerID</span><span class="def">(challengerID), ot
+                .</span><span class="func">getPred</span><span class="def">(), ot.</span><span class="func">getPrice</span><span class="def">());
+        challengeOfferer.</span><span class="func">put</span><span class="def">(challenge.</span><span class="func">getKey</span><span class="def">(), challengerID);
+        playersStores.</span><span class="func">get</span><span class="def">(challengerID).offeredChallenges.</span><span class="func">put</span><span class="def">(challenge.</span><span class="func">getKey</span><span class="def">(), challenge);
+    }
+
+    </span><span class="com">/**
+     * 
+     * Handle an accept challenge transaction
+     * 
+     */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">installTransaction</span><span class="def">(</span><span class="keyw">int</span><span class="def"> challengeeID, AcceptTrans at){
+        </span><span class="keyw">int</span><span class="def"> challengeID = at.</span><span class="func">getChallengeid</span><span class="def">();
+        </span><span class="keyw">int</span><span class="def"> challengerID = challengeOfferer.</span><span class="func">get</span><span class="def">(challengeID);
+        PlayerStore challengerStore = playersStores.</span><span class="func">get</span><span class="def">(challengerID);
+        OfferedChallenge toBeAcceptedChallenge = challengerStore.offeredChallenges.</span><span class="func">get</span><span class="def">(challengeID);
+
+        AcceptedChallenge acceptedChallenge = toBeAcceptedChallenge.</span><span class="func">accept</span><span class="def">(</span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerID</span><span class="def">(challengeeID));
+
+        </span><span class="func">transferMoney</span><span class="def">(challengeeID, challengerID, acceptedChallenge.</span><span class="func">getPrice</span><span class="def">());
+
+        challengerStore.offeredChallenges.</span><span class="func">remove</span><span class="def">(challengeID);
+        challengerStore.acceptedChallenges.</span><span class="func">put</span><span class="def">(challengeID, acceptedChallenge);
+
+    }
+
+    </span><span class="com">/**
+     * 
+     * Handle Provide Transactions
+     * 
+     */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">installTransaction</span><span class="def">(</span><span class="keyw">int</span><span class="def"> challengerID, ProvideTrans pt){
+
+        </span><span class="keyw">int</span><span class="def"> challengeID = pt.</span><span class="func">getChallengeid</span><span class="def">();
+        PlayerStore challengerStore = playersStores.</span><span class="func">get</span><span class="def">(challengerID);
+        AcceptedChallenge toBeProvidedChallenge = challengerStore.acceptedChallenges.</span><span class="func">get</span><span class="def">(challengeID);
+        </span><span class="keyw">int</span><span class="def"> challengee = toBeProvidedChallenge.</span><span class="func">getChallengee</span><span class="def">().</span><span class="func">getId</span><span class="def">();
+
+        Problem problem = pt.</span><span class="func">getInst</span><span class="def">();
+        ProvidedChallenge providedChallenge = toBeProvidedChallenge.</span><span class="func">provide</span><span class="def">(problem);
+
+        PlayerStore challengeeStore = playersStores.</span><span class="func">get</span><span class="def">(challengee);
+        challengerStore.acceptedChallenges.</span><span class="func">remove</span><span class="def">(challengeID);
+        challengeeStore.providedChallenges.</span><span class="func">put</span><span class="def">(challengeID, providedChallenge);
+    }
+
+    </span><span class="com">/**
+     * 
+     * Handle Solve Transactions
+     * 
+     */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">installTransaction</span><span class="def">(</span><span class="keyw">int</span><span class="def"> challengeeID, SolveTrans st){
+        </span><span class="keyw">int</span><span class="def"> challengeID = st.</span><span class="func">getChallengeid</span><span class="def">();
+        PlayerStore challengeeStore = playersStores.</span><span class="func">get</span><span class="def">(challengeeID);
+        ProvidedChallenge toBeSolevedChallenge = challengeeStore.providedChallenges.</span><span class="func">get</span><span class="def">(challengeID);
+        </span><span class="keyw">int</span><span class="def"> challengerID = toBeSolevedChallenge.</span><span class="func">getChallenger</span><span class="def">().</span><span class="func">getId</span><span class="def">();
+
+        Problem inst = toBeSolevedChallenge.</span><span class="func">getInstance</span><span class="def">();
+        Solution sol = st.</span><span class="func">getSol</span><span class="def">();
+
+        </span><span class="keyw">double</span><span class="def"> quality = config.</span><span class="func">getObjective</span><span class="def">().</span><span class="func">value</span><span class="def">(inst, sol);
+        </span><span class="keyw">double</span><span class="def"> secretQuality = config.</span><span class="func">getObjective</span><span class="def">().</span><span class="func">getDefaultQuality</span><span class="def">(inst);
+        </span><span class="keyw">double</span><span class="def"> price = toBeSolevedChallenge.</span><span class="func">getPrice</span><span class="def">();
+        </span><span class="keyw">double</span><span class="def"> profitFactor = config.</span><span class="func">getProfitFactor</span><span class="def">();
+        </span><span class="keyw">double</span><span class="def"> profit = config.</span><span class="func">getObjective</span><span class="def">().</span><span class="func">calculatePayoff</span><span class="def">(quality, secretQuality, price, profitFactor);
+
+        </span><span class="func">transferMoney</span><span class="def">(challengerID, challengeeID, profit);
+
+        challengeeStore.providedChallenges.</span><span class="func">remove</span><span class="def">(challengeID);
+    }
+
+    </span><span class="com">/**
+     * 
+     * Handle Reoffer Transactions
+     * 
+     */</span><span class="def">
+    </span><span class="keyw">public</span><span class="def"> </span><span class="keyw">void</span><span class="def"> </span><span class="func">installTransaction</span><span class="def">(</span><span class="keyw">int</span><span class="def"> newChallenger, ReofferTrans rt){
+        </span><span class="keyw">int</span><span class="def"> challengeID = rt.</span><span class="func">getChallengeid</span><span class="def">();
+
+        </span><span class="keyw">int</span><span class="def"> challengerID = challengeOfferer.</span><span class="func">get</span><span class="def">(challengeID);
+
+        challengeOfferer.</span><span class="func">remove</span><span class="def">(challengeID);
+        challengeOfferer.</span><span class="func">put</span><span class="def">(challengeID, newChallenger);
+
+        PlayerStore challengerStore = playersStores.</span><span class="func">get</span><span class="def">(challengerID);
+        PlayerStore newChallengerStore = playersStores.</span><span class="func">get</span><span class="def">(newChallenger);
+
+        OfferedChallenge toBeReofferedChallenge = challengerStore.offeredChallenges.</span><span class="func">get</span><span class="def">(challengeID);
+        OfferedChallenge reOfferedChallenge = toBeReofferedChallenge
+                .</span><span class="func">reoffer</span><span class="def">(</span><span class="keyw">new</span><span class="def"> </span><span class="func">PlayerID</span><span class="def">(newChallenger), rt.</span><span class="func">getPrice</span><span class="def">());
+
+        challengerStore.offeredChallenges.</span><span class="func">remove</span><span class="def">(challengeID);
+        newChallengerStore.offeredChallenges.</span><span class="func">put</span><span class="def">(challengeID, reOfferedChallenge);
+    }
+
+    </span><span class="com">/** DGP method from Class PrintHeapToString */</span><span class="def">
+    @Override
+    </span><span class="keyw">public</span><span class="def"> </span><span class="prim">String</span><span class="def"> </span><span class="func">toString</span><span class="def">(){
+        </span><span class="keyw">return</span><span class="def"> scg.gen.PrintHeapToString.</span><span class="func">PrintHeapToStringM</span><span class="def">(</span><span class="keyw">this</span><span class="def">);
+    }
+}
+</span></pre></body></html>

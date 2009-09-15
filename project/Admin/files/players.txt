@@ -1,0 +1,2 @@
+playerspec["Team 1" "localhost" 7001]
+playerspec["Team 2" "localhost" 7002]

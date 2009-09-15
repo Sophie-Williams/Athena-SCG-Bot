@@ -1,0 +1,30 @@
+ package edu.neu.ccs.demeterf.lib;
+
+ import edu.neu.ccs.demeterf.lib.*;
+
+ extern interface Comparable(X) = .
+
+ nogen List(X) = Cons(X) | Empty(X).
+ nogen Cons(X) = <first> X *s <rest> List(X).
+ nogen Empty(X)= .
+ 
+ nogen Option(X)= Some(X) | None(X).
+ nogen Some(X)  = <just> X.
+ nogen None(X)  = .
+ 
+ nogen RBColor = RED | BLACK.
+ nogen RED = "red".
+ nogen BLACK = "black".
+ 
+ nogen RBTree(X:Comparable(X)) = RBNode(X) | RBLeaf(X).
+ nogen RBLeaf(X:Comparable(X)) = .
+ nogen RBNode(X:Comparable(X)) = "(node" *s <color> RBColor *s <data> X
+                                         *s <left>  RBTree(X)
+                                         *s <right> RBTree(X) ")".
+ 
+ nogen Entry(K:Comparable(K),V) = "(" <key> K *s "->" *s <val> V ")" 
+                                  implements Comparable(Entry(K,V)).
+ nogen Map(K:Comparable(K),V) = "[" *s <tree> RBTree(Entry(K,V)) *s "]".
+ 
+ nogen Wrap(X:Comparable(X)) = <x> X implements Comparable(Wrap(X)).
+ nogen Set(X:Comparable(X)) = "{" *s <tree> RBTree(Wrap(X)) *s "}".
