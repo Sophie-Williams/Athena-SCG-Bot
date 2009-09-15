@@ -1,0 +1,31 @@
+In this version the behavior is implemented outside the
+behavior file. 
+See file Main.java. 
+
+To go from ../baskets to ../baskets-no-beh, do:
+
+copy program.beh to Main.java.
+copy program.beh to Magic.java
+
+edit Main.java 
+eliminate the Magic class
+put "import gen.*;"
+add "public class" 
+replace {{ by { and }} by }
+
+edit Magic.java 
+eliminate the Main class
+put "import gen.*;"
+add "public class" 
+extend Bc
+replace {{ by { and }} by }
+add: public static Start magic(Start s)
+add: Magic.magic(start)
+
+Eliminate Main=. from file program.cd
+Compile using:
+javac *.java
+
+To run now use:
+java Main < program.input
+

@@ -1,0 +1,19 @@
+package gen;
+import edu.neu.ccs.demeterf.lib.*;
+import edu.neu.ccs.demeterf.*;
+
+nogen List(X) : Cons(X) | Empty(X).
+nogen Cons(X) = <first> X <rest> List(X).
+nogen Empty(X) = .
+
+SimpleRawMaterials = 
+  <constraints> List(RawMaterial) EOF.
+RawMaterial = *l "raw" *s "material" "(" +
+  <constraints> List(Constraint) - ")".
+// Constraint = *l <r> Relation *s <vars> List(Variable).
+Constraint = *l "rel:" *s <r> Relation *s "vars:" *s <vars> List(Variable).
+Relation = "or" *s <length> Length *s <pos> Positive.
+Length = <v> int.
+Positive = <v> int.
+Variable = <v> ident *s.
+

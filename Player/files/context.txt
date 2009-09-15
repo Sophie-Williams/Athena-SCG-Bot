@@ -1,0 +1,12 @@
+context[ config[
+			gamekind: "CSP" 
+			turnduration: 60 
+			mindecrement:  0.01 
+         ]
+         10
+         1.2
+         ()
+         ()
+         ()
+         ()
+         ]
