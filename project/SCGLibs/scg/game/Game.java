@@ -1,5 +1,3 @@
-// ** This class was generated with DemFGen (vers:06/04/2009)
-
 package scg.game;
 
 import java.io.IOException;
@@ -11,23 +9,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import scg.Util;
-import scg.gen.AcceptTrans;
-import scg.gen.AcceptedChallenge;
-import scg.gen.Challenge;
-import scg.gen.Config;
-import scg.gen.OfferTrans;
-import scg.gen.OfferedChallenge;
-import scg.gen.PlayerContext;
-import scg.gen.PlayerID;
-import scg.gen.PlayerKickedEvent;
-import scg.gen.PlayerSpec;
-import scg.gen.PlayerTrans;
-import scg.gen.Problem;
-import scg.gen.ProvideTrans;
-import scg.gen.ProvidedChallenge;
-import scg.gen.ReofferTrans;
-import scg.gen.Solution;
-import scg.gen.SolveTrans;
+import scg.gen.*;
 
 /**
  * 
@@ -51,26 +33,27 @@ public class Game implements GameI {
 
     /** Associates player specs to player id's */
     public static class Player {
-
+        /**  */
         private final int id;
+        /**  */
         private final PlayerProxyI proxy;
 
+        /**  */
         public Player(int id, PlayerProxyI proxy) {
             this.id = id;
             this.proxy = proxy;
         }
 
-        public int getId(){
-            return id;
-        }
-
-        public PlayerSpec getSpec(){
-            return proxy.getSpec();
-        }
-
+        /**  */
+        public int getId(){ return id; }
+        /**  */
+        public PlayerSpec getSpec(){ return proxy.getSpec(); }
+        /**  */
         public PlayerTrans takeTurn(PlayerContext currentPlayerContext) throws Exception{
             return proxy.takeTurn(currentPlayerContext);
         }
+        /**  */
+        public String toString(){ return id+" : "+getSpec().toString(); }
     }
 
     /** Associates player id's to their state in the game */
@@ -79,21 +62,15 @@ public class Game implements GameI {
         double account;
         boolean kicked = false;
 
-        /**
-         * Challenges offered by the player The player shouldn't offer/reoffer
-         * these.
-         */
+        /** Challenges offered by the player The player shouldn't offer/reoffer these. */
         Map<Integer, OfferedChallenge> offeredChallenges = new HashMap<Integer, OfferedChallenge>();
-        /**
-         * Challenges offered by the player and accepted by other player The
-         * player has to provide these.
-         */
+        /** Challenges offered by the player and accepted by other player The player has
+         *    to provide these. */
         Map<Integer, AcceptedChallenge> acceptedChallenges = new HashMap<Integer, AcceptedChallenge>();
-        /**
-         * Challenges provided for the player The player should solve these
-         */
+        /** Challenges provided for the player The player should solve these */
         Map<Integer, ProvidedChallenge> providedChallenges = new HashMap<Integer, ProvidedChallenge>();
 
+        /**  */
         public PlayerStore(double account) {
             this.account = account;
         }
@@ -101,14 +78,20 @@ public class Game implements GameI {
 
     private edu.neu.ccs.demeterf.lib.List<Player> players = edu.neu.ccs.demeterf.lib.List.<Player> create();
     private final Map<Integer, PlayerStore> playersStores = new HashMap<Integer, PlayerStore>();
-
     private final Map<Integer, Integer> challengeOfferer = new HashMap<Integer, Integer>();
     private final Config config;
 
+    /**  */
     public Game(Config config, PlayerProxyI... playerProxies) {
         this(config, Arrays.asList(playerProxies));
     }
 
+    /**  */
+    public Game(Config config, edu.neu.ccs.demeterf.lib.List<PlayerProxyI> proxies) {
+        this(config, proxies.toJavaList());
+    }
+    
+    /**  */
     public Game(Config config, List<? extends PlayerProxyI> playerProxies) {
         this.config = config;
         for (PlayerProxyI playerProxy : playerProxies) {
@@ -118,6 +101,7 @@ public class Game implements GameI {
         }
     }
 
+    /**  */
     public void start(HistoryFile history) throws IOException{
         int numPlayers = players.length();
         history.header(players);
@@ -192,6 +176,7 @@ public class Game implements GameI {
         }
     }
 
+    /**  */
     public edu.neu.ccs.demeterf.lib.List<edu.neu.ccs.demeterf.lib.Entry<PlayerSpec, PlayerStore>> getPlayersState(){
         edu.neu.ccs.demeterf.lib.List<edu.neu.ccs.demeterf.lib.Entry<PlayerSpec, PlayerStore>> playersState = edu.neu.ccs.demeterf.lib.List
                 .<edu.neu.ccs.demeterf.lib.Entry<PlayerSpec, PlayerStore>> create();
@@ -203,6 +188,7 @@ public class Game implements GameI {
         return playersState;
     }
 
+    /**  */
     public edu.neu.ccs.demeterf.lib.List<Player> getPlayersTable(){
         return players;
     }
@@ -232,27 +218,15 @@ public class Game implements GameI {
         return otherOffered;
     }
 
-    /**
-     * 
-     * Transfer money between the accounts of two players
-     * 
-     */
+    /** Transfer money between the accounts of two players */
     private void transferMoney(int from, int to, double amt){
         playersStores.get(from).account -= amt;
         playersStores.get(to).account += amt;
     }
 
-    /**
-     * 
-     * Ad-hoc polymorphic install transaction methods for all transaction types
-     * 
-     */
+    // Install transaction methods for all transaction types */
 
-    /**
-     * 
-     * Handle an offered challenge transaction
-     * 
-     */
+    /** Handle an offered challenge transaction */
     public void installTransaction(int challengerID, OfferTrans ot){
         OfferedChallenge challenge = new OfferedChallenge(config.createChallengeID(), new PlayerID(challengerID), ot
                 .getPred(), ot.getPrice());
@@ -260,11 +234,7 @@ public class Game implements GameI {
         playersStores.get(challengerID).offeredChallenges.put(challenge.getKey(), challenge);
     }
 
-    /**
-     * 
-     * Handle an accept challenge transaction
-     * 
-     */
+    /** Handle an accept challenge transaction */
     public void installTransaction(int challengeeID, AcceptTrans at){
         int challengeID = at.getChallengeid();
         int challengerID = challengeOfferer.get(challengeID);
@@ -280,11 +250,7 @@ public class Game implements GameI {
 
     }
 
-    /**
-     * 
-     * Handle Provide Transactions
-     * 
-     */
+    /** Handle Provide Transactions */
     public void installTransaction(int challengerID, ProvideTrans pt){
 
         int challengeID = pt.getChallengeid();
@@ -300,11 +266,7 @@ public class Game implements GameI {
         challengeeStore.providedChallenges.put(challengeID, providedChallenge);
     }
 
-    /**
-     * 
-     * Handle Solve Transactions
-     * 
-     */
+    /** Handle Solve Transactions */
     public void installTransaction(int challengeeID, SolveTrans st){
         int challengeID = st.getChallengeid();
         PlayerStore challengeeStore = playersStores.get(challengeeID);
@@ -325,11 +287,7 @@ public class Game implements GameI {
         challengeeStore.providedChallenges.remove(challengeID);
     }
 
-    /**
-     * 
-     * Handle Reoffer Transactions
-     * 
-     */
+    /** Handle Reoffer Transactions */
     public void installTransaction(int newChallenger, ReofferTrans rt){
         int challengeID = rt.getChallengeid();
 

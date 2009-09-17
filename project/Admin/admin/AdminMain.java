@@ -9,6 +9,7 @@ import java.util.List;
 import logging.Logger;
 import reg.RegServer;
 import scg.Util;
+import scg.Constants;
 import scg.game.Game;
 import scg.game.HistoryFile;
 import scg.game.PlayerProxyI;
@@ -17,15 +18,10 @@ import scg.gen.ParseException;
 import scg.gen.PlayerSpec;
 import scg.gen.PlayersFile;
 import edu.neu.ccs.demeterf.util.CLI;
+import edu.neu.ccs.demeterf.lib.Option;
 
 /**  */
 public class AdminMain {
-
-    private static final String HISTORY_FILE_PREFIX = "files/history/history";
-    private static final String HISTORY_FILE_SUFFIX = ".txt";
-    private static final String CONFIG_FILE = "files/config.txt";
-    /** For testing purposes */
-    private static final String PLAYERS_FILE = "files/players.txt";
 
     /** Options */
     static final String HELP = "--help", NO_REG = "--noreg", RELATIVE_TIME = "--relative";
@@ -41,10 +37,10 @@ public class AdminMain {
                 + "      --noreg     : Skip registration, use a preset players file\n"
                 + "      --relative  : Use a 'relative' start time instead of an absolute\n"
                 + "                     start time. Used for running a quick competition.\n\n"
-                + "    Absolute Time (default) is formated as: 'mm/dd/yyyy hh:mm am|pm'.\n"
+                + "    Absolute Time (default) is formated as: 'mm/dd/yyyy hh:mm:ss am|pm'.\n"
                 + "    Relative Time is an integer; the number of seconds before starting\n\n"
                 + "    If 'noreg' is used, the location of a players info file can be\n"
-                + "      given... otherwise the default is '" + PLAYERS_FILE + "'\n");
+                + "      given... otherwise the default is '" + Constants.PLAYERS_FILE + "'\n");
         System.exit(1);
     }
 
@@ -74,11 +70,11 @@ public class AdminMain {
             logger = Logger.text(System.out);
             if (options.contains(NO_REG)) {
                 logger.event("Skipping Registration");
-                String pfile = args.length() > 1 ? args.lookup(1) : PLAYERS_FILE;
+                String pfile = args.length() > 1 ? args.lookup(1) : Constants.PLAYERS_FILE;
                 players = loadPlayers(pfile);
             } else {
                 logger.event("Registering");
-                players = RegServer.create(logger).runRegistration(start).toJavaList();
+                players = RegServer.create(logger).runRegistration(Option.some(start)).toJavaList();
             }
             Util.waitUntil(start);
         } catch (java.text.ParseException pe) {
@@ -88,9 +84,9 @@ public class AdminMain {
             usage("Exception while starting up: " + e.getMessage());
             return;
         }
-        Game game = new Game(loadConfig(CONFIG_FILE), wrapPlayerSpecs(players));
+        Game game = new Game(loadConfig(Constants.CONFIG_FILE), wrapPlayerSpecs(players));
         logger.event("Opening History file");
-        HistoryFile history = new HistoryFile(HISTORY_FILE_PREFIX, start, HISTORY_FILE_SUFFIX);
+        HistoryFile history = new HistoryFile(Constants.HISTORY_FILE_PREFIX, start, Constants.HISTORY_FILE_SUFFIX);
         logger.event("Competition Started");
         game.start(history);
         logger.event("Competition Complete");

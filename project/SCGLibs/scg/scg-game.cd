@@ -53,10 +53,10 @@ Config = "config[" *l
             *l*t "mindecrement:" *s <mindecr> double
             *l*t "initacc:" *s <initacc> double
             *l*t "objective:" *s <objective> Objective
-			*l*t "predicate:" *s <predicate> Predicate
-			*l*t "numrounds:" *s <numrounds> int
-			*l*t "profitfactor:" *s <profitFactor> double *l
-			*l*t "otrounds:" *s <otrounds> int
+            *l*t "predicate:" *s <predicate> Predicate
+            *l*t "numrounds:" *s <numrounds> int
+            *l*t "profitfactor:" *s <profitFactor> double *l
+            *l*t "otrounds:" *s <otrounds> int
          "]".
  
 PlayerContext = "context["

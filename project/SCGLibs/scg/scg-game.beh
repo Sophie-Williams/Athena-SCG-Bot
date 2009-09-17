@@ -39,15 +39,15 @@ Transaction{{
 
 OfferTrans{{
    public void install(int playerId, GameI game, boolean isOverTime){
-   		if(!isOverTime){
-        	game.installTransaction(playerId, this);
-        }
-    }
+       if(!isOverTime){
+           game.installTransaction(playerId, this);
+       }
+   }
 }}
 AcceptTrans{{ 
    public void install(int playerId, GameI game, boolean isOverTime){
-   		if(!isOverTime){
-        	game.installTransaction(playerId, this);
+           if(!isOverTime){
+            game.installTransaction(playerId, this);
         }
     }
 }}
@@ -63,8 +63,8 @@ SolveTrans{{
 }}
 ReofferTrans{{
    public void install(int playerId, GameI game, boolean isOverTime){
-   		if(!isOverTime){
-        	game.installTransaction(playerId, this);
+           if(!isOverTime){
+            game.installTransaction(playerId, this);
         }
     }
 }}
@@ -122,9 +122,9 @@ PlayerTrans{{
 
 
 PlayerContext{{
-	public boolean isOverTime(){
-	  return currentRound > config.getNumrounds();
-	}
+    public boolean isOverTime(){
+      return currentRound > config.getNumrounds();
+    }
     /**  */
     public List<OfferedChallenge> getAllOffered(){ return ourOffered.append(theirOffered); }
     
@@ -316,25 +316,25 @@ PlayerContext{{
  *
  */
 Config{{
-	private final int START_PLAYER_ID = 100;
-	private final int START_CHALLENGE_ID = 500;
-	
-	private int currentChallengeID = START_CHALLENGE_ID;
-	private int currentPlayerID = START_PLAYER_ID;
-	
-	public int createPlayerID(){
-		return currentPlayerID++;
-	}
-	
-	public int createChallengeID(){
-		return currentChallengeID++;
-	}
-	
-	public boolean isOverTime(int round){
-	  return round > getNumrounds();
-	}
-	
-	/** Get a general comparator that can compare Challenges to Transactions */
+    private final int START_PLAYER_ID = 100;
+    private final int START_CHALLENGE_ID = 500;
+    
+    private int currentChallengeID = START_CHALLENGE_ID;
+    private int currentPlayerID = START_PLAYER_ID;
+    
+    public int createPlayerID(){
+        return currentPlayerID++;
+    }
+    
+    public int createChallengeID(){
+        return currentChallengeID++;
+    }
+    
+    public boolean isOverTime(int round){
+      return round > getNumrounds();
+    }
+    
+    /** Get a general comparator that can compare Challenges to Transactions */
     static <CH extends Challenge, TR extends Transaction> edu.neu.ccs.demeterf.lib.List.GComp<CH, TR> getComp(){
         return new edu.neu.ccs.demeterf.lib.List.GComp<CH, TR>() {
 
@@ -344,48 +344,23 @@ Config{{
             }
         };
     }
-	
+    
 }}
 
-/**
- * 
- * Ad-hoc polymorphic install transaction methods for all transaction types
- * 
- */
+
 GameI{{
-    /**
-     * 
-     * Handle an offer challenge transaction
-     * 
-     */
+    /** Handle an offer challenge transaction */
     void installTransaction(int challengerID, OfferTrans ot);
 
-    /**
-     * 
-     * Handle an accept challenge transaction
-     * 
-     */
+    /** Handle an accept challenge transaction */
     void installTransaction(int challengeeID, AcceptTrans at);
 
-    /**
-     * 
-     * Handle Provide Transactions
-     * 
-     * */
+    /** Handle Provide Transactions */
     void installTransaction(int challengerID, ProvideTrans pt);
  
-    /**
-     * 
-     * Handle Solve Transactions
-     * 
-     * */
-	void installTransaction(int challengeeID, SolveTrans st);
+    /** Handle Solve Transactions */
+    void installTransaction(int challengeeID, SolveTrans st);
 
-	/**
- 	* 
- 	* Handle Reoffer Transactions
- 	* 
- 	* */
-	void installTransaction(int newChallenger, ReofferTrans rt);
-		
+    /** Handle Reoffer Transactions */
+    void installTransaction(int newChallenger, ReofferTrans rt);
 }}

@@ -1,5 +1,7 @@
 #! /bin/bash
 
+javac -classpath .:/home/chadwick/www/demeterf/demeterf.jar:../SCGLibs/ \
+    *.java player/*.java
 cp ../SCGLibs/demeterfRT.jar ./player.jar
 
 jar -umf player/player.mf player.jar \

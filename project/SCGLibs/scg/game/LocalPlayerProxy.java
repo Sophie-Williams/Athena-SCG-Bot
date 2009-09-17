@@ -1,34 +1,21 @@
 package scg.game;
 
-import java.lang.reflect.Method;
-
 import scg.gen.PlayerSpec;
 import edu.neu.ccs.demeterf.http.classes.HTTPReq;
 import edu.neu.ccs.demeterf.http.classes.HTTPResp;
+import edu.neu.ccs.demeterf.http.server.ServerDispatch;
 
-public class LocalPlayerProxy extends PlayerProxy implements PlayerProxyI {
+/** Supports the direct calling of Player handler methods */
+public class LocalPlayerProxy extends PlayerProxy{
+    /** The local Player ServerDispatch */
+    private ServerDispatch dispatch;
 
-    private final Object player;
-    private Method method = null;
-
-    public LocalPlayerProxy(PlayerSpec spec, Object player) {
+    /** Create a LocalPlayerProxy from the PlayerSpec, and a Server Object/Handler */
+    public LocalPlayerProxy(PlayerSpec spec, Object handler){
         super(spec);
-        this.player = player;
-        if (player != null) {
-            try {
-                this.method = player.getClass().getMethod("playerResponse", HTTPReq.class);
-            } catch (Exception e) {
-                throw new RuntimeException("incorrect player type");
-            }
-        }
-
+        dispatch = ServerDispatch.create(handler);
     }
 
-    @Override
-    public HTTPResp contactPlayer(HTTPReq req) throws Exception{
-        if (player != null && method != null) {
-            return (HTTPResp) method.invoke(player, req);
-        }
-        throw new RuntimeException("Player unable to take turn");
-    }
+    /** Contact (dispatch to) the Player server directly */
+    public HTTPResp contactPlayer(HTTPReq req){ return dispatch.handle(req); }
 }

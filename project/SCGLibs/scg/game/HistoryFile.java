@@ -15,12 +15,17 @@ import scg.gen.Round;
 import edu.neu.ccs.demeterf.lib.Entry;
 import edu.neu.ccs.demeterf.lib.List;
 
+/**  */
 public class HistoryFile {
 
+    /**  */
     private final String historyFile;
+    /**  */
     private final Writer history;
+    /**  */
     private boolean headerPrinted = false;
 
+    /**  */
     public HistoryFile(String prefix, Date compTime, String suffix) throws Exception {
         this.historyFile = prefix + Util.getFileNameSafeDate(compTime) + suffix;
         File f = new File(historyFile);
@@ -30,6 +35,7 @@ public class HistoryFile {
         this.history = new OutputStreamWriter(new FileOutputStream(f));
     }
 
+    /** TODO: This header is not the same as the one described by "History" in the CD file */
     public void header(List<Game.Player> players) throws IOException{
         if (headerPrinted) {
             throw new RuntimeException("Header can be printed only once");
@@ -40,14 +46,18 @@ public class HistoryFile {
         headerPrinted = true;
     }
 
+    /**  */
     private int round = -1;
+    /**  */
     private List<Event> roundEvents = List.create();
 
+    /**  */
     public void startRound(int numRound){
-        this.round = numRound;
-        this.roundEvents = List.create();
+        round = numRound;
+        roundEvents = List.create();
     }
 
+    /**  */
     public void flushRound() throws IOException{
         Round r = new Round(round, roundEvents.reverse());
         history.append(r.toString() + "\n");
@@ -55,6 +65,7 @@ public class HistoryFile {
         round = -1;
     }
 
+    /**  */
     public void recordEvent(int playerID, Event event){
         if (round == -1) {
             throw new RuntimeException("Can record events in the context of a round only");
@@ -62,6 +73,7 @@ public class HistoryFile {
         this.roundEvents = this.roundEvents.push(event);
     }
 
+    /**  */
     public void footer(List<Entry<PlayerSpec, PlayerStore>> playersState) throws IOException{
         history.append("**** Final Results *****\n");
         List<Entry<PlayerSpec, PlayerStore>> sortedState = playersState
@@ -90,7 +102,5 @@ public class HistoryFile {
 
         history.flush();
         history.close();
-        // TODO: Should we close the File too?
-
     }
 }

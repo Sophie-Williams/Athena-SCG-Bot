@@ -90,7 +90,7 @@ public class Util {
         Calendar c = new GregorianCalendar();
         c.setTime(date);
         return "_" + c.get(Calendar.YEAR) + "_" + (c.get(Calendar.MONTH) + 1) + "_" + c.get(Calendar.DAY_OF_MONTH)
-                + "_" + c.get(Calendar.HOUR_OF_DAY) + "_" + c.get(Calendar.MINUTE) + c.get(Calendar.SECOND);
+                + "_" + c.get(Calendar.HOUR_OF_DAY) + "_" + c.get(Calendar.MINUTE) + "_" + c.get(Calendar.SECOND);
     }
 
     /** Is the first Date after the Second Date? */

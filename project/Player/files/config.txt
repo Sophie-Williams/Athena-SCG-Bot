@@ -1,4 +1,4 @@
-// Config file for the Admin
+// A sample config...
 
 config[ 
         gamekind: "CSP"
@@ -10,4 +10,5 @@ config[
         numrounds: 15
         profitfactor: 1.0
         otrounds: 2
-]
+      ]
+

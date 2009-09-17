@@ -2,6 +2,7 @@ package reg;
 
 import edu.neu.ccs.demeterf.http.classes.*;
 import scg.gen.PlayerSpec;
+import scg.Constants;
 
 /** Test the Player Registration */
 public class RegTest {
@@ -15,7 +16,7 @@ public class RegTest {
         
         HTTPResp res = HTTPReq.Post("/register?password=ABCDE",
                 "" + new PlayerSpec("Team Bryan", "auto", 9000)).send(
-                "pacman.ccs.neu.edu", RegServer.PORT);
+                "pacman.ccs.neu.edu", Constants.DEF_REG_PORT);
         System.out.println(" RESP:\n" + res);
     }
 }

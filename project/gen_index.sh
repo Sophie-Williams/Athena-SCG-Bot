@@ -18,8 +18,8 @@ TITLE=$2
 CURR=`pwd | egrep -o "$BASE.*$"`
 
 DIRS=`ls --color=never -dl * | grep "^d" | awk '{ print $8 }'`
-JFILES=`ls --color=never -dl * | grep "^-" | grep ".java$" | awk '{ print $8 }'`
-OFILES=`ls --color=never -dl * | grep "^-" | grep -v ".java$" | grep -v ".class$" | grep -v ".html$" | awk '{ print $8 }'`
+JFILES=`ls --color=never -dl * | grep "^-" | egrep "\.java$" | awk '{ print $8 }'`
+OFILES=`ls --color=never -dl * | grep "^-" | egrep -v "(*\.java$)|(\.class$)|(index\.html$)|(\.java\.html$)|(~$)" | awk '{ print $8 }'`
 
 cat <<EOF
 <html>
@@ -29,7 +29,7 @@ cat <<EOF
          table{
             border:dashed 1px blue;
             padding: 10px;
-            min-width:500px;
+            width:500px;
          }
          td{
             padding-right: 10px;
@@ -65,7 +65,7 @@ if [ "$JFILES" != "" ]; then
         fi
         echo "        <tr><td>$i</td><td><a href='$i'>Plain</a></td><td><a href='$i.html'>HTML</a></td></tr>"
     done
-    echo "        <tr></tr>"
+    echo "        <tr>&nbsp;</tr>"
 fi
 
 
@@ -73,11 +73,13 @@ if [ "$OFILES" != "" ]; then
     echo "        <tr><th colspan='3'>Other Files</th></tr>"
     echo "           <tr><td colspan='3'><hr/></td></tr>"
     for i in $OFILES; do
-        echo $i | grep ".class$" &> /dev/null
+        echo $i | egrep "(\.class$)|(index\.html$)|(~$)" &> /dev/null
         if [ $? == 1 ]; then
             echo $i | grep ".html$" &> /dev/null
             if [ $? == 1 ]; then
                 echo "        <tr><td>$i</td><td><a href='$i'>Plain</a></td><td></td></tr>"
+            else
+                echo "        <tr><td>$i</td><td></td><td><a href='$i'>HTML</a></td></tr>"
             fi
         fi
     done

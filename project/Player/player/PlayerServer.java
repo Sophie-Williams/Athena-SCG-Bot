@@ -18,6 +18,10 @@ public class PlayerServer {
 
     /** Path the player server listens for */
     public static final String EntryPath = "/player";
+    /** Receives a competition "start" message at this path */
+    public static final String StartPath = "/start";
+    /** Receives a competition "end" message at this path */
+    public static final String EndPath = "/end";
     /** Default port for the Player */
     public static final int DEFAULT_PORT = 8000;
 
@@ -45,7 +49,18 @@ public class PlayerServer {
             return HTTPResp.error(""+e);
         }
     }
-
+    /** Handle an Admin competition "start" message */
+    @Path(StartPath)
+    public HTTPResp startResponse(HTTPReq req){
+        return HTTPResp.textResponse("OK");
+    }
+    
+    /** Handle an Admin competition "end" message */
+    @Path(EndPath)
+    public HTTPResp endResponse(HTTPReq req){
+        return HTTPResp.textResponse("OK");
+    }
+        
     /** Default Handler for other paths */
     @Path
     public HTTPResp defaultResponse(){
