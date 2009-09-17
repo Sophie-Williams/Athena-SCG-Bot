@@ -1,4 +1,4 @@
-// ** This class was generated with DemFGen (vers:09/12/2009)
+// ** This class was generated with DemFGen (vers:09/15/2009)
 
 package scg.gen;
 
@@ -45,8 +45,8 @@ public class ReofferTrans extends Transaction{
     public static class price extends edu.neu.ccs.demeterf.control.Fields.any{}
 
    public void install(int playerId, GameI game, boolean isOverTime){
-   		if(!isOverTime){
-        	game.installTransaction(playerId, this);
+           if(!isOverTime){
+            game.installTransaction(playerId, this);
         }
     }
 

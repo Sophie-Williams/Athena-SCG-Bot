@@ -1,13 +1,13 @@
 class:
 		javac -classpath .:/home/chadwick/www/demeterf/demeterf.jar:../SCGLibs/ \
-				*.java player/*.java || true
+				*.java player/*.java player/tasks/*.java || true
 
 jar: class
 		@cp ../SCGLibs/demeterfRT.jar ./player.jar
 		@jar -umf player/player.mf player.jar \
 				`find ./ -name '*.class'` \
 				`find ./ -name '*.java'`  \
-				makeJar.sh overview.html files/ \
+				files/ \
 				.classpath .project player/player.mf
 		echo Adding scg
 		cd ../SCGLibs && jar uf ../Player/player.jar `find . -name '*.class'`

@@ -1,3 +1,3 @@
 // Test Players File... Will probably be overwritten
-playerspec["Team 1" "localhost" 7001]
-playerspec["Team 2" "localhost" 7002]
+playerspec["donkeyballs" "localhost" 7001]
+playerspec["donkeyblls" "localhost" 7001]

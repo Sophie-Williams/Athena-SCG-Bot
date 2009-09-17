@@ -1,4 +1,4 @@
-// ** This class was generated with DemFGen (vers:09/12/2009)
+// ** This class was generated with DemFGen (vers:09/15/2009)
 
 package scg.gen;
 
@@ -68,9 +68,9 @@ public class PlayerContext{
     /** Field Class for PlayerContext.provided */
     public static class provided extends edu.neu.ccs.demeterf.control.Fields.any{}
 
-	public boolean isOverTime(){
-	  return currentRound > config.getNumrounds();
-	}
+    public boolean isOverTime(){
+      return currentRound > config.getNumrounds();
+    }
     /**  */
     public List<OfferedChallenge> getAllOffered(){ return ourOffered.append(theirOffered); }
     

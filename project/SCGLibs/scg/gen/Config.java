@@ -1,4 +1,4 @@
-// ** This class was generated with DemFGen (vers:09/12/2009)
+// ** This class was generated with DemFGen (vers:09/15/2009)
 
 package scg.gen;
 
@@ -72,25 +72,25 @@ public class Config{
     /** Field Class for Config.otrounds */
     public static class otrounds extends edu.neu.ccs.demeterf.control.Fields.any{}
 
-	private final int START_PLAYER_ID = 100;
-	private final int START_CHALLENGE_ID = 500;
-	
-	private int currentChallengeID = START_CHALLENGE_ID;
-	private int currentPlayerID = START_PLAYER_ID;
-	
-	public int createPlayerID(){
-		return currentPlayerID++;
-	}
-	
-	public int createChallengeID(){
-		return currentChallengeID++;
-	}
-	
-	public boolean isOverTime(int round){
-	  return round > getNumrounds();
-	}
-	
-	/** Get a general comparator that can compare Challenges to Transactions */
+    private final int START_PLAYER_ID = 100;
+    private final int START_CHALLENGE_ID = 500;
+    
+    private int currentChallengeID = START_CHALLENGE_ID;
+    private int currentPlayerID = START_PLAYER_ID;
+    
+    public int createPlayerID(){
+        return currentPlayerID++;
+    }
+    
+    public int createChallengeID(){
+        return currentChallengeID++;
+    }
+    
+    public boolean isOverTime(int round){
+      return round > getNumrounds();
+    }
+    
+    /** Get a general comparator that can compare Challenges to Transactions */
     static <CH extends Challenge, TR extends Transaction> edu.neu.ccs.demeterf.lib.List.GComp<CH, TR> getComp(){
         return new edu.neu.ccs.demeterf.lib.List.GComp<CH, TR>() {
 
@@ -100,7 +100,7 @@ public class Config{
             }
         };
     }
-	
+    
 
     /** DGP method from Class PrintHeapToString */
     public  String toString(){ return scg.gen.PrintHeapToString.PrintHeapToStringM(this); }

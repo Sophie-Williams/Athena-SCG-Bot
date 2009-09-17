@@ -1,4 +1,4 @@
-// ** This class was generated with DemFGen (vers:09/12/2009)
+// ** This class was generated with DemFGen (vers:09/15/2009)
 
 package scg.gen;
 
@@ -41,8 +41,8 @@ public class AcceptTrans extends Transaction{
     public static class challengeid extends edu.neu.ccs.demeterf.control.Fields.any{}
  
    public void install(int playerId, GameI game, boolean isOverTime){
-   		if(!isOverTime){
-        	game.installTransaction(playerId, this);
+           if(!isOverTime){
+            game.installTransaction(playerId, this);
         }
     }
 

@@ -1,4 +1,4 @@
-// ** This class was generated with DemFGen (vers:09/12/2009)
+// ** This class was generated with DemFGen (vers:09/15/2009)
 
 package scg.gen;
 
