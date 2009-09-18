@@ -2,22 +2,14 @@
 __author__ = "Alex Lee <lee@ccs.neu.edu"
 
 from pyparsing import *
+from parser import String, Double, sup_lit, wrap
 
-
-def wrap(expr, open_char="[", close_char="]"):
-  return Suppress(Literal(open_char)) + expr + Suppress(Literal(close_char))
-
-def sup_lit(expr):
-  return Suppress(Literal(expr))
-
-String = QuotedString(quoteChar='"')
-flo = Combine(Word( nums ) + "." + Word( nums ))
 
 TransactionType = Or([Literal("BUY"), Literal("CREATE"), Literal("REOFFER"),
                       Literal("DELIVER"), Literal("FINISH")])
 
-Price = flo 
-Quality = flo
+Price = Double 
+Quality = Double
 
 Predicate = sup_lit("pred") + String
 
@@ -34,6 +26,6 @@ Transaction = TransactionType + Challenge
 
 PlayerTransaction = String + ZeroOrMore(Transaction)
 
-Round = sup_lit("round") + wrap(ZeroOrMore(PlayerTransaction))
+Round = sup_lit("round") + wrap(ZeroOrMore(PlayerTransaction("pt")))
 
 History = sup_lit("history") + wrap(ZeroOrMore(Round))
