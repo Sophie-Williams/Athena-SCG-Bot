@@ -3,3 +3,4 @@
 *.pyc
 *.log
 player.tgz
+*.py[co]
