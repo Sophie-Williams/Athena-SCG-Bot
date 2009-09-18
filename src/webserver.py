@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import BaseHTTPServer
-import parserwrapper
+import game
 
 class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
@@ -37,7 +37,7 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def handle_post_request(self):
       body = self.rfile.read()
-      ctx = parserwrapper.GetContext(body)
+      ctx = game.PlayerContext.fromString(body)
       reply = ('playertrans[\n\t'
                '101\n\t'
                'offer[(68) 0.4587002152887071]\n\t'

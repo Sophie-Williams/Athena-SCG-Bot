@@ -12,16 +12,38 @@ integer = Word( nums )
 PlayerID = integer
 flo = Combine(Word( nums ) + "." + Word( nums ))
 
+
+#Problem =  <vars> List(Var) *s <clauses> List(Clause).
+#Clause = "(" <relnum> int *s <vars> List(Var) ")".
+ProblemType = ("(" + ZeroOrMore(integer("pt")) + ")")
+
+OfferedChallenge = Suppress(Literal("offered["))
+AcceptedChallenge = (Suppress("accepted[") + PlayerID("challengee"))
+ProvidedChallenge = (Suppress("provided[") + PlayerID("challengee"))
+SolvedChallenge = (Suppress("solved[") + PlayerID("challengee")
+                   + Problem("instance"))
+
+Challenge = (Or([OfferedChallenge, AcceptedChallenge, ProvidedChallenge,
+                 SolvedChallenge]) + integer("key") + PlayerID("challenger")
+             + ProblemType("pred") + flo("price") + "]")
+
 Objective = Literal("[]")
 Predicate = Literal("[]")
-ourOffered = Literal("()")
-theirOffered = Literal("()")
-accepted = Literal("()")
-provided = Literal("()")
+ChallengeList = Suppress("(") + ZeroOrMore(Challenge) + Suppress(")")
+ourOffered = ChallengeList
+theirOffered = ChallengeList
+accepted = ChallengeList
+provided = ChallengeList
 
-OfferTrans = AcceptTrans = ReofferTrans = ProvideTrans = SolveTrans = Literal('&')
+OfferTrans = ( L + Suppress("offer[") + ProblemType("pred") + flo("price") )
+AcceptTrans = ( L + Suppress("accept[") + integer("challengeid") )
+ProvideTrans = ( L + Suppress("provide[") + integer("challengeid") )
+SolveTrans = ( L + Suppress("solve[") + integer("challengeid") )
+ReofferTrans = ( L + Suppress("reoffer[") + integer("challengeid")
+                + flo("price") ) 
 
-Transaction = Or([OfferTrans,AcceptTrans,ReofferTrans,ProvideTrans,SolveTrans])
+Transaction = Or([OfferTrans, AcceptTrans, ReofferTrans, ProvideTrans,
+                  SolveTrans]) + Suppress("]")
 
 L = Suppress(LineEnd())
 Config = (Suppress(Literal("config[")) + L
@@ -37,7 +59,7 @@ Config = (Suppress(Literal("config[")) + L
           + Suppress(Literal("]"))
          )
 
-PlayerContext = (Literal("context[") + L
+PlayerContext = (Suppress(Literal("context[")) + L
                  + Config("config") + L
                  + PlayerID("playerid") + L
                  + flo("balance") + L
@@ -50,6 +72,6 @@ PlayerContext = (Literal("context[") + L
                  )
 ListOfTrans = ZeroOrMore(Transaction)
 
-PlayerTrans = (Literal("playertrans[") + L
+PlayerTrans = (Suppress(Literal("playertrans[")) + L
                + PlayerID("playerid") + L
                + ListOfTrans("ts"))
