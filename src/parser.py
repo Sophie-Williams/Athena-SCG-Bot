@@ -53,6 +53,3 @@ ListOfTrans = ZeroOrMore(Transaction)
 PlayerTrans = (Literal("playertrans[") + L
                + PlayerID("playerid") + L
                + ListOfTrans("ts"))
-
-c = open('/net/tmp/context.txt').read()
-print PlayerContext.searchString(c)

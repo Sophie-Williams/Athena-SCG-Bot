@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import BaseHTTPServer
-
+import parserwrapper
 
 class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
     def do_something(self, handler):
-        print self.rfile.read()
         status, data = handler()
 
         if status == 200:
@@ -37,7 +36,14 @@ class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         return 200, result
 
     def handle_post_request(self):
-        return 200, self.rfile.read()
+      body = self.rfile.read()
+      ctx = parserwrapper.GetContext(body)
+      reply = ('playertrans[\n\t'
+               '101\n\t'
+               'offer[(68) 0.4587002152887071]\n\t'
+               'offer[(6 ) 0.5791155954286649]\n'
+               ']')
+      return 200, reply
 
     def answer(self):
         context = self.create_context()
