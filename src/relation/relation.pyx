@@ -1,10 +1,16 @@
+cdef extern from "stdint.h":
+    ctypedef unsigned long int uint32_t
 
-ctypedef unsigned long int uint32_t
+# GNU builtin
+cdef extern int __builtin_popcountl(unsigned long)
 
-cdef int SOURCE
-SOURCE = 0
-cdef int TARGET
-TARGET = 1
+
+cdef int C_SOURCE
+C_SOURCE = 0
+cdef int C_TARGET
+C_TARGET = 1
+SOURCE = C_SOURCE
+TARGET = C_TARGET
 
 MAGIC_NUMBERS = ( 0x55555555, 0x33333333, 0x0F0F0F0F, 0x00FF00FF, 0x0000FFFF )
 
@@ -26,7 +32,7 @@ def get_mask(int rank):
         0xF,
         0xFF,
         0xFFFF,
-        0xFFFFFFFF,
+        0xFFFFFFFFL,
     )[rank]
 
 
@@ -35,16 +41,16 @@ def is_irrelevant(uint32_t rn, int rank, int var_p):
     # Therefore, right shift by (1<<var_p) won't reach 32 therefore, it'll always execute
     cdef uint32_t m
     m = get_magic_number(rank, var_p, 1)
-    # Must use >>> (unsigned shift right) coz relations of rank 5 might be -ve
     return ((rn & m) >> (1 << var_p)) == (rn & (~m))
-    
-# Counts the number of relevantVariables in the given relation
-# @param relationNumber the relation number whose number of relevant variables is to be counted
+
+
+# Counts the number of relevant variables in the given relation
+# @param rn the relation number whose number of relevant variables is to be counted
 # @param rank rank of the given relation
 # @return The number of relevant variables in the given relation
 def num_relevant_variables(uint32_t rn, int rank):
     # checkRank(rank);
-    # checkRelationNumber(relationNumber, rank);
+    # checkRelationNumber(rn, rank);
    
     cdef int rel_vars
     cdef int i
@@ -52,14 +58,13 @@ def num_relevant_variables(uint32_t rn, int rank):
     rel_vars = rank
 
     for 0 <= i < rank:
-        if is_irrelevant(rn, rank, var_p):
+        if is_irrelevant(rn, rank, i):
             rel_vars -= 1
-        i += 1
     return rel_vars
 
 
 # Checks if the given relation forces the given variablePosition
-# @param relationNumber
+# @param rn
 # @param rank rank of the given relation
 # @param variablePosition positon of the varible checked for being forced
 # @return 0 if the given relation forces the given variable to 0
@@ -87,23 +92,24 @@ def is_forced(uint32_t rn, int rank, int var_p):
 
 
 # starting at the given startPosition, get the position of the first variable forced by the given relation.
-# @param relationNumber relation number
+# @param rn relation number
 # @param rank rank of the given relation number
 # @param startPosition
 # @return -1 if nothing is forced
 #         the position of the first forced variable
 def first_forced_variable(uint32_t rn, int rank, int start_p):
     # checkRank(rank);
-    # checkRelationNumber(relationNumber, rank);
+    # checkRelationNumber(rn, rank);
     # checkVariablePosition(startPosition, rank);
    
     for var_p in range(start_p, rank):
         if is_forced(rn, rank, var_p) != -1:
             return var_p
-    
+
+
 # NMaps one of the variables in a relation i.e. replaces it by it's complement
 # for example: nMapping x in Or(x,y,z) results in: or(!x,y,z)
-# @param relationNumber 
+# @param rn 
 # @param rank rank of the given relation
 # @param variablePosition the variable to be nmapped
 # @return The number of the given relation with the specified variable nmapped
@@ -129,22 +135,21 @@ def n_map(uint32_t rn, int rank, int var_p):
 # @param value
 # @return
 def reduce(uint32_t rn, int rank, int var_p, int value):
-    # checkRank(rank);
-    # checkRelationNumber(rn, rank);
-    # checkVariablePosition(var_p, rank);
-    # checkValue(value);
+    # checkRank(rank)
+    # checkRelationNumber(rn, rank)
+    # checkVariablePosition(var_p, rank)
+    # checkValue(value)
 
     cdef uint32_t m
     cdef uint32_t rm
 
-    m = get_magic_number(rank, var_p, value);
+    m = get_magic_number(rank, var_p, value)
     rm = (rn & m)
 
     if value == 0:
         return rm | (rm << (1 << var_p))
     else:
         return rm | (rm >> (1 << var_p))
-
 
 
 # Swaps two variables in a relation. When variables are swapped, The truth table order gets scrambled
@@ -250,27 +255,35 @@ def swap(uint32_t rn, int rank, int var_p1, int var_p2):
 
 
 
-# permute the variables in the given relationNumber according to the given permutation
+# permute the variables in the given rn according to the given permutation
 # fix the truth table order after doing the permutation. @see swap
-# @param relationNumber
+# @param rn
 # @param rank rank of the given relation
-# @param permutationSemantics specifies how the permutation should be applied. can be either RelationCore.SOURCE or RelationCore.TARGET
-# for example: <p>
-#    for the relation: R(v2,v1,v0) <p>
+# @param perm_semantics specifies how the permutation should be applied. can be either RelationCore.C_SOURCE or RelationCore.C_TARGET
+# for example:
+#    for the relation: R(v2,v1,v0)
 #    and the permutation {1,2,0} 
-#    SOURCE semantics means that v0 goes to position1, v1 goes to position2, v2 goes to position 0
-#    TARGET semantics means that position0 gets v1, position1 gets v2, position2 gets v0
+#    C_SOURCE semantics means that v0 goes to position1, v1 goes to position2, v2 goes to position 0
+#    C_TARGET semantics means that position0 gets v1, position1 gets v2, position2 gets v0
 # @param permutation an array of variable positions describing the desired location of every variables
-# for example: <p>
-#    for the relation: R(v2,v1,v0) <p>
+# for example:
+#    for the relation: R(v2,v1,v0)
 #    and the permutation {1,2,0} means v0 goes to position1, v1 goes to position2, v2 goes to position 0
-# @return the modified relationNumber
-def renme(uint32_t rn, int rank, int permutationSemantics, permutation):
-    # checkRank(rank);
-    # checkRelationNumber(rn, rank);
-    # checkPermutation(rank, permutation);
-    # checkPermutationSemantics(permutationSemantics);
-    
+# @return the modified rn
+def renme(uint32_t rn, int rank, int perm_semantics, permutation):
+    # checkRank(rank)
+    # checkRelationNumber(rn, rank)
+    # checkPermutation(rank, permutation)
+    # checkPermutationSemantics(perm_semantics)
+
+    cdef uint32_t new_rn
+    new_rn = 0
+
+    if perm_semantics == C_SOURCE:
+        for x in permutation:
+            new_rn += rn & (1 << x)
+        return new_rn
+
     # sort dimensions
     cdef int i
     cdef int j
@@ -278,75 +291,81 @@ def renme(uint32_t rn, int rank, int permutationSemantics, permutation):
     cdef int tmp
 
     for 0 <= i < rank - 1:
-        min = i; #  minimum
+        min = i
         for i + 1 <= j < rank:
-            #  inner loop
-            if (permutation[j] < permutation[min]): #  if min greater,
-                min = j; #  a new min
+            if (permutation[j] < permutation[min]):
+                # if min greater,
+                min = j
         # swap elements at min, i
-        tmp = permutation[i]
-        permutation[i] = permutation[min]
-        permutation[min] = tmp
-        # see
+        permutation[i], permutation[min] = permutation[min], permutation[i]
+        # tmp = permutation[i]
+        # permutation[i] = permutation[min]
+        # permutation[min] = tmp
 
-        if permutationSemantics == SOURCE:
+        if perm_semantics == C_SOURCE:
             rn = swap(rn, rank, permutation[min], permutation[i])
-        elif permutationSemantics == TARGET:
+        elif perm_semantics == C_TARGET:
             rn = swap(rn, rank, min, i)
         else:
             pass # error
+
     return rn
 
 
-# returns the number of ones in the given relationNumber
-# @param relationNumber
+# returns the number of 1-bits in the given rn masked by the rank
+# m = 2 ** (2 ** rank)
+# so, the 1-bits of (rn & m)
+# @param rn
 # @param rank
-# @return
+# @return the number of 1-bits in rn limited by rank
 def ones(uint32_t rn, int rank):
-    # checkRank(rank);
-    # checkRelationNumber(relationNumber, rank);
+    return __builtin_popcountl(rn & get_mask(rank))
+# The slower version.
+#
+# def ones(uint32_t rn, int rank):
+#     # checkRank(rank)
+#     # checkRelationNumber(rn, rank)
+# 
+#     cdef int c
+#     cdef int i
+# 
+#     c = 0
+#     for 0 <= i < (1 << rank):
+#         if ((rn & (1 << i)) != 0):
+#             c += 1
+#     return c
 
-    cdef int c
-    cdef int i
 
-    c = 0
-    for 0 <= i < (1 << rank):
-        if ((rn & (1 << i)) != 0):
-            c += 1
-    return c
-
-
-
-# @param relationNumber
+# @param rn
 # @param rank
 # @param num_true_vars used to identify a set of rows in the truth table
 # @return counts the number of ones corresponding to truth table rows with the given number of true variables
 def q(uint32_t rn, int rank, int num_true_vars):
     # checkRank(rank);
-    # checkRelationNumber(relationNumber, rank);
+    # checkRelationNumber(rn, rank);
 
     cdef int m
     if num_true_vars > rank:
         return -1
 
-    m = x_true_vars(rank, num_true_vars);
+    m = x_true_vars(rank, num_true_vars)
     return ones(rn & m, rank)
 
 
-
-# for 1in3 use xTrueVars(3,1)
+# for 1in3 use x_true_vars(3, 1)
 # @param rank
 # @param num_true_vars
-# @return an integer representing the relation number which is true only when the given number of vars is true
+# @return an integer representing the relation number which is true
+#         only when the given number of vars is true
 def x_true_vars(int rank, int num_true_vars):
     cdef uint32_t rn
     cdef int i
 
     rn = 0
-
+    
     for 0 <= i < (1 << rank):
-        # RelationCore.ones(i, 3) a truth table row can have up to 5 columns
-        # RelationCore.ones(i, 3) will count ones up to the 8th column
+        # ones(i, 3) a truth table row can have up to 5 columns
+        # ones(i, 3) will count ones up to the 8th column
         if(ones(i, 3) == num_true_vars): 
             rn |= (1 << i)
     return rn
