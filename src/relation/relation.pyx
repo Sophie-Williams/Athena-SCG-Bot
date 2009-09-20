@@ -1,20 +1,63 @@
+"""
+The semantics of the relation numbers are thus,
+
+Where a binary number is represented from MSB to LSB, e.g.
+
+        10010110 == 2^1 + 2^2 + 2^4 + 2^7
+
+the rows represented by this (binary) number are (1, 4, 7)
+
+                  row | binary  | number
+                  -----------------------
+                  0   | 0 0 0 0 | 0
+               -> 1   | 0 0 0 1 | 1 <-
+               -> 2   | 0 0 1 0 | 1 <-
+                  3   | 0 0 1 1 | 0
+               -> 4   | 0 1 0 0 | 1 <-
+                  5   | 0 1 0 1 | 0
+                  6   | 0 1 1 0 | 0
+               -> 7   | 0 1 1 1 | 1 <-
+                        .
+                        .
+                        .
+
+so, 10010110 => 2^1 + 2^2 + 2^4 + 2^7
+              => (1, 2, 4, 7)
+              => ([0 0 0 1], [0 0 1 0], [0 1 0 0], [0 1 1 1])
+  for variables a, b, c, d
+    (and [or !a !b !c  d]
+         [or !a !b  c !d]
+         [or !a  b !c !d]
+         [or !a  b  c  d])
+
+
+The rank of a number is the number of variables a clause can have.
+
+"""
+
+
+
 cdef extern from "stdint.h":
     ctypedef unsigned long int uint32_t
+
+
+cdef extern from "relation_consts.h":
+    cdef uint32_t TRUE_VARS[][6]
+    cdef uint32_t MAGIC_NUMBERS[]
+    cdef uint32_t MASKS[]
+    cdef int C_SOURCE "SOURCE"
+    cdef int C_TARGET "TARGET"
+
+# for the module
+SOURCE = C_SOURCE
+TARGET = C_TARGET
+
 
 # GNU builtin
 cdef extern int __builtin_popcountl(unsigned long)
 
-
-cdef int C_SOURCE
-C_SOURCE = 0
-cdef int C_TARGET
-C_TARGET = 1
-SOURCE = C_SOURCE
-TARGET = C_TARGET
-
-MAGIC_NUMBERS = ( 0x55555555, 0x33333333, 0x0F0F0F0F, 0x00FF00FF, 0x0000FFFF )
-
-
+# defined in relation_consts.h
+# MAGIC_NUMBERS = ( 0x55555555, 0x33333333, 0x0F0F0F0F, 0x00FF00FF, 0x0000FFFF )
 def get_magic_number(int rank, int var_p, int value):
     cdef uint32_t mask
     cdef uint32_t col
@@ -26,14 +69,7 @@ def get_magic_number(int rank, int var_p, int value):
 
 
 def get_mask(int rank):
-    return (
-        0x1,
-        0x3,
-        0xF,
-        0xFF,
-        0xFFFF,
-        0xFFFFFFFFL,
-    )[rank]
+    return MASKS[rank]
 
 
 def is_irrelevant(uint32_t rn, int rank, int var_p):
@@ -259,12 +295,12 @@ def swap(uint32_t rn, int rank, int var_p1, int var_p2):
 # fix the truth table order after doing the permutation. @see swap
 # @param rn
 # @param rank rank of the given relation
-# @param perm_semantics specifies how the permutation should be applied. can be either RelationCore.C_SOURCE or RelationCore.C_TARGET
+# @param perm_semantics specifies how the permutation should be applied. can be either SOURCE or TARGET
 # for example:
 #    for the relation: R(v2,v1,v0)
 #    and the permutation {1,2,0} 
-#    C_SOURCE semantics means that v0 goes to position1, v1 goes to position2, v2 goes to position 0
-#    C_TARGET semantics means that position0 gets v1, position1 gets v2, position2 gets v0
+#    SOURCE semantics means that v0 goes to position1, v1 goes to position2, v2 goes to position 0
+#    TARGET semantics means that position0 gets v1, position1 gets v2, position2 gets v0
 # @param permutation an array of variable positions describing the desired location of every variables
 # for example:
 #    for the relation: R(v2,v1,v0)
@@ -339,7 +375,8 @@ def ones(uint32_t rn, int rank):
 # @param rn
 # @param rank
 # @param num_true_vars used to identify a set of rows in the truth table
-# @return counts the number of ones corresponding to truth table rows with the given number of true variables
+# @return counts the number of ones corresponding to truth table rows
+#         with the given number of true variables
 def q(uint32_t rn, int rank, int num_true_vars):
     # checkRank(rank);
     # checkRelationNumber(rn, rank);
@@ -357,15 +394,27 @@ def q(uint32_t rn, int rank, int num_true_vars):
 # @param num_true_vars
 # @return an integer representing the relation number which is true
 #         only when the given number of vars is true
-def x_true_vars(int rank, int num_true_vars):
-    cdef uint32_t rn
-    cdef int i
 
-    rn = 0
-    
-    for 0 <= i < (1 << rank):
-        # ones(i, 3) a truth table row can have up to 5 columns
-        # ones(i, 3) will count ones up to the 8th column
-        if(ones(i, 3) == num_true_vars): 
-            rn |= (1 << i)
-    return rn
+
+# this is in relation_consts.h
+# TRUE_VARS = (
+#     (),
+#     (1, 2),
+#     (1, 6, 8),
+#     (1, 22, 104, 128),
+#     (1, 278, 5736, 26752, 32768)
+#     (1, 65814, 18224744, 375941248, 1753251840, 2147483648L),
+# )
+def x_true_vars(int rank, int num_true_vars):
+    return TRUE_VARS[rank][num_true_vars]
+#     cdef uint32_t rn
+#     cdef int i
+# 
+#     rn = 0
+#     
+#     for 0 <= i < (1 << rank):
+#         # ones(i, 3) a truth table row can have up to 5 columns
+#         # ones(i, 3) will count ones up to the 8th column
+#         if(ones(i, 3) == num_true_vars): 
+#             rn |= (1 << i)
+#     return rn

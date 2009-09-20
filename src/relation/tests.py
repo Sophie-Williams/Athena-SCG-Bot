@@ -16,24 +16,44 @@ class TestRelation(unittest.TestCase):
     self.assertEqual(relation.get_mask(5), formula(5))
 
   def test_is_irrelevant(self):
+    # XXX needs more tests
     self.assertEqual(relation.is_irrelevant(123123, 3, 2), 0)
 
   def test_num_relevant_variables(self):
+    # XXX needs more tests
     self.assertEqual(relation.num_relevant_variables(123123, 3), 3)
 
   def test_is_forced(self):
+    # XXX needs more tests
     self.assertEqual(relation.is_forced(123123, 3, 1), -1)
 
   def test_first_forced_variable(self):
+    # XXX needs more tests
     self.assertEqual(relation.first_forced_variable(123123, 3, 0), None)
 
   def test_n_map(self):
+    # XXX needs more tests
     self.assertEqual(relation.n_map(123123, 3, 1), 252)
 
   def test_reduce(self):
-    self.assertEqual(relation.reduce(123123, 3, 1, 0), 255)
+    # XXX probably need more tests
+    # valued extracted from the original Java implementation
+    f = relation.reduce
+    self.assertEqual(f(150, 3, 2, 0), 102)
+    self.assertEqual(f(150, 3, 2, 1), 153)
+    self.assertEqual(f(150, 3, 1, 0), 90)
+    self.assertEqual(f(150, 3, 1, 1), 165)
+    self.assertEqual(f(150, 3, 0, 0), 60)
+    self.assertEqual(f(150, 3, 0, 1), 195)
+    self.assertEqual(f(231, 3, 2, 0), 119)
+    self.assertEqual(f(231, 3, 2, 1), 238)
+    self.assertEqual(f(231, 3, 1, 0), 175)
+    self.assertEqual(f(231, 3, 1, 1), 245)
+    self.assertEqual(f(231, 3, 0, 0), 207)
+    self.assertEqual(f(231, 3, 0, 1), 243)
 
   def test_swap(self):
+    # XXX needs more tests
     self.assertEqual(relation.swap(123123, 4, 1, 2), 51407)
 
   def test_renme(self):
@@ -55,6 +75,9 @@ class TestRelation(unittest.TestCase):
     self.assertEqual(relation.ones(2 ** 32 - 1 + 2 ** 32, 5), 32)
 
   def test_q(self):
+    # XXX needs more tests
+    f = relation.q
+    self.assertEqual(f(12354312, 5, 4), 2)
     pass
 
   def test_x_true_vars(self):
