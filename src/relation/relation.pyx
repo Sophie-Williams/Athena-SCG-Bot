@@ -36,7 +36,6 @@ The rank of a number is the number of variables a clause can have.
 """
 
 
-
 cdef extern from "stdint.h":
     ctypedef unsigned long int uint32_t
 
@@ -48,6 +47,14 @@ cdef extern from "relation_consts.h":
     cdef int C_SOURCE "SOURCE"
     cdef int C_TARGET "TARGET"
 
+
+cdef extern from "_relation.c":
+    cdef int _is_irrelevant(uint32_t rn, int rank, int var_p)
+    cdef uint32_t _get_mask(int rank)
+    cdef uint32_t _get_magic_number(int rank, int var_p, int value)
+    cdef int _num_relevant_variables(uint32_t rn, int rank)
+
+
 # for the module
 SOURCE = C_SOURCE
 TARGET = C_TARGET
@@ -57,27 +64,33 @@ TARGET = C_TARGET
 cdef extern int __builtin_popcountl(unsigned long)
 
 # defined in relation_consts.h
-# MAGIC_NUMBERS = ( 0x55555555, 0x33333333, 0x0F0F0F0F, 0x00FF00FF, 0x0000FFFF )
+# MAGIC_NUMBERS = ( 0x55555555, 0x33333333, 0x0F0F0F0F,
+#                   0x00FF00FF, 0x0000FFFF )
 def get_magic_number(int rank, int var_p, int value):
-    cdef uint32_t mask
-    cdef uint32_t col
-    mask = get_mask(rank)
-    col = ((MAGIC_NUMBERS[var_p]) & mask)
-    if value == 1:
-        return mask ^ col
-    return col
+#     cdef uint32_t mask
+#     cdef uint32_t col
+#     mask = get_mask(rank)
+#     col = ((MAGIC_NUMBERS[var_p]) & mask)
+#     if value == 1:
+#         return mask ^ col
+#     return col
+    return _get_magic_number(rank, var_p, value)
 
-
+# defined in relation_consts.h
+# MASKS = ( 0x1, 0x3, 0xF, 0xFF, 0xFFFF, 0xFFFFFFFF )
 def get_mask(int rank):
-    return MASKS[rank]
+    # get_mask(rank) = (2 ** (2 ** rank)) - 1
+    # since rank is in the range [1, 5], the values are precomputed
+#     return MASKS[rank]
+    return _get_mask(rank)
 
 
 def is_irrelevant(uint32_t rn, int rank, int var_p):
-    # Note that the maximum value of variable position is less than rank by one
-    # Therefore, right shift by (1<<var_p) won't reach 32 therefore, it'll always execute
-    cdef uint32_t m
-    m = get_magic_number(rank, var_p, 1)
-    return ((rn & m) >> (1 << var_p)) == (rn & (~m))
+    # True if the variable at a given position is irrelevant to the relation
+#     cdef uint32_t m
+#     m = get_magic_number(rank, var_p, 1)
+#     return ((rn & m) >> (1 << var_p)) == (rn & (~m))
+    return _is_irrelevant(rn, rank, var_p)
 
 
 # Counts the number of relevant variables in the given relation
@@ -85,27 +98,28 @@ def is_irrelevant(uint32_t rn, int rank, int var_p):
 # @param rank rank of the given relation
 # @return The number of relevant variables in the given relation
 def num_relevant_variables(uint32_t rn, int rank):
-    # checkRank(rank);
-    # checkRelationNumber(rn, rank);
-   
-    cdef int rel_vars
-    cdef int i
+#     # checkRank(rank);
+#     # checkRelationNumber(rn, rank);
+#    
+#     cdef int rel_vars
+#     cdef int i
+# 
+#     rel_vars = rank
+# 
+#     for 0 <= i < rank:
+#         if is_irrelevant(rn, rank, i):
+#             rel_vars -= 1
+#     return rel_vars
+    return _num_relevant_variables(rn, rank)
 
-    rel_vars = rank
 
-    for 0 <= i < rank:
-        if is_irrelevant(rn, rank, i):
-            rel_vars -= 1
-    return rel_vars
-
-
-# Checks if the given relation forces the given variablePosition
+# Checks if the given relation forces the given var_p
 # @param rn
 # @param rank rank of the given relation
-# @param variablePosition positon of the varible checked for being forced
-# @return 0 if the given relation forces the given variable to 0
-#         1 if the given relation forces the given variable to 1
-#         -1 given relation doesn't forces the given variable
+# @param var_p positon of the varible checked for being forced
+# @return 0 if the given relation force the given variable to 0
+#         1 if the given relation force the given variable to 1
+#         -1 given relation doesn't force the given variable
 def is_forced(uint32_t rn, int rank, int var_p):
     # checkRank(rank);
     # checkRelationNumber(rn, rank);
@@ -127,12 +141,13 @@ def is_forced(uint32_t rn, int rank, int var_p):
             return -1
 
 
-# starting at the given startPosition, get the position of the first variable forced by the given relation.
+# Starting at the given starting position, get the position of the first
+# variable forced by the given relation.
 # @param rn relation number
 # @param rank rank of the given relation number
-# @param startPosition
-# @return -1 if nothing is forced
-#         the position of the first forced variable
+# @param start_p
+# @return if nothing is forced = -1
+#         else = the position of the first forced variable
 def first_forced_variable(uint32_t rn, int rank, int start_p):
     # checkRank(rank);
     # checkRelationNumber(rn, rank);
@@ -147,7 +162,7 @@ def first_forced_variable(uint32_t rn, int rank, int start_p):
 # for example: nMapping x in Or(x,y,z) results in: or(!x,y,z)
 # @param rn 
 # @param rank rank of the given relation
-# @param variablePosition the variable to be nmapped
+# @param var_p the variable to be nmapped
 # @return The number of the given relation with the specified variable nmapped
 def n_map(uint32_t rn, int rank, int var_p):
     # checkRank(rank);
@@ -161,7 +176,7 @@ def n_map(uint32_t rn, int rank, int var_p):
     m0 = get_magic_number(rank, var_p, 0)
     m1 = get_magic_number(rank, var_p, 1)
     s = (1 << var_p)
-    return ((rn & m0) << s) | ((rn & m1) >>s)
+    return ((rn & m0) << s) | ((rn & m1) >> s)
 
 
 # Reduces a relation by assigning a value to one of its variables
@@ -188,10 +203,12 @@ def reduce(uint32_t rn, int rank, int var_p, int value):
         return rm | (rm >> (1 << var_p))
 
 
-# Swaps two variables in a relation. When variables are swapped, The truth table order gets scrambled
-# rows of the truth table needs to be reordered to restore the correct truth table order.
-# Here are two exmples showing how the swap method works for two relations:
-# 1in3(x,y,z), x implies z. We are swapping variables at positions 0,2 i.e: x ,z
+# Swaps two variables in a relation. When variables are swapped, The truth
+# table order gets scrambled rows of the truth table needs to be reordered
+# to restore the correct truth table order. Here are two exmples showing
+# how the swap method works for two relations: 
+#         1in3(x,y,z), x implies z.
+# We are swapping variables at positions 0,2 i.e: x ,z
 # 
 #      original relations            scrambled truth table      restored truth table ordering  
 # Row# x y z 1in3(x,y,z)  x=>z  ||  z y x 1in3(z,y,x) x=>z  ||  z y x 1in3(z,y,x) x=>z old_Row#
@@ -262,20 +279,27 @@ def swap(uint32_t rn, int rank, int var_p1, int var_p2):
     # e.g. row 0, row 7, other rows depending on the two swapped columns
     # same_filter selects these rows based on the columns
     same_filter = d11 & d21 | d10 & d20
-    # Assuming that column1 is to the right of column2 which is valid by the swapping we do at the begining of this method
-    # Rows where column1 is 0 and column2 is 1 must be moved up because after doing the swap we'll have a 0 in column 2 and 1 in column 1
-    # simply because the 0 in column2 means that the row number of column2 becomes smaller than the row number of column1. to restore the proper numbering
+    # Assuming that column1 is to the right of column2 which is valid by
+    # the swapping we do at the begining of this method Rows where column1
+    # is 0 and column2 is 1 must be moved up because after doing the swap
+    # we'll have a 0 in column 2 and 1 in column 1 simply because the
+    # 0 in column2 means that the row number of column2 becomes smaller
+    # than the row number of column1. to restore the proper numbering
     # we have to swap the two rows
     up_filter = d21 & d10
     # Select rows to be moved down. the reasoning is similar to up_filter
     dn_filter = d20 & d11
-    # shift_amount is the difference between the row number in the before we do the swap and the row number after we do the swap
-    # for example if we are swapping the variable at position 2 with the variable at position 0 then the rows to be swapped are of the form        
-    #  bbbbb1b0 and bbbbb0b1 where b stands for an arbitrary bits that stays the same.
-    #  Noting that: bbbbb1b0 - bbbbb0b1 is the same as: (bbbbb1b0-bbbbb0b0) - (bbbbb0b1-bbbbb0b0)
-    #  by subtracting bbbbb0b0 from both numbers we get
-    #  00000100 and 00000001
-    #  Therefore we need to shift both ways by 2^var_p2 - 2^var_p1
+    # shift_amount is the difference between the row number in the before
+    # we do the swap and the row number after we do the swap for example
+    # if we are swapping the variable at position 2 with the variable at
+    # position 0 then the rows to be swapped are of the form bbbbb1b0
+    # and bbbbb0b1 where b stands for an arbitrary bits that stays the same.
+
+    # Noting that:
+    # bbbbb1b0 - bbbbb0b1 == (bbbbb1b0-bbbbb0b0) - (bbbbb0b1-bbbbb0b0)
+    # by subtracting bbbbb0b0 from both numbers we get
+    # 00000100 and 00000001
+    # Therefore we need to shift both ways by 2^var_p2 - 2^var_p1
     
     shift_amt = (1 << var_p2) - (1 << var_p1)
     
@@ -295,16 +319,21 @@ def swap(uint32_t rn, int rank, int var_p1, int var_p2):
 # fix the truth table order after doing the permutation. @see swap
 # @param rn
 # @param rank rank of the given relation
-# @param perm_semantics specifies how the permutation should be applied. can be either SOURCE or TARGET
+# @param perm_semantics specifies how the permutation should be applied.
+#                       can be either SOURCE or TARGET
 # for example:
 #    for the relation: R(v2,v1,v0)
 #    and the permutation {1,2,0} 
-#    SOURCE semantics means that v0 goes to position1, v1 goes to position2, v2 goes to position 0
-#    TARGET semantics means that position0 gets v1, position1 gets v2, position2 gets v0
-# @param permutation an array of variable positions describing the desired location of every variables
-# for example:
+#    SOURCE semantics means that v0 goes to position1, v1 goes to position2,
+#           v2 goes to position 0
+#    TARGET semantics means that position0 gets v1, position1 gets v2,
+#           position2 gets v0
+# @param permutation an array of variable positions describing the desired
+#                    location of every variables
+# For example:
 #    for the relation: R(v2,v1,v0)
-#    and the permutation {1,2,0} means v0 goes to position1, v1 goes to position2, v2 goes to position 0
+#    and the permutation {1,2,0} means v0 goes to position1, v1 goes to
+#        position2, v2 goes to position 0
 # @return the modified rn
 def renme(uint32_t rn, int rank, int perm_semantics, permutation):
     # checkRank(rank)

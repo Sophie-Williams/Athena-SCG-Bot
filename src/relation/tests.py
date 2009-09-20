@@ -17,7 +17,23 @@ class TestRelation(unittest.TestCase):
 
   def test_is_irrelevant(self):
     # XXX needs more tests
-    self.assertEqual(relation.is_irrelevant(123123, 3, 2), 0)
+    #   is_irrelevant(rn, rank, var_p)
+    # = (reduce(rn, rank, var_p, 0) == reduce(rn, rank, var_p, 1))
+    f = relation.is_irrelevant
+    g = relation.reduce
+    h = lambda x, y, z: g(x, y, z, 0) == g(x, y, z, 1)
+    j = lambda x, y, z: f(x, y, z) == h(x, y, z)
+
+    self.assertTrue(j(23423, 3, 3))
+    self.assertTrue(j(23423, 3, 2))
+    self.assertTrue(j(23423, 3, 1))
+    self.assertTrue(j(23423, 3, 0))
+    self.assertTrue(j(23421233, 5, 0))
+    self.assertTrue(j(23421233, 5, 1))
+    self.assertTrue(j(23421233, 5, 2))
+    self.assertTrue(j(23421233, 5, 3))
+    self.assertTrue(j(23421233, 5, 4))
+    self.assertTrue(j(23421233, 5, 5))
 
   def test_num_relevant_variables(self):
     # XXX needs more tests
@@ -37,7 +53,7 @@ class TestRelation(unittest.TestCase):
 
   def test_reduce(self):
     # XXX probably need more tests
-    # valued extracted from the original Java implementation
+    # values extracted from the original Java implementation
     f = relation.reduce
     self.assertEqual(f(150, 3, 2, 0), 102)
     self.assertEqual(f(150, 3, 2, 1), 153)
@@ -77,8 +93,18 @@ class TestRelation(unittest.TestCase):
   def test_q(self):
     # XXX needs more tests
     f = relation.q
+
+    # values extracted from the original Java implementation
+    self.assertEqual(f(150, 3, 0), 0)
+    self.assertEqual(f(150, 3, 1), 3)
+    self.assertEqual(f(150, 3, 2), 0)
+    self.assertEqual(f(150, 3, 3), 1)
+    self.assertEqual(f(234, 3, 0), 0)
+    self.assertEqual(f(234, 3, 1), 1)
+    self.assertEqual(f(234, 3, 2), 3)
+    self.assertEqual(f(234, 3, 3), 1) 
+
     self.assertEqual(f(12354312, 5, 4), 2)
-    pass
 
   def test_x_true_vars(self):
     f = relation.x_true_vars

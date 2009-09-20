@@ -1,3 +1,6 @@
+#ifndef RELATION_CONSTS_H_
+#define RELATION_CONSTS_H_
+
 #include <stdint.h>
 
 
@@ -26,3 +29,5 @@ static const uint32_t MASKS[] = {
     0x00000001, 0x00000003, 0x0000000F,
     0x000000FF, 0x0000FFFF, 0xFFFFFFFF
 };
+
+#endif
