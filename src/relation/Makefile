@@ -14,5 +14,8 @@ relation.so: relation.o _relation.o
 
 all: relation.so
 
+test: all
+	python tests.py
+
 clean:
 	$(RM) relation.c *.o *.so
