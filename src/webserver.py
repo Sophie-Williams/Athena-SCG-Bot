@@ -1,63 +1,44 @@
 #!/usr/bin/env python
-import BaseHTTPServer
+import logging
+import web
+
 import game
 
-class RequestHandler(BaseHTTPServer.BaseHTTPRequestHandler):
+urls = (
+  '/player', 'GameHandler',
+  '/start', 'OkHandler',
+  '/end', 'OkHandler',
+  '/register', 'RegisterHandler',
+)
 
-    def do_something(self, handler):
-        status, data = handler()
+app = web.application(urls, globals())
+web.webapi.config.debug = False
 
-        if status == 200:
-            self.send_response(200)
-        else:
-            self.send_error(status)
-            return
-        self.send_header('Content-Length', len(data))
-        self.end_headers()
+class RegisterHandler(object):
+  def GET(self):
+    raise web.seeother('/static/register.html')
 
-        self.wfile.write(data)
+  def POST(self):
+    req = web.input(host='', team='', password='')
+    return game.doregistration(req['host'], 8080, req['team'], req['password'])
 
-    def do_GET(self):
-        self.do_something(self.handle_get_request)
+class GameHandler(object):
+  def GET(self):
+    return 'Game Data Here'
 
-    def do_POST(self):
-        self.do_something(self.handle_post_request)
+  def POST(self):
+    ctx = game.PlayerContext.fromString(self.data())
+    print ctx
+    reply = ('playertrans[\n\t'
+              '101\n\t'
+              'offer[(68) 0.4587002152887071]\n\t'
+              'offer[(6 ) 0.5791155954286649]\n'
+              ']')
+    return 200, reply
 
-    def handle_get_request(self):
-        try:
-            result = {
-                '/player': self.answer,
-                '/start': lambda x: 'OK',
-                '/end': lambda x: 'OK',
-            }[self.path]()
-
-        except: # KeyError
-            return 404, 'Unknown Request'
-        return 200, result
-
-    def handle_post_request(self):
-      body = self.rfile.read()
-      ctx = game.PlayerContext.fromString(body)
-      reply = ('playertrans[\n\t'
-               '101\n\t'
-               'offer[(68) 0.4587002152887071]\n\t'
-               'offer[(6 ) 0.5791155954286649]\n'
-               ']')
-      return 200, reply
-
-    def answer(self):
-        context = self.create_context()
-
-    def create_context(self):
-        return self.rfile.read()
-
-
-def run(server_class=BaseHTTPServer.HTTPServer,
-        handler_class=RequestHandler, address='', port=8000):
-    server_address = (address, port)
-    httpd = server_class(server_address, handler_class)
-    httpd.serve_forever()
-
+class OkHandler(object):
+  def GET(self):
+    return 'OK'
 
 if __name__ == '__main__':
-    run()
+    app.run()

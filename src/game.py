@@ -1,4 +1,7 @@
 #!/usr/bin/python
+import urllib
+import urllib2
+
 import parser
 
 
@@ -55,3 +58,17 @@ class PlayerContext(object):
 
 class PlayerTransaction(object):
   pass
+
+def doregistration(server, ourport, ourteam, ourpass):
+  regurl = ('http://%s:7005/register?password=%s'
+            % (server, ourpass))
+  regdata = 'playerspec["%s" "auto" %d]' % (ourteam, ourport)
+  req = urllib2.Request(regurl, regdata)
+  try:
+    resp = urllib2.urlopen(req).read()
+    if str(resp) == str(ourteam):
+      return '%s registration success!' % ourteam
+    else:
+      return '"%s" != "%s"' % (str(resp), str(ourteam))
+  except urllib2.HTTPError, e:
+    return '%s registration FAILURE! (%s)' % (ourteam, str(e))
