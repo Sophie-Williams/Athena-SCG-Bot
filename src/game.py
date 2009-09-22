@@ -45,7 +45,7 @@ class Config(object):
 
 
 class PlayerContext(object):
-  def __init__(self, config=None):
+  def __init__(self, config=None, provided=None):
     self.config = config
 
   @classmethod
@@ -56,7 +56,8 @@ class PlayerContext(object):
 
   @classmethod
   def FromParsed(cls, parsed):
-    return cls(config=Config.FromParsed(parsed))
+    return cls(config=Config.FromParsed(parsed.config),
+               provided=parsed.provided)
 
 
 class PlayerTransaction(object):
@@ -79,4 +80,5 @@ def DoRegistration(server, ourport, ourteam, ourpass):
 
 
 def DoPlay(gamedata):
-  return 'Fuck this shit'
+  pctx = PlayerContext.FromString(gamedata)
+  return str(pctx)
