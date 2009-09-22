@@ -27,18 +27,19 @@ class GameHandler(object):
     return 'Game Data Here'
 
   def POST(self):
-    ctx = game.PlayerContext.fromString(self.data())
+    ctx = game.PlayerContext.fromString(web.data())
     print ctx
     reply = ('playertrans[\n\t'
               '101\n\t'
               'offer[(68) 0.4587002152887071]\n\t'
               'offer[(6 ) 0.5791155954286649]\n'
               ']')
-    return 200, reply
+    return reply
 
 class OkHandler(object):
   def GET(self):
     return 'OK'
+  POST = GET
 
 if __name__ == '__main__':
     app.run()
