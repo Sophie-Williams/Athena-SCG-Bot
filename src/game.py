@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import logging
 import urllib
 import urllib2
 import urlparse
@@ -45,7 +46,12 @@ class Config(object):
 
 
 class PlayerContext(object):
-  def __init__(self, config=None, provided=None):
+  def __init__(self, config=None, offered=None, provided=None, accepted=None, 
+               solved=None):
+    self.offered = offered
+    self.provided = provided
+    self.accepted = accepted
+    self.solved = solved
     self.config = config
 
   @classmethod
@@ -57,7 +63,8 @@ class PlayerContext(object):
   @classmethod
   def FromParsed(cls, parsed):
     return cls(config=Config.FromParsed(parsed.config),
-               provided=parsed.provided)
+               provided=parsed.provided, offered=parsed.offered,
+               accepted=parsed.accepted, solved=parsed.solved)
 
 
 class PlayerTransaction(object):
@@ -78,7 +85,39 @@ def DoRegistration(server, ourport, ourteam, ourpass):
   except urllib2.HTTPError, e:
     return '%s registration FAILURE! (%s)' % (ourteam, str(e))
 
+class Game(object):
+  def __init__(self, initialdata):
+    self.context = PlayerContext.FromString(initialdata)
 
-def DoPlay(gamedata):
-  pctx = PlayerContext.FromString(gamedata)
-  return str(pctx)
+  def RunTasks(self):
+    logging.info('Running all tasks...')
+    for x in [self.AcceptTask, self.ProvideTask, self.SolveTask,
+              self.OfferTask, self.ReofferTask]:
+      x()
+
+  def AcceptTask(self):
+    logging.debug('Running AcceptTask')
+    logging.debug('Available: %s' % str(self.context.offered))
+    logging.debug('Available: %s' % str(self.context.provided))
+
+  def ProvideTask(self):
+    logging.debug('Running ProvideTask')
+
+  def SolveTask(self):
+    logging.debug('Running SolveTask')
+
+  def OfferTask(self):
+    logging.debug('Running OfferTask')
+
+  def ReofferTask(self):
+    logging.debug('Running ReofferTask')
+
+  def GenerateReply(self):
+    logging.info('Generating Game Reply')
+    return 'playertrans[]'
+
+  @classmethod
+  def Play(cls, gamedata):
+    g = cls(gamedata)
+    g.RunTasks()
+    return g.GenerateReply()

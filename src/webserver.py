@@ -14,6 +14,8 @@ urls = (
 app = web.application(urls, globals())
 web.webapi.config.debug = False
 
+logging.basicConfig(level=logging.DEBUG)
+
 class RegisterHandler(object):
   def GET(self):
     raise web.seeother('/static/register.html')
@@ -32,7 +34,7 @@ class GameHandler(object):
     raise web.seeother('http://www.google.com/search?q=your+doing+it+wrong')
 
   def POST(self):
-    return game.DoPlay(web.data())
+    return game.Game.Play(web.data())
 
 class OkHandler(object):
   def GET(self):
