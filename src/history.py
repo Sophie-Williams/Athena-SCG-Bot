@@ -66,6 +66,7 @@ class History(ListsAndThings):
 def GetHistory(ctx):
   hctx = parser_history.History.searchString(ctx)
   if hctx:
+    print hctx
     return History.parse(hctx)
 
 

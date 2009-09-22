@@ -1,0 +1,20 @@
+context[
+    config[
+
+    gamekind: "CSP"
+    turnduration: 60
+    mindecrement: 0.01
+    initacc: 100.0
+    objective: []
+    predicate: []
+    numrounds: 10000
+    profitfactor: 1.0
+    otrounds: 2]
+    101
+    100.0
+    1
+    ()
+    ()
+    ()
+    ()
+]
