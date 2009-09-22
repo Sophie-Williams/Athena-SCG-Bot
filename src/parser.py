@@ -59,7 +59,7 @@ List = ZeroOrMore
 
 # Primitive Objects
 PlayerID = Integer
-Var = Word(alphanums)
+Var = Combine('v'+Integer)
 
 # XXX is this right?
 Clause = wrap(Integer("relation_number") + List(Var), "(", ")")

@@ -47,12 +47,13 @@ class Config(object):
 
 class PlayerContext(object):
   def __init__(self, config=None, offered=None, provided=None, accepted=None, 
-               solved=None):
+               solved=None, playerid=None):
     self.offered = offered
     self.provided = provided
     self.accepted = accepted
     self.solved = solved
     self.config = config
+    self.playerid = int(playerid)
 
   @classmethod
   def FromString(cls, input):
@@ -63,8 +64,9 @@ class PlayerContext(object):
   @classmethod
   def FromParsed(cls, parsed):
     return cls(config=Config.FromParsed(parsed.config),
-               provided=parsed.provided, offered=parsed.offered,
-               accepted=parsed.accepted, solved=parsed.solved)
+               provided=parsed.their_offered, offered=parsed.our_offered,
+               accepted=parsed.accepted, solved=parsed.solved,
+               playerid=parsed.playerid)
 
 
 class PlayerTransaction(object):
@@ -88,6 +90,7 @@ def DoRegistration(server, ourport, ourteam, ourpass):
 class Game(object):
   def __init__(self, initialdata):
     self.context = PlayerContext.FromString(initialdata)
+    self.id = int(self.context.playerid)
 
   def RunTasks(self):
     logging.info('Running all tasks...')
@@ -97,8 +100,10 @@ class Game(object):
 
   def AcceptTask(self):
     logging.debug('Running AcceptTask')
-    logging.debug('Available: %s' % str(self.context.offered))
-    logging.debug('Available: %s' % str(self.context.provided))
+    logging.debug('Offered: %s' % str(self.context.offered))
+    logging.debug('accepted: %s' % str(self.context.accepted))
+    logging.debug('provided: %s' % str(self.context.provided))
+    logging.debug('solved: %s' % str(self.context.solved))
 
   def ProvideTask(self):
     logging.debug('Running ProvideTask')
@@ -114,10 +119,13 @@ class Game(object):
 
   def GenerateReply(self):
     logging.info('Generating Game Reply')
-    return 'playertrans[]'
+    return ('\nplayertrans[\n    %d\n    offer[(3 ) 0.8710813713911519] \n'
+            '    offer[(3 ) 0.8710813713911519] \n'
+            '    accept[ %s ] \n]\n' % (self.id, self.context.provided[0]))
 
   @classmethod
   def Play(cls, gamedata):
+    logging.debug('Got: %s' % gamedata)
     g = cls(gamedata)
     g.RunTasks()
     return g.GenerateReply()
