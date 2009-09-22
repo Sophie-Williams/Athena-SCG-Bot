@@ -5,7 +5,8 @@ Fuck this shit.
 """
 __author__ = "Will Nowak <wan@ccs.neu.edu>"
 
-from pyparsing import *
+from pyparsing import (nums, alphanums, Word, Combine, Suppress, Literal,
+                       ZeroOrMore, QuotedString, LineEnd, Or)
 
 def wrap(expr, open_char="[", close_char="]"):
   """
@@ -47,49 +48,46 @@ class QString(str):
     tokens[0] = cls(tokens[0])
 
 
-def convert_to_int(tokens):
-  tokens[0] = int(tokens[0])
-
-
 # Some basic values
 String = QuotedString(quoteChar='"')
-# String.setParseAction(QString.parse_action)
 Double = Combine(Word(nums) + "." + Word(nums))
 Integer = Word(nums)
 L = Suppress(LineEnd())
+List = ZeroOrMore
 
+# Game syntax
 
-gamekind = String
+# Primitive Objects
 PlayerID = Integer
-
 Var = Word(alphanums)
 
+# XXX is this right?
+Clause = wrap(Integer("relation_number") + List(Var), "(", ")")
 
-#Clause = "(" <relnum> int *s <vars> List(Var) ")".
-Clause = sup_lit('(') + Integer + ZeroOrMore(Var) + sup_lit(')')
+Problem = List(Var) + sup_lit(' ') + List(Clause)
+ProblemType = wrap(List(Integer("pt")), "(", ")")
 
-#Problem =  <vars> List(Var) *s <clauses> List(Clause).
-Problem = ZeroOrMore(Var) + sup_lit(' ') + ZeroOrMore(Clause)
-ProblemType = ("(" + ZeroOrMore(Integer("pt")) + ")")
 
-OfferedChallenge = sup_lit("offered[")
-AcceptedChallenge = (Suppress("accepted[") + PlayerID("challengee"))
-ProvidedChallenge = (Suppress("provided[") + PlayerID("challengee"))
-SolvedChallenge = (Suppress("solved[") + PlayerID("challengee")
-                   + Problem("instance"))
+ChallengeCommon = ( Integer("key") + PlayerID("challenger") +
+                    ProblemType("pred") + Double("price") )
 
-Challenge = (Or([OfferedChallenge, AcceptedChallenge, ProvidedChallenge,
-                 SolvedChallenge]) + Integer("key") + PlayerID("challenger")
-             + ProblemType("pred") + Double("price") + "]")
+OfferedChallenge = sup_lit("offered") + wrap(ChallengeCommon)
+AcceptedChallenge = sup_lit("accepted") + wrap(PlayerID("challengee")
+                  + ChallengeCommon)
+ProvidedChallenge = sup_lit("provided") + wrap(PlayerID("challengee")
+                  + ChallengeCommon)
+SolvedChallenge = sup_lit("solved") + wrap(PlayerID("challengee")
+                + Problem("instance") + ChallengeCommon)
+
+Challenge = ( Or([OfferedChallenge, AcceptedChallenge, ProvidedChallenge,
+                  SolvedChallenge]) )
 
 Objective = Literal("[]")
 Predicate = Literal("[]")
-ChallengeList = sup_lit("(") + ZeroOrMore(Challenge) + sup_lit(")")
-ourOffered = ChallengeList
-theirOffered = ChallengeList
-accepted = ChallengeList
-provided = ChallengeList
+ChallengeList = wrap(List(Challenge), "(", ")")
 
+
+# Describes the five transactions
 OfferTrans = Suppress("offer") + wrap(ProblemType("pred") + Double("price"))
 AcceptTrans = Suppress("accept") + wrap(Integer("challengeid"))
 ProvideTrans = Suppress("provide") + wrap(Integer("challengeid"))
@@ -97,11 +95,16 @@ SolveTrans = Suppress("solve") + wrap(Integer("challengeid"))
 ReofferTrans = ( Suppress("reoffer") + wrap(Integer("challengeid")
                 + Double("price")) )
 
-Transaction = L + Or([OfferTrans, AcceptTrans, ReofferTrans, ProvideTrans,
-                      SolveTrans])
+Transaction = Or([OfferTrans, AcceptTrans, ReofferTrans, ProvideTrans,
+                  SolveTrans])
+ListOfTransactions = List(L + Transaction)
+PlayerTransaction = ( sup_lit("playertrans") + wrap(L
+                    + PlayerID("playerid") + L
+                    + ListOfTransactions("ts")) )
 
+# Describes the config syntax
 Config = (sup_lit("config") + wrap(L
-          + KeyAndValue("gamekind", gamekind) + L
+          + KeyAndValue("gamekind", String) + L
           + KeyAndValue("turnduration", Integer) + L
           + KeyAndValue("mindecrement", Double) + L
           + KeyAndValue("initacc", Double) + L
@@ -111,67 +114,15 @@ Config = (sup_lit("config") + wrap(L
           + KeyAndValue("profitfactor", Double) + L
           + KeyAndValue("otrounds", Integer)
          ))
-def test_config():
-  """
-  >>> s = ('config[\\n' +
-  ... '    gamekind: "CSP"\\n' +
-  ... '    turnduration: 60\\n' +
-  ... '    mindecrement: 0.01\\n' +
-  ... '    initacc: 100.0\\n' +
-  ... '    objective: []\\n' +
-  ... '    predicate: []\\n' +
-  ... '    numrounds: 10000\\n' +
-  ... '    profitfactor: 1.0\\n' +
-  ... '    otrounds: 2]')
-  >>> cfg = Config.searchString(s)[0]
-  >>> cfg['gamekind']
-  'CSP'
-  >>> cfg['turnduration']
-  '60'
-  >>> cfg['predicate']
-  '[]'
-  >>> cfg['otrounds']
-  '2'
-  """
 
+# Describes the player context syntax (sent by the admin)
 PlayerContext = (sup_lit("context") + wrap(L
                  + Config("config") + L
                  + PlayerID("playerid") + L
                  + Double("balance") + L
                  + Integer("currentround") + L
-                 + ourOffered("ourOffered") + L
-                 + theirOffered("theirOffered") + L
-                 + accepted("accepted") + L
-                 + provided("provided") + L
+                 + ChallengeList("our_offered") + L
+                 + ChallengeList("their_offered") + L
+                 + ChallengeList("accepted") + L
+                 + ChallengeList("provided") + L
                 ))
-def test_context():
-  """
-  >>> s = ('context[\\n' +
-  ... '    config[\\n' +
-  ... '\\n' +
-  ... '    gamekind: "CSP"\\n' +
-  ... '    turnduration: 60\\n' +
-  ... '    mindecrement: 0.01\\n' +
-  ... '    initacc: 100.0\\n' +
-  ... '    objective: []\\n' +
-  ... '    predicate: []\\n' +
-  ... '    numrounds: 10000\\n' +
-  ... '    profitfactor: 1.0\\n' +
-  ... '    otrounds: 2]\\n' +
-  ... '    101\\n' +
-  ... '    100.0\\n' +
-  ... '    1\\n' +
-  ... '    ()\\n' +
-  ... '    ()\\n' +
-  ... '    ()\\n' +
-  ... '    ()\\n' +
-  ... ']\\n')
-  >>> pctx = PlayerContext.searchString(s)
-  >>> len(pctx[0]) > 0
-  True
-  """
-ListOfTrans = ZeroOrMore(Transaction)
-
-PlayerTrans = (sup_lit("playertrans") + wrap(L
-               + PlayerID("playerid") + L
-               + ListOfTrans("ts")))
