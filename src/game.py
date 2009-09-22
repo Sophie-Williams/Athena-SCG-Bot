@@ -62,7 +62,6 @@ class PlayerContext(object):
 class PlayerTransaction(object):
   pass
 
-<<<<<<< HEAD:src/game.py
 def DoRegistration(server, ourport, ourteam, ourpass):
   reghost = '%s:%s' % (server, GAMEREG_PORT)
   regurl = urlparse.urlunparse(('http', reghost, '/register', '',
