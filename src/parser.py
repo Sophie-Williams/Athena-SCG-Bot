@@ -61,10 +61,9 @@ List = ZeroOrMore
 PlayerID = Integer
 Var = Combine('v'+Integer)
 
-# XXX is this right?
 Clause = wrap(Integer("relation_number") + List(Var), "(", ")")
 
-Problem = List(Var) + sup_lit(' ') + List(Clause)
+Problem = List(Var) + List(Clause)
 ProblemType = wrap(List(Integer("pt")), "(", ")")
 
 
@@ -75,6 +74,7 @@ OfferedChallenge = sup_lit("offered") + wrap(ChallengeCommon)
 AcceptedChallenge = sup_lit("accepted") + wrap(PlayerID("challengee")
                   + ChallengeCommon)
 ProvidedChallenge = sup_lit("provided") + wrap(PlayerID("challengee")
+                                               + Problem("instance")
                   + ChallengeCommon)
 SolvedChallenge = sup_lit("solved") + wrap(PlayerID("challengee")
                 + Problem("instance") + ChallengeCommon)
