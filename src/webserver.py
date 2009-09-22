@@ -20,21 +20,19 @@ class RegisterHandler(object):
 
   def POST(self):
     req = web.input(host='', team='', password='')
-    return game.doregistration(req['host'], 8080, req['team'], req['password'])
+    try:
+      port = int(web.ctx.host.split(':')[-1])
+    except:
+      port = 8080
+    return game.DoRegistration(req['host'], port,
+                               req['team'], req['password'])
 
 class GameHandler(object):
   def GET(self):
-    return 'Game Data Here'
+    raise web.seeother('http://www.google.com/search?q=your+doing+it+wrong')
 
   def POST(self):
-    ctx = game.PlayerContext.fromString(web.data())
-    print ctx
-    reply = ('playertrans[\n\t'
-              '101\n\t'
-              'offer[(68) 0.4587002152887071]\n\t'
-              'offer[(6 ) 0.5791155954286649]\n'
-              ']')
-    return reply
+    return game.DoPlay(web.data())
 
 class OkHandler(object):
   def GET(self):

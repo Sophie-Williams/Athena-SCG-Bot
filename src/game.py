@@ -1,9 +1,11 @@
 #!/usr/bin/python
 import urllib
 import urllib2
+import urlparse
 
 import parser
 
+GAMEREG_PORT = 7005
 
 class Objective(object):
   pass
@@ -59,9 +61,10 @@ class PlayerContext(object):
 class PlayerTransaction(object):
   pass
 
-def doregistration(server, ourport, ourteam, ourpass):
-  regurl = ('http://%s:7005/register?password=%s'
-            % (server, ourpass))
+def DoRegistration(server, ourport, ourteam, ourpass):
+  reghost = '%s:%s' % (server, GAMEREG_PORT)
+  regurl = urlparse.urlunparse(('http', reghost, '/register', '',
+                                urllib.urlencode({'password': ourpass}), ''))
   regdata = 'playerspec["%s" "auto" %d]' % (ourteam, ourport)
   req = urllib2.Request(regurl, regdata)
   try:
@@ -72,3 +75,7 @@ def doregistration(server, ourport, ourteam, ourpass):
       return '"%s" != "%s"' % (str(resp), str(ourteam))
   except urllib2.HTTPError, e:
     return '%s registration FAILURE! (%s)' % (ourteam, str(e))
+
+
+def DoPlay(gamedata):
+  return 'Fuck this shit'
