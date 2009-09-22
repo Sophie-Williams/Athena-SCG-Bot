@@ -1,6 +1,6 @@
 import unittest
 import parser
-
+import game
 
 class ParserTestCase(unittest.TestCase):
 
@@ -25,6 +25,8 @@ class ParserTestCase(unittest.TestCase):
     self.assertEqual(cfg['numrounds'], '10000')
     self.assertEqual(cfg['profitfactor'], '1.0')
     self.assertEqual(cfg['otrounds'], '2')
+    g_cfg = game.Config.FromParsed(cfg)
+    self.assertTrue(g_cfg is not None)
 
   def test_context(self):
     s = '''context[
