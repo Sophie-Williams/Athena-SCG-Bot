@@ -10,57 +10,59 @@ GAMEREG_PORT = 7005
 class Objective(object):
   pass
 
+
 class Predicate(object):
   pass
 
-class Config(object):
-  def __init__(self):
-    self.gamekind = None
-    self.turnduration = None
-    self.mindecrement = None
-    self.initacc = None
-    self.objective = None
-    self.predicate = None
-    self.numrounds = None
-    self.profitfactor = None
-    self.otrounds = None
 
-  @staticmethod
-  def fromString(input):
+class Config(object):
+
+  def __init__(self, gamekind=None, turnduration=None, mindecrement=None,
+               initacc=None, objective=None, predicate=None, numrounds=None,
+               profitfactor=None, otrounds=None):
+    """
+    A Config object with type enforcement.
+    """
+    self.gamekind = gamekind
+    self.turnduration = int(turnduration)
+    self.mindecrement = float(mindecrement)
+    self.initacc = float(initacc)
+    self.objective = objective
+    self.predicate = predicate
+    self.numrounds = int(numrounds)
+    self.profitfactor = float(profitfactor)
+    self.otrounds = int(otrounds)
+
+  @classmethod
+  def FromString(cls, input):
     ps = parser.Config.searchString(input)
     if ps:
-      ps = ps[0]
-      c = Config()
-      c.PopulateFromParsed(ps)
-      return c
+      return cls.FromParsed(ps[0])
 
-  def PopulateFromParsed(self, parsed):
-    for x in ['gamekind', 'turnduration', 'mindecrement', 'initacc',
-              'objective', 'predicate', 'numrounds', 'profitfactor',
-              'otrounds']:
-      print '%s %s' % (x, getattr(parsed, x))
-      setattr(self, x, getattr(parsed, x))
+  @classmethod
+  def FromParsed(cls, parse_obj):
+    return cls(**parse_obj.asDict())
+
 
 class PlayerContext(object):
-  def __init__(self):
-    self.config = None
+  def __init__(self, config=None):
+    self.config = config
 
-  @staticmethod
-  def fromString(input):
+  @classmethod
+  def FromString(cls, input):
     ps = parser.PlayerContext.searchString(input)
     if ps:
-      ps = ps[0]
-      c = Config()
-      c.PopulateFromParsed(ps)
-      return c
+      return cls.FromParsed(ps[0])
 
-  def PopulateFromParsed(self, parsed):
-    self.config = Config()
-    self.config.PopulateFromParsed(parsed.config)
+  @classmethod
+  def FromParsed(cls, parsed):
+    return cls(config=Config.FromParsed(parsed))
+
 
 class PlayerTransaction(object):
   pass
 
+<<<<<<< HEAD:src/game.py
 def DoRegistration(server, ourport, ourteam, ourpass):
   reghost = '%s:%s' % (server, GAMEREG_PORT)
   regurl = urlparse.urlunparse(('http', reghost, '/register', '',
