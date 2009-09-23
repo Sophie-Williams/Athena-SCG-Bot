@@ -37,3 +37,8 @@ _num_relevant_variables(uint32_t rn, int rank) {
     }
     return rel_vars;
 }
+
+int
+_ones(uint32_t rn, int rank) {
+    return __builtin_popcountl(rn & _get_mask(rank));
+}

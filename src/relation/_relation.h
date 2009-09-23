@@ -15,4 +15,7 @@ _is_irrelevant(uint32_t rn, int rank, int var_p);
 int
 _num_relevant_variables(uint32_t rn, int rank);
 
+int
+_ones(uint32_t rn, int rank);
+
 #endif
