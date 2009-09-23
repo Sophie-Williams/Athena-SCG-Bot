@@ -1,3 +1,3 @@
 // Test Players File... Will probably be overwritten
 playerspec["ballsdonkey" "login-linux" 7001]
-playerspec["donkeyballs" "zerowing" 8080]
+playerspec["donkeyballs" "login-linux" 8080]
