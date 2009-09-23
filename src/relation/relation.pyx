@@ -52,6 +52,7 @@ cdef extern from "_relation.c":
     cdef int _is_irrelevant(uint32_t rn, int rank, int var_p)
     cdef uint32_t _get_mask(int rank)
     cdef uint32_t _get_magic_number(int rank, int var_p, int value)
+    cdef int _ones(uint32_t rn, int rank)
     cdef int _num_relevant_variables(uint32_t rn, int rank)
 
 
@@ -384,7 +385,7 @@ def renme(uint32_t rn, int rank, int perm_semantics, permutation):
 # @param rank
 # @return the number of 1-bits in rn limited by rank
 def ones(uint32_t rn, int rank):
-    return __builtin_popcountl(rn & get_mask(rank))
+    return _ones(rn, rank)
 # The slower version.
 #
 # def ones(uint32_t rn, int rank):

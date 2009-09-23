@@ -3,6 +3,12 @@ CFLAGS = -std=c99 -O3 -fforce-addr -funroll-loops -frerun-cse-after-loop \
 
 relation.so: relation.o _relation.o
 
+poly_test: poly.o
+	$(CC) $(CFLAGS) -lm -I. -o poly_test poly.o poly_test.c
+
+poly.o: poly.c
+	$(CC) $(CFLAGS) -lm -fPIC -I. -c -o $@ poly.c
+
 %.so: %.o
 	$(CC) $(CFLAGS) -shared $< -o $@
 
@@ -14,8 +20,10 @@ relation.so: relation.o _relation.o
 
 all: relation.so
 
-test: all
+test: all poly_test
 	python tests.py
+	./poly_test
+
 
 clean:
-	$(RM) relation.c *.o *.so
+	$(RM) relation.c *.o *.so poly_test
