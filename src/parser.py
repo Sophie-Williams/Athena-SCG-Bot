@@ -1,7 +1,7 @@
 #!/usr/bin/python
 """Parser for SCG in CS4500.
 
-Fuck this shit.
+Parses messages to be exchanged between the player and the admin.
 """
 __author__ = "Will Nowak <wan@ccs.neu.edu>"
 

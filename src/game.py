@@ -57,9 +57,14 @@ class Offer(object):
                                                             self.playerid,
                                                             self.problemnumber,
                                                             self.price)
+  def __repr__(self):
+    return str(self)
 
   def IsGoodBuy(self):
     return relation.relation.break_even(self.problemnumber, 3) < self.price
+
+  def GetReoffer(self, decrement=0.1):
+    return 'reoffer[%d %0.8f]' % (self.offerid, self.price - decrement)
 
   @classmethod
   def GetOfferList(cls, parsedlist):
@@ -69,16 +74,41 @@ class Offer(object):
       parsedlist = parsedlist[4:]
     return outputlist
 
+class AcceptedChallenge(object):
+  def __init__(self, acceptor, offerid, provider, problemnumber, price):
+    self.acceptor = int(acceptor)
+    self.offerid = int(offerid)
+    self.provider = int(provider)
+    self.problemnumber = int(problemnumber)
+    self.price = float(price)
+
+  def __str__(self):
+    return ('AcceptedChallenge(acceptor=%s, offerid=%s, provider=%s,'
+            ' problem=%s, price=%s)' % (self.acceptor, self.offerid,
+                                        self.provider, self.problemnumber,
+                                        self.price))
+  def __repr__(self):
+    return str(self)
+
+  @classmethod
+  def GetAcceptedChallengeList(cls, parsedlist):
+    outputlist = []
+    while parsedlist:
+      outputlist.append(cls(*parsedlist[:5]))
+      parsedlist = parsedlist[5:]
+    return outputlist
+
 class PlayerContext(object):
   def __init__(self, config=None, their_offered=None,
                our_offered=None, accepted=None, 
-               provided=None, playerid=None):
+               provided=None, playerid=None, balance=None):
     self.their_offered = Offer.GetOfferList(their_offered)
     self.our_offered = Offer.GetOfferList(our_offered)
-    self.accepted = accepted
+    self.accepted = AcceptedChallenge.GetAcceptedChallengeList(accepted)
     self.provided = provided
     self.config = config
     self.playerid = int(playerid)
+    self.balance = float(balance)
 
   @classmethod
   def FromString(cls, input):
@@ -92,7 +122,7 @@ class PlayerContext(object):
                their_offered=parsed.their_offered,
                our_offered=parsed.our_offered,
                accepted=parsed.accepted, provided=parsed.provided,
-               playerid=parsed.playerid)
+               playerid=parsed.playerid, parsed.balance)
 
 
 class PlayerTransaction(object):
@@ -138,6 +168,8 @@ class Game(object):
     logging.debug('Running AcceptTask')
     otheroffers = list(self.context.their_offered)
     for offer in self.context.their_offered:
+      if offer.price < self.context.balance:
+        logging.info('%s is out of budget' % str(offer))
       if offer.IsGoodBuy():
         logging.info('%s is good buy' % str(offer))
       else:
@@ -147,10 +179,12 @@ class Game(object):
   def ProvideTask(self):
     logging.debug('Running ProvideTask')
     otheroffers = list(self.context.accepted)
-    while otheroffers:
-      id, bla, blah, blaah, price = otheroffers[:5]
-      otheroffers = otheroffers[5:]
-      self.offers.append('provide[v0 v1 v2 v3 v4  (229 v3 v4 v0 ) (229 v0 v1 v2 ) (229 v3 v4 v0 ) (229 v3 v4 v0 ) (229 v2 v3 v4 ) (229 v4 v0 v1 ) (229 v0 v1 v2 ) (229 v3 v4 v0 ) (229 v0 v1 v2 ) (229 v4 v0 v1 ) %s ]' % id)
+    for accepted in self.context.accepted:
+      self.offers.append('provide[v0 v1 v2 v3 v4  (229 v3 v4 v0 ) '
+                         '(229 v0 v1 v2 ) (229 v3 v4 v0 ) (229 v3 v4 v0 ) '
+                         '(229 v2 v3 v4 ) (229 v4 v0 v1 ) (229 v0 v1 v2 ) '
+                         '(229 v3 v4 v0 ) (229 v0 v1 v2 ) (229 v4 v0 v1 ) '
+                         '%s ]' % accepted.offerid)
 
   def SolveTask(self):
     logging.debug('Running SolveTask')
@@ -164,8 +198,7 @@ class Game(object):
     otheroffers = (list(self.context.their_offered)
                    + list(self.context.our_offered))
     for offer in otheroffers:
-      self.offers.append('reoffer[%d %0.8f]'
-                         % (offer.offerid, offer.price - 0.1))
+      self.offers.append(offer.GetReoffer())
 
   def GenerateReply(self):
     logging.info('Generating Game Reply')
