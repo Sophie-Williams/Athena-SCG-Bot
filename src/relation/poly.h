@@ -90,6 +90,6 @@ double
 poly3_eval(poly3 *poly, double x);
 
 double
-find_break_even(uint32_t rn);
+find_break_even(uint32_t rn, int rank);
 
 #endif

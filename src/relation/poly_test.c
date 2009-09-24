@@ -93,7 +93,7 @@ static char *test_find_break_even() {
      * XXX is this true? */
     for (rn = 1; rn < 256; rn += 2) {
         mu_assert("broke, damn it",
-                  IN_RANGE(find_break_even(rn), 0.0));
+                  IN_RANGE(find_break_even(rn, 3), 1.0));
     }
     /* http://www.ccs.neu.edu/home/lieber/courses/cs4500/f09/preparation/break-even-table
     0 : 0.0 : 0.0
@@ -121,17 +121,17 @@ static char *test_find_break_even() {
     22 : 0.3333333333333333 : 0.4444444444444445
     */
 
-    mu_assert("RN 2", IN_RANGE(find_break_even(2), 0.3333333));
-    mu_assert("RN 4", IN_RANGE(find_break_even(4), 0.3333333));
-    mu_assert("RN 6", IN_RANGE(find_break_even(6), 0.3333333));
-    mu_assert("RN 8", IN_RANGE(find_break_even(8), 0.6666666));
-    mu_assert("RN 10", IN_RANGE(find_break_even(10), 0.5));
-    mu_assert("RN 12", IN_RANGE(find_break_even(12), 0.5));
-    mu_assert("RN 14", IN_RANGE(find_break_even(14), 0.42264973));
-    mu_assert("RN 16", IN_RANGE(find_break_even(16), 0.3333333));
-    mu_assert("RN 18", IN_RANGE(find_break_even(18), 0.3333333));
-    mu_assert("RN 20", IN_RANGE(find_break_even(20), 0.3333333));
-    mu_assert("RN 22", IN_RANGE(find_break_even(22), 0.3333333));
+    mu_assert("RN 2", IN_RANGE(find_break_even(2, 3), 0.148148148148));
+    mu_assert("RN 4", IN_RANGE(find_break_even(4, 3), 0.148148148148));
+    mu_assert("RN 6", IN_RANGE(find_break_even(6, 3), 0.296296296296));
+    mu_assert("RN 8", IN_RANGE(find_break_even(8, 3), 0.148148148148));
+    mu_assert("RN 10", IN_RANGE(find_break_even(10, 3), 0.25));
+    mu_assert("RN 12", IN_RANGE(find_break_even(12, 3), 0.25));
+    mu_assert("RN 14", IN_RANGE(find_break_even(14, 3), 0.384900179));
+    mu_assert("RN 16", IN_RANGE(find_break_even(16, 3), 0.148148148148));
+    mu_assert("RN 18", IN_RANGE(find_break_even(18, 3), 0.296296296296));
+    mu_assert("RN 20", IN_RANGE(find_break_even(20, 3), 0.296296296296));
+    mu_assert("RN 22", IN_RANGE(find_break_even(22, 3), 0.444444444444));
 
     return NULL;
 }
@@ -151,15 +151,16 @@ void print_all_p3() {
 
     for (i = 1; i < 256; i++) {
         p = poly3_create(i);
-        printf("%03d %12lf\n", i, find_break_even(i));
+        printf("%03d %12lf\n", i, find_break_even(i, 3));
         free(p);
     }
 }
 
-
 int main(int argc, char **argv) {
     char *result = all_tests();
-
+/*
+    print_all_p3();
+ */
     if (result != 0) {
         printf("%s\n", result);
     }

@@ -56,6 +56,10 @@ cdef extern from "_relation.c":
     cdef int _num_relevant_variables(uint32_t rn, int rank)
 
 
+cdef extern from "poly.c":
+    cdef double find_break_even(uint32_t rn, int rank)
+
+
 # for the module
 SOURCE = C_SOURCE
 TARGET = C_TARGET
@@ -448,3 +452,8 @@ def x_true_vars(int rank, int num_true_vars):
 #         if(ones(i, 3) == num_true_vars): 
 #             rn |= (1 << i)
 #     return rn
+
+
+# rank should be 3 for now.
+def break_even(uint32_t rn, int rank):
+    return find_break_even(rn, rank)

@@ -127,19 +127,29 @@ poly3_eval(poly3 *poly, double x) {
 }
 
 double
-find_break_even(uint32_t rn) {
+find_break_even(uint32_t rn, int rank) {
     poly3 *poly;
     double answer;
 
+    /* If odd, the break even is 1.0
+     *
+     * The first row is 000 => (1-p)^3 = 1^3 -3p +3p^2 -p^3
+     * So, when p == 0, the equation == 1
+     *
+     * Even when added to other rows, this is true because the other rows'
+     * 0th coefficient == 0
+     */
     if(rn % 2 == 1) {
-        return 0.0;
+        return 1.0;
     }
 
     poly = poly3_create(rn);
 
+    /* this usually means ENOMEM : no memory */
     assert(poly != NULL);
 
-    answer = poly3_get_maximum(poly);
+    /* The break even is the value of the polynomial at its maximum. */
+    answer = poly3_eval(poly, poly3_get_maximum(poly));
     free(poly);
 
     return answer;

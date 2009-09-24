@@ -129,6 +129,24 @@ class TestRelation(unittest.TestCase):
     self.assertEqual(f(5, 4), 0b01101000100000001000000000000000)
     self.assertEqual(f(5, 5), 0b10000000000000000000000000000000)
 
+  def test_break_even(self):
+    f = relation.break_even
+    for rn in range(1, 255, 2):
+      self.assertEqual(f(rn, 3), 1.0)
+
+    self.assertAlmostEqual(f(2, 3), 0.148148148148)
+    self.assertAlmostEqual(f(4, 3), 0.148148148148)
+    self.assertAlmostEqual(f(6, 3), 0.296296296296)
+    self.assertAlmostEqual(f(8, 3), 0.148148148148)
+    self.assertAlmostEqual(f(10, 3), 0.25)
+    self.assertAlmostEqual(f(12, 3), 0.25)
+    self.assertAlmostEqual(f(14, 3), 0.384900179)
+    self.assertAlmostEqual(f(16, 3), 0.148148148148)
+    self.assertAlmostEqual(f(18, 3), 0.296296296296)
+    self.assertAlmostEqual(f(20, 3), 0.296296296296)
+    self.assertAlmostEqual(f(22, 3), 0.444444444444)
+    # XXX more test cases?
+
 
 if __name__ == '__main__':
   unittest.main()
