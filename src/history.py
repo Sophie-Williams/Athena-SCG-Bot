@@ -72,4 +72,4 @@ def GetHistory(ctx):
 
 if __name__ == '__main__':
   import sys
-  print GetHistory(open('./sample-history', 'r').read())
+  print GetHistory(open('./testdata/sample-history', 'r').read())
