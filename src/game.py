@@ -9,14 +9,6 @@ import relation
 
 GAMEREG_PORT = 7005
 
-class Objective(object):
-  pass
-
-
-class Predicate(object):
-  pass
-
-
 class Config(object):
 
   def __init__(self, gamekind=None, turnduration=None, mindecrement=None,
@@ -65,6 +57,9 @@ class Offer(object):
 
   def GetReoffer(self, decrement=0.1):
     return 'reoffer[%d %0.8f]' % (self.offerid, self.price - decrement)
+
+  def GetAccept(self):
+    return 'accept[ %d ]' % (self.offerid)
 
   @classmethod
   def GetOfferList(cls, parsedlist):
@@ -172,6 +167,7 @@ class Game(object):
         logging.info('%s is out of budget' % str(offer))
       if offer.IsGoodBuy():
         logging.info('%s is good buy' % str(offer))
+        self.offers.append(offer.GenAccept())
       else:
         logging.info('%s is bad buy' % str(offer))
 
