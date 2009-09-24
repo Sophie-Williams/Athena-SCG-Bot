@@ -1,4 +1,5 @@
 import relation
+import gen
 import unittest
 
 
@@ -147,6 +148,10 @@ class TestRelation(unittest.TestCase):
     self.assertAlmostEqual(f(22, 3), 0.444444444444)
     # XXX more test cases?
 
+  def test_gen_permute3(self):
+    f = gen.permute3
+    # for x in f(450):
+    #   x
 
 if __name__ == '__main__':
   unittest.main()

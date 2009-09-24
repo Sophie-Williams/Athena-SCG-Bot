@@ -457,3 +457,34 @@ def x_true_vars(int rank, int num_true_vars):
 # rank should be 3 for now.
 def break_even(uint32_t rn, int rank):
     return find_break_even(rn, rank)
+
+
+
+def generate_variables(uint32_t amount):
+    cdef uint32_t i
+    x = list()
+
+    for 0 < i < amount:
+        x += 'alamo%dalamo' % i
+    return x
+
+
+def create_prob(uint32_t rn, int rank):
+#    vars = [v for v in generate_variables(1140)
+    return
+#     /** Create a random problem instance of the given ProblemType */
+#     Problem createProb(ProblemType t){
+#         final List<Integer> type = t.getType();
+#         return new Problem(vars, 
+#                 List.buildlist(new List.Build<Clause>(){
+#                     public Clause build(int i){
+#                         int v = Util.random(vars.length());
+#                         return new Clause(type.lookup(Util.random(type.length())),
+#                                 List.create(
+#                                         vars.lookup(v),
+#                                         vars.lookup((v+1)%vars.length()),
+#                                         vars.lookup((v+2)%vars.length())));
+#                     }
+#                 }, NUM_CLAUSES));
+#     }
+# 
