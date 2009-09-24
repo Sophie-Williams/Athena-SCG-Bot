@@ -33,7 +33,7 @@ def var(n):
 def problem(p_type, degree=100):
     y = ''
     for x in range(0, degree):
-        y += '%s ' % var(x)
+        y += '%s  ' % var(x)
     for i, j, k in permute3(degree):
         y += '(%d %s %s %s ) ' % (p_type, var(i), var(j), var(k))
     return y
@@ -42,7 +42,7 @@ import time
 
 s = time.time()
 # print s
-print problem(22, degree=10)
+print problem(60, degree=10)
 e = time.time()
 #print e
 # print e - s
