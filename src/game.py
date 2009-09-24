@@ -43,6 +43,7 @@ class Offer(object):
     self.playerid = int(playerid)
     self.problemnumber = int(problemnumber)
     self.price = float(price)
+    self.actedon = False
   
   def __str__(self):
     return 'Offer(id=%s, from=%s, problem=%s, price=%s)' % (self.offerid,
@@ -59,6 +60,7 @@ class Offer(object):
     return 'reoffer[%d %0.8f]' % (self.offerid, self.price - decrement)
 
   def GetAccept(self):
+    self.actedon = True
     return 'accept[ %d ]' % (self.offerid)
 
   @classmethod
@@ -167,7 +169,7 @@ class Game(object):
         logging.info('%s is out of budget' % str(offer))
       if offer.IsGoodBuy():
         logging.info('%s is good buy' % str(offer))
-        self.offers.append(offer.GenAccept())
+        self.offers.append(offer.GetAccept())
       else:
         logging.info('%s is bad buy' % str(offer))
 
@@ -193,8 +195,12 @@ class Game(object):
     logging.debug('Running ReofferTask')
     otheroffers = (list(self.context.their_offered)
                    + list(self.context.our_offered))
-    for offer in otheroffers:
-      self.offers.append(offer.GetReoffer())
+    a = [x.actedon for x in self.context.their_offered]
+    if True in a:
+      return
+    else:
+      for offer in otheroffers:
+        self.offers.append(offer.GetReoffer())
 
   def GenerateReply(self):
     logging.info('Generating Game Reply')
