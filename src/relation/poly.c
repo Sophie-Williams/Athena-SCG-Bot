@@ -4,28 +4,39 @@
 #include <math.h>
 
 #include "poly.h"
+#include "_relation.h"
 
 #define HAVE_NTH(x, nth) (((x >> nth) % 2) == 1)
 
 poly3 *
 poly3_create(uint32_t rn) {
-    /*
-    int have8 = ((rn >> 7) % 2) == 1;
-    int have7 = ((rn >> 6) % 2) == 1;
-    int have6 = ((rn >> 5) % 2) == 1;
-    int have5 = ((rn >> 4) % 2) == 1;
-    int have4 = ((rn >> 3) % 2) == 1;
-    int have3 = ((rn >> 2) % 2) == 1;
-    int have2 = ((rn >> 1) % 2) == 1;
-    int have1 = (rn % 2) == 1;
-    */
+    poly3 *poly;
+/*    poly3 temp; */
 
-    poly3 *poly = malloc(sizeof(poly3));
+    poly = malloc(sizeof(poly3));
     if (poly == NULL) {
         return NULL;
     }
-
+    
     POLY3(*poly, 0, 0, 0, 0);
+
+/* version 2
+    POLY3_SET_30(temp);
+    POLY3_MULTIPLY(temp, _q(rn, 3, 3));
+    poly3_add(poly, &temp);
+
+    POLY3_SET_21(temp);
+    POLY3_MULTIPLY(temp, _q(rn, 3, 2));
+    poly3_add(poly, &temp);
+
+    POLY3_SET_12(temp);
+    POLY3_MULTIPLY(temp, _q(rn, 3, 1));
+    poly3_add(poly, &temp);
+
+    POLY3_SET_03(temp);
+    POLY3_MULTIPLY(temp, _q(rn, 3, 0));
+    poly3_add(poly, &temp);
+*/
 
     if (HAVE_NTH(rn, 0)) POLY3_ADD_03(*poly);
     if (HAVE_NTH(rn, 1)) POLY3_ADD_12(*poly);
@@ -55,8 +66,8 @@ poly3_add(poly3 *a, poly3 *b) {
 
 double
 poly3_get_maximum(poly3 *poly) {
-    double answer1;
-    double answer2;
+    double answer1 = 0.0;
+    double answer2 = 0.0;
     double a;
     double b;
     double c;
@@ -75,9 +86,13 @@ poly3_get_maximum(poly3 *poly) {
      * XXX TODO FIXME
      */
 
+    if (a == 0 && b == 0) {
+        return 0.0;
+    }
+
     z = pow(b, 2) - (4 * a * c);
     if (z < 0) {
-        return -1.0;
+        return 0.0;
     }
 
     /* corner case, if a == 0, this is a polynomial or degree 1 
@@ -86,17 +101,46 @@ poly3_get_maximum(poly3 *poly) {
      *     x = ((-c) / b)
      */
     if (a == 0) {
-        return -(((double)c) / b);
+        answer1 = -(((double)c) / b);
+    }
+    else {
+        answer1 = (-b + sqrt(z)) / (2 * a);
+        answer2 = (-b - sqrt(z)) / (2 * a);
     }
 
-    answer1 = (-b + sqrt(z)) / (2 * a);
-    answer2 = (-b - sqrt(z)) / (2 * a);
-
-    if (answer1 > 0 && answer2 > 0) {
-        return answer1 > answer2 ? answer1 : answer2;
-    }
-    else if(answer1 > 0) {
+    if (0 < answer1 && answer1 < 1) {
         return answer1;
     }
-    return answer2;
+    if (0 < answer2 && answer2 < 1) {
+        return answer2;
+    }
+
+    return 0.0;
+}
+
+double
+poly3_eval(poly3 *poly, double x) {
+    assert(poly != NULL);
+
+    return (pow(x, 3) * poly->coeff3 + pow(x, 2) * poly->coeff2 +
+            x * poly->coeff1 + poly->coeff0);
+}
+
+double
+find_break_even(uint32_t rn) {
+    poly3 *poly;
+    double answer;
+
+    if(rn % 2 == 1) {
+        return 0.0;
+    }
+
+    poly = poly3_create(rn);
+
+    assert(poly != NULL);
+
+    answer = poly3_get_maximum(poly);
+    free(poly);
+
+    return answer;
 }

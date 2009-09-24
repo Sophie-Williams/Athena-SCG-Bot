@@ -3,8 +3,8 @@ CFLAGS = -std=c99 -O3 -fforce-addr -funroll-loops -frerun-cse-after-loop \
 
 relation.so: relation.o _relation.o
 
-poly_test: poly.o
-	$(CC) $(CFLAGS) -lm -I. -o poly_test poly.o poly_test.c
+poly_test: poly.o _relation.o poly_test.c
+	$(CC) $(CFLAGS) -lm -I. -o poly_test poly.o _relation.o poly_test.c
 
 poly.o: poly.c
 	$(CC) $(CFLAGS) -lm -fPIC -I. -c -o $@ poly.c

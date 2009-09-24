@@ -18,4 +18,10 @@ _num_relevant_variables(uint32_t rn, int rank);
 int
 _ones(uint32_t rn, int rank);
 
+int
+_q(uint32_t rn, int rank, int num_true_vars);
+
+uint32_t
+_x_true_vars(int rank, int num_true_vars);
+
 #endif

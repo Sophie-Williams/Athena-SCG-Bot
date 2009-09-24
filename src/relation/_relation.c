@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <assert.h>
 #include "relation_consts.h"
 #include "_relation.h"
 
@@ -41,4 +42,23 @@ _num_relevant_variables(uint32_t rn, int rank) {
 int
 _ones(uint32_t rn, int rank) {
     return __builtin_popcountl(rn & _get_mask(rank));
+}
+
+int
+_q(uint32_t rn, int rank, int num_true_vars) {
+    uint32_t m;
+    
+    if (num_true_vars > rank) {
+        return -1;
+    }
+
+    m = _x_true_vars(rank, num_true_vars);
+    return _ones(rn & m, rank);
+}
+
+uint32_t
+_x_true_vars(int rank, int num_true_vars) {
+    assert(0 < rank && rank < 6);
+    assert(0 <= num_true_vars && num_true_vars < 6);
+    return TRUE_VARS[rank][num_true_vars];
 }
