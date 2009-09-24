@@ -122,7 +122,7 @@ class PlayerContext(object):
                their_offered=parsed.their_offered,
                our_offered=parsed.our_offered,
                accepted=parsed.accepted, provided=parsed.provided,
-               playerid=parsed.playerid, parsed.balance)
+               playerid=parsed.playerid, balance=parsed.balance)
 
 
 class PlayerTransaction(object):
