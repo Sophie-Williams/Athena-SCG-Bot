@@ -7,7 +7,7 @@ config[
         initacc: 100.0
         objective: []
         predicate: []
-        numrounds: 10000
+        numrounds: 15
         profitfactor: 1.0
         otrounds: 2
 ]

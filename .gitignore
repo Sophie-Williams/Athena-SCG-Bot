@@ -7,3 +7,8 @@ player.tgz
 *.so
 *.o
 *.swp
+project/Admin/tournament*.txt
+project/Admin/final_results*.html
+project/Admin/files/history/*
+project/Admin/files/players.*
+project/Admin/files/history/*
