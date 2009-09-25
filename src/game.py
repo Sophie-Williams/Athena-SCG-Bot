@@ -18,8 +18,8 @@ class Game(object):
     logging.debug('Accepted: %s' % str(self.context.accepted))
     logging.debug('Provided: %s' % str(self.context.provided))
     logging.info('Running all tasks...')
-    for x in [self.AcceptTask, self.ProvideTask, self.SolveTask,
-              self.OfferTask, self.ReofferTask]:
+    for x in [self.OfferTask, self.AcceptTask, self.ReofferTask,
+              self.ProvideTask, self.SolveTask]:
       x()
 
   #TODO(wan): Actually accept good buys
@@ -57,17 +57,20 @@ class Game(object):
     ouroffer  = [x.problemnumber for x in self.context.our_offered]
     theiroffer  = [x.problemnumber for x in self.context.their_offered]
     problemno = None
-    while True:
-      problemno = random.randint(2,256) 
-      if problemno in ouroffer:
-        logging.debug('Can\'t offer %d, already offered by us' % problemno)
-      elif problemno in theiroffer:
-        logging.debug('Can\'t offer %d, already offered by them' % problemno)
-      else:
-        price = 1.0 - 0.00001*random.random()
-        logging.debug('Offering %d for %0.8f' % (problemno, price))
-        self.replies.append('offer[( %d) %0.8f]' % (problemno, price))
-        break
+    first = None
+    for x in [1,2]:
+      while True:
+        problemno = random.randint(2,256) 
+        if problemno in ouroffer or problemno == first:
+          logging.debug('Can\'t offer %d, already offered by us' % problemno)
+        elif problemno in theiroffer:
+          logging.debug('Can\'t offer %d, already offered by them' % problemno)
+        else:
+          first = problemno
+          price = 1.0 - 0.00001*random.random()
+          logging.debug('Offering %d for %0.8f' % (problemno, price))
+          self.replies.append('offer[( %d) %0.8f]' % (problemno, price))
+          break
                           
 
   def ReofferTask(self):

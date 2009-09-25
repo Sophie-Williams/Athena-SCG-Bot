@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import random
 import relation.relation
 
 class Offer(object):
@@ -18,8 +19,9 @@ class Offer(object):
     return str(self)
 
   def IsGoodBuy(self):
-    return (relation.relation.break_even(self.problemnumber, 3) < self.price
-            or self.price < 0.5)
+    return ((self.price < 0.5) or
+            (relation.relation.break_even(self.problemnumber, 3) < self.price))
+            
 
   def GetReoffer(self, decrement=0.2):
     return 'reoffer[%d %0.8f]' % (self.offerid, self.price - decrement)
