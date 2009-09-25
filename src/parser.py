@@ -8,6 +8,11 @@ __author__ = "Will Nowak <wan@ccs.neu.edu>"
 from pyparsing import (nums, alphanums, Word, Combine, Suppress, Literal,
                        ZeroOrMore, QuotedString, LineEnd, Or)
 
+def sup_lit(expr):
+  """A Suppressed Literal"""
+  return Suppress(Literal(expr))
+
+
 def wrap(expr, open_char="[", close_char="]"):
   """
   >>> w = wrap(Word(nums))
@@ -16,12 +21,7 @@ def wrap(expr, open_char="[", close_char="]"):
   >>> len(w.searchString('[1231 123123]')) == 0
   True
   """
-  return Suppress(Literal(open_char)) + expr + Suppress(Literal(close_char))
-
-
-def sup_lit(expr):
-  """A Suppressed Literal"""
-  return Suppress(Literal(expr))
+  return sup_lit(open_char) + expr + sup_lit(close_char)
 
 
 def KeyAndValue(key, value_type, sep=':'):

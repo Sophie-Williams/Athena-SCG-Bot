@@ -33,7 +33,8 @@ def var(n):
 def problem(p_type, degree=100):
     y = ''
     for x in range(0, degree):
-        y += '%s  ' % var(x)
+        y += '%s ' % var(x)
+    y += ' '
     for i, j, k in permute3(degree):
         y += '(%d %s %s %s ) ' % (p_type, var(i), var(j), var(k))
     return y
