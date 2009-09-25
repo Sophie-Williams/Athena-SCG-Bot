@@ -13,6 +13,22 @@ GAMEREG_PORT = 7005
 NUM_VARS = 5
 NUM_CLAUSES = 10
 
+def DoRegistration(server, ourport, ourteam, ourpass):
+  reghost = '%s:%s' % (server, GAMEREG_PORT)
+  regurl = urlparse.urlunparse(('http', reghost, '/register', '',
+                                urllib.urlencode({'password': ourpass}), ''))
+  regdata = 'playerspec["%s" "auto" %d]' % (ourteam, ourport)
+  req = urllib2.Request(regurl, regdata)
+  try:
+    resp = urllib2.urlopen(req).read()
+    if str(resp) == str(ourteam):
+      return '%s registration success!' % ourteam
+    else:
+      return '"%s" != "%s"' % (str(resp), str(ourteam))
+  except Exception, e:
+    logging.exception('Reg Failure at %s ' % regurl)
+    return '%s registration FAILURE! (%s)' % (ourteam, str(e))
+
 class Config(object):
 
   def __init__(self, gamekind=None, turnduration=None, mindecrement=None,
@@ -127,24 +143,35 @@ class PlayerContext(object):
                playerid=parsed.playerid, balance=parsed.balance)
 
 
-class PlayerTransaction(object):
-  pass
+class Clause(object):
+  def __init__(self, number, list_of_vars):
+    self.problemnumber = number
+    self.vars = list_of_vars
 
-def DoRegistration(server, ourport, ourteam, ourpass):
-  reghost = '%s:%s' % (server, GAMEREG_PORT)
-  regurl = urlparse.urlunparse(('http', reghost, '/register', '',
-                                urllib.urlencode({'password': ourpass}), ''))
-  regdata = 'playerspec["%s" "auto" %d]' % (ourteam, ourport)
-  req = urllib2.Request(regurl, regdata)
-  try:
-    resp = urllib2.urlopen(req).read()
-    if str(resp) == str(ourteam):
-      return '%s registration success!' % ourteam
-    else:
-      return '"%s" != "%s"' % (str(resp), str(ourteam))
-  except Exception, e:
-    logging.exception('Reg Failure at %s ' % regurl)
-    return '%s registration FAILURE! (%s)' % (ourteam, str(e))
+  def __str__(self):
+    return 'Clause(num=%d, vars=%s)' % (self.problemnumber, str(self.vars))
+
+  def __repr__(self):
+    return str(self)
+
+class Problem(object):
+  def __init__(self, list_of_vars, problemnumber, price, seller):
+    self.vars = list_of_vars
+    self.problemnumber = int(problemnumber)
+    self.price = float(price)
+    self.seller = int(seller)
+    self.clauses = []
+
+  def AddClause(self, clause):
+    self.clauses.append(clause)
+
+  #TODO(wan): this.
+  @classmethod
+  def GetProblemList(cls, parsedlist):
+    outputlist = []
+    for problem in parsedlist:
+      pass
+    return outputlist
 
 class Game(object):
   def __init__(self, initialdata):
@@ -168,22 +195,21 @@ class Game(object):
     logging.debug('Running AcceptTask')
     otheroffers = list(self.context.their_offered)
     for offer in self.context.their_offered:
-      if offer.IsGoodBuy() and False:
+      if offer.IsGoodBuy():
         logging.info('%s is good buy' % str(offer))
         self.offers.append(offer.GetAccept())
-      elif offer.price < self.context.balance:
+      elif offer.price > self.context.balance:
         logging.info('%s is out of budget' % str(offer))
       else:
         logging.info('%s is bad buy' % str(offer))
 
-  #TODO(lee): Can we generate some problems here?
   def ProvideTask(self):
     logging.debug('Running ProvideTask')
     otheroffers = list(self.context.accepted)
     for accepted in self.context.accepted:
       if self.context.playerid != accepted.provider:
         continue
-      self.offers.append('provide[ %s  %s ]'
+      self.offers.append('provide[ %s %s ]'
                          % (relation.gen.problem(accepted.problemnumber,
                                                  degree=5),
                             accepted.offerid))
@@ -193,9 +219,21 @@ class Game(object):
 
   def OfferTask(self):
     logging.debug('Running OfferTask')
-    self.offers.append('offer[( %d) %0.8f]'
-                       % (random.randint(2,300),
-                          1.0 - 0.00001*random.random()))
+    ouroffer  = [x.problemnumber for x in self.context.our_offered]
+    theiroffer  = [x.problemnumber for x in self.context.their_offered]
+    problemno = None
+    while True:
+      problemno = random.randint(2,256) 
+      if problemno in ouroffer:
+        logging.debug('Can\'t offer %d, already offered by us' % problemno)
+      elif problemno in theiroffer:
+        logging.debug('Can\'t offer %d, already offered by them' % problemno)
+      else:
+        price = 1.0 - 0.00001*random.random()
+        logging.debug('Offering %d for %0.8f' % (problemno, price))
+        self.offers.append('offer[( %d) %0.8f]' % (problemno, price))
+        break
+                          
 
   def ReofferTask(self):
     logging.debug('Running ReofferTask')

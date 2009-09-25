@@ -6,7 +6,7 @@ Parses messages to be exchanged between the player and the admin.
 __author__ = "Will Nowak <wan@ccs.neu.edu>"
 
 from pyparsing import (nums, alphanums, Word, Combine, Suppress, Literal,
-                       ZeroOrMore, QuotedString, LineEnd, Or)
+                       ZeroOrMore, QuotedString, LineEnd, Or, Group)
 
 def sup_lit(expr):
   """A Suppressed Literal"""
@@ -61,9 +61,9 @@ List = ZeroOrMore
 PlayerID = Integer
 Var = Combine('v'+Integer)
 
-Clause = wrap(Integer("relation_number") + List(Var), "(", ")")
+Clause = Group(wrap(Integer("relation_number") + List(Var), "(", ")"))
 
-Problem = List(Var) + List(Clause)
+Problem = Group(Group(List(Var)) + Group(List(Clause)))
 ProblemType = wrap(List(Integer("pt")), "(", ")")
 
 
@@ -73,9 +73,9 @@ ChallengeCommon = ( Integer("key") + PlayerID("challenger") +
 OfferedChallenge = sup_lit("offered") + wrap(ChallengeCommon)
 AcceptedChallenge = sup_lit("accepted") + wrap(PlayerID("challengee")
                   + ChallengeCommon)
-ProvidedChallenge = sup_lit("provided") + wrap(PlayerID("challengee")
-                                               + Problem("instance")
-                  + ChallengeCommon)
+ProvidedChallenge = (sup_lit("provided")
+                     + Group(wrap(PlayerID("challengee") + Problem("instance")
+                             + ChallengeCommon)))
 SolvedChallenge = sup_lit("solved") + wrap(PlayerID("challengee")
                 + Problem("instance") + ChallengeCommon)
 
