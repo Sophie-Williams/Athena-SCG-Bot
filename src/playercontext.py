@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+
+class Config(object):
+
+  def __init__(self, gamekind=None, turnduration=None, mindecrement=None,
+               initacc=None, objective=None, predicate=None, numrounds=None,
+               profitfactor=None, otrounds=None):
+    """
+    A Config object with type enforcement.
+    """
+    self.gamekind = gamekind
+    self.turnduration = int(turnduration)
+    self.mindecrement = float(mindecrement)
+    self.initacc = float(initacc)
+    self.objective = objective
+    self.predicate = predicate
+    self.numrounds = int(numrounds)
+    self.profitfactor = float(profitfactor)
+    self.otrounds = int(otrounds)
+
+  @classmethod
+  def FromString(cls, input):
+    ps = parser.Config.searchString(input)
+    if ps:
+      return cls.FromParsed(ps[0])
+
+  @classmethod
+  def FromParsed(cls, parse_obj):
+    return cls(**parse_obj.asDict())
+
+
+class PlayerContext(object):
+  def __init__(self, config=None, their_offered=None,
+               our_offered=None, accepted=None, 
+               provided=None, playerid=None, balance=None):
+    self.their_offered = Offer.GetOfferList(their_offered)
+    self.our_offered = Offer.GetOfferList(our_offered)
+    self.accepted = AcceptedChallenge.GetAcceptedChallengeList(accepted)
+    self.provided = Problem.GetProblemList(provided)
+    self.config = config
+    self.playerid = int(playerid)
+    self.balance = float(balance)
+
+  @classmethod
+  def FromString(cls, input):
+    ps = parser.PlayerContext.searchString(input)
+    if ps:
+      return cls.FromParsed(ps[0])
+
+  @classmethod
+  def FromParsed(cls, parsed):
+    return cls(config=Config.FromParsed(parsed.config),
+               their_offered=parsed.their_offered,
+               our_offered=parsed.our_offered,
+               accepted=parsed.accepted, provided=parsed.provided,
+               playerid=parsed.playerid, balance=parsed.balance)
