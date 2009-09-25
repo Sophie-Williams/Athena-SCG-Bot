@@ -123,7 +123,7 @@ class PlayerContext(object):
     self.their_offered = Offer.GetOfferList(their_offered)
     self.our_offered = Offer.GetOfferList(our_offered)
     self.accepted = AcceptedChallenge.GetAcceptedChallengeList(accepted)
-    self.provided = provided
+    self.provided = Problem.GetProblemList(provided)
     self.config = config
     self.playerid = int(playerid)
     self.balance = float(balance)
@@ -145,7 +145,7 @@ class PlayerContext(object):
 
 class Clause(object):
   def __init__(self, number, list_of_vars):
-    self.problemnumber = number
+    self.problemnumber = int(number)
     self.vars = list_of_vars
 
   def __str__(self):
@@ -154,23 +154,64 @@ class Clause(object):
   def __repr__(self):
     return str(self)
 
+  def GetProvideBlob(self):
+    return '(%d %s )' % (self.problemnumber, ' '.join(self.vars))
+
 class Problem(object):
-  def __init__(self, list_of_vars, problemnumber, price, seller):
+  def __init__(self, buyer, list_of_vars, clauselist, challengeid, seller,
+               problemnumber, price):
+    self.buyer = int(buyer)
     self.vars = list_of_vars
+    self.clauses = []
+    self.AddClauses(clauselist)
+    self.challengeid = int(challengeid)
+    self.seller = int(seller)
     self.problemnumber = int(problemnumber)
     self.price = float(price)
-    self.seller = int(seller)
-    self.clauses = []
+
+  def __str__(self):
+    return ('Problem(num=%d, vars=%s, price=%s, seller=%s clauses=%s)'
+            % (self.problemnumber, str(self.vars), self.price, self.seller,
+               str(self.clauses)))
+
+  def __repr__(self):
+    return str(self)
+
+  def AddClauses(self, clauselist):
+    for clause in clauselist:
+      self.AddClause(Clause(clause[0], clause[1:]))
 
   def AddClause(self, clause):
     self.clauses.append(clause)
 
-  #TODO(wan): this.
+  def GetProvide(self):
+    return ('provide[%s %s %d]'
+            % (' '.join(self.vars),
+                ' '.join([x.GetProvideBlob() for x in self.clauses]),
+                self.challengeid))
+
+
+  def Solve(self):
+    logging.info('Solving offer %d' % self.challengeid)
+
+  @classmethod
+  def GenerateProblem(cls, problemnumber, degree, offerid):
+    p = cls(0, ['v%d' % x for x in range(0, degree)], [], offerid, 0,
+            problemnumber, 0)
+    for i, j, k in relation.gen.permute3(degree):
+      p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
+    return p
+
   @classmethod
   def GetProblemList(cls, parsedlist):
+    logging.info('Parsing: %s' % parsedlist)
     outputlist = []
     for problem in parsedlist:
-      pass
+      #buyer, list_of_vars, clauselist, challengeid, seller,
+      # problemnumner, price
+      newp = cls(problem[0], problem[1][0], problem[1][1], problem[2],
+                 problem[3], problem[4], problem[5])
+      outputlist.append(newp)
     return outputlist
 
 class Game(object):
@@ -209,13 +250,13 @@ class Game(object):
     for accepted in self.context.accepted:
       if self.context.playerid != accepted.provider:
         continue
-      self.offers.append('provide[ %s %s ]'
-                         % (relation.gen.problem(accepted.problemnumber,
-                                                 degree=5),
-                            accepted.offerid))
+      self.offers.append(Problem.GenerateProblem(accepted.problemnumber, 5,
+                                                 accepted.offerid).GetProvide())
 
   def SolveTask(self):
     logging.debug('Running SolveTask')
+    for problem in self.context.provided:
+      problem.Solve()
 
   def OfferTask(self):
     logging.debug('Running OfferTask')
