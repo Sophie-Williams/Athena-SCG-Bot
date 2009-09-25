@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+import offer
+import parser
+import problem
 
 class Config(object):
 
@@ -33,10 +36,10 @@ class PlayerContext(object):
   def __init__(self, config=None, their_offered=None,
                our_offered=None, accepted=None, 
                provided=None, playerid=None, balance=None):
-    self.their_offered = Offer.GetOfferList(their_offered)
-    self.our_offered = Offer.GetOfferList(our_offered)
-    self.accepted = AcceptedChallenge.GetAcceptedChallengeList(accepted)
-    self.provided = Problem.GetProblemList(provided)
+    self.their_offered = offer.Offer.GetOfferList(their_offered)
+    self.our_offered = offer.Offer.GetOfferList(our_offered)
+    self.accepted = offer.AcceptedChallenge.GetAcceptedChallengeList(accepted)
+    self.provided = problem.Problem.GetProblemList(provided)
     self.config = config
     self.playerid = int(playerid)
     self.balance = float(balance)

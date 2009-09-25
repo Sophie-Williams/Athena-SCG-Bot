@@ -3,6 +3,7 @@ import logging
 import web
 
 import game
+import util
 
 urls = (
   '/player', 'GameHandler',
@@ -26,7 +27,7 @@ class RegisterHandler(object):
       port = int(web.ctx.host.split(':')[-1])
     except:
       port = 8080
-    return game.DoRegistration(req['host'], port,
+    return util.DoRegistration(req['host'], port,
                                req['team'], req['password'])
 
 class GameHandler(object):

@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import logging
+
 import relation.gen
 
 class Clause(object):
@@ -48,6 +50,11 @@ class Problem(object):
                 ' '.join([x.GetProvideBlob() for x in self.clauses]),
                 self.challengeid))
 
+  def GetProvided(self):
+    return ('provided[%d %s %s %d %d (%d ) %0.8f]'
+            % (self.buyer, ' '.join(self.vars),
+                ' '.join([x.GetProvideBlob() for x in self.clauses]),
+               self.challengeid, self.seller, self.problemnumber, self.price))
 
   def Solve(self):
     logging.info('Solving offer %d' % self.challengeid)

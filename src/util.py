@@ -1,5 +1,10 @@
 #!/usr/bin/env python
+import urllib
+import urllib2
+import urlparse
+
 import constants
+
 
 def DoRegistration(server, ourport, ourteam, ourpass):
   reghost = '%s:%s' % (server, constants.GAMEREG_PORT)

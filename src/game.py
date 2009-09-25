@@ -1,21 +1,18 @@
 #!/usr/bin/python
 import logging
 import random
-import urllib
-import urllib2
-import urlparse
 
-import parser
-import relation
-import relation.gen
+import playercontext
+import problem
+import proxysolver
 
 class Game(object):
   def __init__(self, initialdata):
-    self.context = PlayerContext.FromString(initialdata)
+    self.context = playercontext.PlayerContext.FromString(initialdata)
     self.id = int(self.context.playerid)
 
   def RunTasks(self):
-    self.offers = []
+    self.replies = []
     logging.debug('Their Offered: %s' % str(self.context.their_offered))
     logging.debug('Our Offered: %s' % str(self.context.our_offered))
     logging.debug('Accepted: %s' % str(self.context.accepted))
@@ -33,7 +30,7 @@ class Game(object):
     for offer in self.context.their_offered:
       if offer.IsGoodBuy():
         logging.info('%s is good buy' % str(offer))
-        self.offers.append(offer.GetAccept())
+        self.replies.append(offer.GetAccept())
       elif offer.price > self.context.balance:
         logging.info('%s is out of budget' % str(offer))
       else:
@@ -45,13 +42,15 @@ class Game(object):
     for accepted in self.context.accepted:
       if self.context.playerid != accepted.provider:
         continue
-      self.offers.append(Problem.GenerateProblem(accepted.problemnumber, 5,
-                                                 accepted.offerid).GetProvide())
+      p = problem.Problem.GenerateProblem(accepted.problemnumber,
+                                          3, accepted.offerid)
+      self.replies.append(p.GetProvide())
 
   def SolveTask(self):
     logging.debug('Running SolveTask')
     for problem in self.context.provided:
       problem.Solve()
+      self.replies.append(proxysolver.ProxySolve(problem))
 
   def OfferTask(self):
     logging.debug('Running OfferTask')
@@ -67,7 +66,7 @@ class Game(object):
       else:
         price = 1.0 - 0.00001*random.random()
         logging.debug('Offering %d for %0.8f' % (problemno, price))
-        self.offers.append('offer[( %d) %0.8f]' % (problemno, price))
+        self.replies.append('offer[( %d) %0.8f]' % (problemno, price))
         break
                           
 
@@ -80,12 +79,12 @@ class Game(object):
       return
     else:
       for offer in otheroffers:
-        self.offers.append(offer.GetReoffer())
+        self.replies.append(offer.GetReoffer())
 
   def GenerateReply(self):
     logging.info('Generating Game Reply')
     r = '\nplayertrans[\n    %d\n' % self.id
-    for o in self.offers:
+    for o in self.replies:
       r += '    %s \n' % o
     r +=']\n'
     logging.info('Replying with: %s' % r)
