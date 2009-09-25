@@ -1,13 +1,17 @@
 #!/usr/bin/python
 import logging
+import random
 import urllib
 import urllib2
 import urlparse
 
 import parser
 import relation
+import relation.gen
 
 GAMEREG_PORT = 7005
+NUM_VARS = 5
+NUM_CLAUSES = 10
 
 class Config(object):
 
@@ -95,6 +99,7 @@ class AcceptedChallenge(object):
       parsedlist = parsedlist[5:]
     return outputlist
 
+
 class PlayerContext(object):
   def __init__(self, config=None, their_offered=None,
                our_offered=None, accepted=None, 
@@ -141,8 +146,6 @@ def DoRegistration(server, ourport, ourteam, ourpass):
     logging.exception('Reg Failure at %s ' % regurl)
     return '%s registration FAILURE! (%s)' % (ourteam, str(e))
 
-
-
 class Game(object):
   def __init__(self, initialdata):
     self.context = PlayerContext.FromString(initialdata)
@@ -165,11 +168,11 @@ class Game(object):
     logging.debug('Running AcceptTask')
     otheroffers = list(self.context.their_offered)
     for offer in self.context.their_offered:
-      if offer.price < self.context.balance:
-        logging.info('%s is out of budget' % str(offer))
-      if offer.IsGoodBuy():
+      if offer.IsGoodBuy() and False:
         logging.info('%s is good buy' % str(offer))
         self.offers.append(offer.GetAccept())
+      elif offer.price < self.context.balance:
+        logging.info('%s is out of budget' % str(offer))
       else:
         logging.info('%s is bad buy' % str(offer))
 
@@ -178,18 +181,21 @@ class Game(object):
     logging.debug('Running ProvideTask')
     otheroffers = list(self.context.accepted)
     for accepted in self.context.accepted:
-      self.offers.append('provide[v0 v1 v2 v3 v4  (229 v3 v4 v0 ) '
-                         '(229 v0 v1 v2 ) (229 v3 v4 v0 ) (229 v3 v4 v0 ) '
-                         '(229 v2 v3 v4 ) (229 v4 v0 v1 ) (229 v0 v1 v2 ) '
-                         '(229 v3 v4 v0 ) (229 v0 v1 v2 ) (229 v4 v0 v1 ) '
-                         '%s ]' % accepted.offerid)
+      if self.context.playerid != accepted.provider:
+        continue
+      self.offers.append('provide[ %s  %s ]'
+                         % (relation.gen.problem(accepted.problemnumber,
+                                                 degree=5),
+                            accepted.offerid))
 
   def SolveTask(self):
     logging.debug('Running SolveTask')
 
   def OfferTask(self):
     logging.debug('Running OfferTask')
-    self.offers.append('offer[(229) 0.8710813713911519]')
+    self.offers.append('offer[( %d) %0.8f]'
+                       % (random.randint(2,300),
+                          1.0 - 0.00001*random.random()))
 
   def ReofferTask(self):
     logging.debug('Running ReofferTask')

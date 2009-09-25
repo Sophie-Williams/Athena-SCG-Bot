@@ -38,11 +38,12 @@ def problem(p_type, degree=100):
         y += '(%d %s %s %s ) ' % (p_type, var(i), var(j), var(k))
     return y
 
-import time
+if __name__ == '__main__':
+  import time
 
-s = time.time()
-# print s
-print problem(60, degree=10)
-e = time.time()
-#print e
-# print e - s
+  s = time.time()
+  # print s
+  print problem(60, degree=10)
+  e = time.time()
+  #print e
+  # print e - s

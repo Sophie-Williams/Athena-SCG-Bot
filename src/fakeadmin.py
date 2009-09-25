@@ -7,8 +7,28 @@ import urllib2
 gflags.DEFINE_string('hostport', '', 'Host:port to connect to')
 
 FLAGS = gflags.FLAGS
-
 data = """context[
+    config[
+
+    gamekind: "CSP"
+    turnduration: 60
+    mindecrement: 0.01
+    initacc: 100.0
+    objective: []
+    predicate: []
+    numrounds: 15
+    profitfactor: 1.0
+
+    otrounds: 2]
+    101
+    99.99694187
+    2
+    (offered[ 500 101 (179 ) 0.43837239] offered[ 502 101 (22 ) 1.0] )
+    (offered[ 504 100 (64 ) 0.641355797721469] offered[ 503 100 (44 ) 0.5900717715655577] )
+    (accepted[100 501 101 (135 ) -0.00305813] )
+    ()
+]"""
+data1 = """context[
     config[
 
     gamekind: "CSP"
