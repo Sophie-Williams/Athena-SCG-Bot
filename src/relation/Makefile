@@ -1,3 +1,6 @@
+
+
+CC = gcc
 CFLAGS = -std=c99 -O3 -fforce-addr -funroll-loops -frerun-cse-after-loop \
          -frerun-loop-opt -falign-functions=4 -Wall -pedantic
 

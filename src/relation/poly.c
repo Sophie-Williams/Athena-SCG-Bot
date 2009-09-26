@@ -64,16 +64,18 @@ poly3_add(poly3 *a, poly3 *b) {
     return a;
 }
 
-double
-poly3_get_maximum(poly3 *poly) {
-    double answer1 = 0.0;
-    double answer2 = 0.0;
+pair_double *
+poly3_get_maximum(poly3 *poly, pair_double *answer) {
     double a;
     double b;
     double c;
     double z;
 
+    assert(answer != NULL);
     assert(poly != NULL);
+
+    answer->first = 0.0;
+    answer->last = 0.0;
 
     a = poly->coeff3 * 3;
     b = poly->coeff2 * 2;
@@ -87,12 +89,12 @@ poly3_get_maximum(poly3 *poly) {
      */
 
     if (a == 0 && b == 0) {
-        return 0.0;
+        return answer;
     }
 
     z = pow(b, 2) - (4 * a * c);
     if (z < 0) {
-        return 0.0;
+        return answer;
     }
 
     /* corner case, if a == 0, this is a polynomial or degree 1 
@@ -101,21 +103,16 @@ poly3_get_maximum(poly3 *poly) {
      *     x = ((-c) / b)
      */
     if (a == 0) {
-        answer1 = -(((double)c) / b);
+        answer->first = -(((double)c) / b);
     }
     else {
-        answer1 = (-b + sqrt(z)) / (2 * a);
-        answer2 = (-b - sqrt(z)) / (2 * a);
+        answer->first = (-b + sqrt(z)) / (2 * a);
+        answer->last = (-b - sqrt(z)) / (2 * a);
     }
 
-    if (0 < answer1 && answer1 < 1) {
-        return answer1;
-    }
-    if (0 < answer2 && answer2 < 1) {
-        return answer2;
-    }
-
-    return 0.0;
+    answer->first = poly3_eval(poly, answer->first);
+    answer->last = poly3_eval(poly, answer->last);
+    return answer;
 }
 
 double
@@ -126,10 +123,30 @@ poly3_eval(poly3 *poly, double x) {
             x * poly->coeff1 + poly->coeff0);
 }
 
+/* Not your best sort */
+static void sort(double *list, int length) {
+    int i;
+    int j;
+    double temp;
+
+    for (i = 0; i < length - 1; i++) {
+        for (j = i + 1; j < length; j++) {
+            if (*(list+j) > *(list+i)) {
+                /* SWAP */
+                temp = *(list+j);
+                *(list+j) = *(list+i);
+                *(list+i) = temp;
+            }
+        }
+    }
+}
+
 double
 find_break_even(uint32_t rn, int rank) {
     poly3 *poly;
-    double answer;
+    pair_double possible;
+    double p[4];
+    int i;
 
     /* If odd, the break even is 1.0
      *
@@ -139,7 +156,14 @@ find_break_even(uint32_t rn, int rank) {
      * Even when added to other rows, this is true because the other rows'
      * 0th coefficient == 0
      */
-    if(rn % 2 == 1) {
+    if (rn % 2 == 1) {
+        return 1.0;
+    }
+
+    /*
+     * Optimized Prime!
+     */
+    if (rn >= 127) {
         return 1.0;
     }
 
@@ -148,9 +172,26 @@ find_break_even(uint32_t rn, int rank) {
     /* this usually means ENOMEM : no memory */
     assert(poly != NULL);
 
-    /* The break even is the value of the polynomial at its maximum. */
-    answer = poly3_eval(poly, poly3_get_maximum(poly));
+    poly3_get_maximum(poly, &possible);
+
+    /* All possible maximum values for [0,1]. It may include points from o */
+    p[0] = poly3_eval(poly, 0);
+    p[1] = poly3_eval(poly, 1);
+    p[2] = possible.first;
+    p[3] = possible.last;
+
     free(poly);
 
-    return answer;
+    /* The break even is the value of the polynomial at its maximum. */
+
+    sort(p, 4);
+
+    for (i = 0; i < 4; i++) {
+        if (!(p[i] > 1)) {
+            return p[i];
+        }
+    }
+
+    /* Every maximum was out of range, so normalize. */
+    return 1.0;
 }

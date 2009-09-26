@@ -28,6 +28,12 @@
 
 
 /* Data defs */
+
+typedef struct __pair_double {
+    double first;
+    double last;
+} pair_double;
+
 typedef struct __polynomial {
     int coefficient;
     int degree;
@@ -83,8 +89,8 @@ poly3_create(uint32_t rn);
 poly3 *
 poly3_add(poly3 *a, poly3 *b);
 
-double
-poly3_get_maximum(poly3 *poly);
+pair_double *
+poly3_get_maximum(poly3 *poly, pair_double *answer);
 
 double
 poly3_eval(poly3 *poly, double x);
