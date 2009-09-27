@@ -19,9 +19,7 @@ class Offer(object):
     return str(self)
 
   def IsGoodBuy(self):
-    return ((self.price < 0.5) or
-            (relation.relation.break_even(self.problemnumber, 3) < self.price))
-            
+    return (relation.relation.break_even(self.problemnumber, 3) < self.price)
 
   def GetReoffer(self, decrement=0.2):
     return 'reoffer[%d %0.8f]' % (self.offerid, self.price - decrement)

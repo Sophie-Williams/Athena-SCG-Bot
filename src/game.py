@@ -44,7 +44,7 @@ class Game(object):
       if self.context.playerid != accepted.provider:
         continue
       p = problem.Problem.GenerateProblem(accepted.problemnumber,
-                                          3, accepted.offerid)
+                                          6, accepted.offerid)
       self.replies.append(p.GetProvide())
 
   def SolveTask(self):
@@ -61,7 +61,7 @@ class Game(object):
     first = None
     for x in [1,2]:
       while True:
-        problemno = random.randint(2,256) 
+        problemno = random.randint(1,255) 
         if problemno in ouroffer or problemno == first:
           logging.debug('Can\'t offer %d, already offered by us' % problemno)
         elif problemno in theiroffer:
@@ -91,6 +91,7 @@ class Game(object):
     for o in self.replies:
       r += '    %s \n' % o
     r +=']\n'
+    logging.info('Reply Size: %s' % len(r))
     logging.info('Replying with: %s' % r)
     return r
 

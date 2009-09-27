@@ -50,8 +50,9 @@ class QString(str):
 
 # Some basic values
 String = QuotedString(quoteChar='"')
-Double = Combine(ZeroOrMore("-") + Word(nums) + "." + Word(nums))
 Integer = Word(nums)
+Double = Combine(ZeroOrMore("-") + Word(nums) + "." + Word(nums)
+                 +Group(ZeroOrMore('E'+ZeroOrMore('-')+Integer)))
 L = Suppress(LineEnd())
 List = ZeroOrMore
 
