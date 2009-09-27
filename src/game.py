@@ -13,6 +13,7 @@ class Game(object):
 
   def RunTasks(self):
     self.replies = []
+    logging.info('Current Balance: $%0.2f' % self.context.balance)
     logging.debug('Their Offered: %s' % str(self.context.their_offered))
     logging.debug('Our Offered: %s' % str(self.context.our_offered))
     logging.debug('Accepted: %s' % str(self.context.accepted))
@@ -67,7 +68,7 @@ class Game(object):
           logging.debug('Can\'t offer %d, already offered by them' % problemno)
         else:
           first = problemno
-          price = 1.0 - 0.00001*random.random()
+          price = 1.0 - 0.001*random.random()
           logging.debug('Offering %d for %0.8f' % (problemno, price))
           self.replies.append('offer[( %d) %0.8f]' % (problemno, price))
           break

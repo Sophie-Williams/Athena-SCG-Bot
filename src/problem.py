@@ -69,7 +69,6 @@ class Problem(object):
 
   @classmethod
   def GetProblemList(cls, parsedlist):
-    logging.info('Parsing: %s' % parsedlist)
     outputlist = []
     for problem in parsedlist:
       #buyer, list_of_vars, clauselist, challengeid, seller,
