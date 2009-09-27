@@ -10,25 +10,23 @@ int tests_run = 0;
     (((expected - DELTA) <= actual) && (actual <= (expected + DELTA)))
 
 static char *test_poly3_create() {
-    poly3 *p;
+    poly3 p;
     poly3 test;
 
-    p = poly3_create(10);
+    poly3_create(10, &p);
     POLY3(test, 0, -1, 1, 0); 
     mu_assert("RN 10 -> 001 + 011",
-              POLY3_EQUAL(*p, test));
-    free(p);
+              POLY3_EQUAL(p, test));
 
-    p = poly3_create(78);
+    poly3_create(78, &p);
     POLY3(test, 0, -2, 2, 0);
     mu_assert("RN 78 -> 101 011 010 001",
-              POLY3_EQUAL(*p, test));
+              POLY3_EQUAL(p, test));
 
-    p = poly3_create(255);
+    poly3_create(255, &p);
     POLY3(test, 0, 0, 0, 1);
     mu_assert("RN 255 -> ALL",
-              POLY3_EQUAL(*p, test));
-    free(p);
+              POLY3_EQUAL(p, test));
 
     return NULL;
 }
@@ -147,19 +145,18 @@ static char *all_tests() {
 void print_all_p3();
 void print_all_p3() {
     int i;
-    poly3 *p;
+    poly3 p;
 
     for (i = 1; i < 256; i++) {
-        p = poly3_create(i);
+        poly3_create(i, &p);
         printf("%03d %12lf\n", i, find_break_even(i, 3));
-        free(p);
     }
 }
 
 int main(int argc, char **argv) {
     char *result = all_tests();
 
-    print_all_p3();
+/*    print_all_p3(); */
 
     if (result != 0) {
         printf("%s\n", result);

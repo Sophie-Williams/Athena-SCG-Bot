@@ -83,7 +83,7 @@ typedef struct __poly3 {
                                  COEFF03_1, COEFF03_0)
 
 poly3 *
-poly3_create(uint32_t rn);
+poly3_create(uint32_t rn, poly3 *poly);
 
 
 poly3 *

@@ -4,39 +4,14 @@
 #include <math.h>
 
 #include "poly.h"
-#include "_relation.h"
 
 #define HAVE_NTH(x, nth) (((x >> nth) % 2) == 1)
 
 poly3 *
-poly3_create(uint32_t rn) {
-    poly3 *poly;
-/*    poly3 temp; */
+poly3_create(uint32_t rn, poly3 *poly) {
+    assert(poly != NULL);
 
-    poly = malloc(sizeof(poly3));
-    if (poly == NULL) {
-        return NULL;
-    }
-    
     POLY3(*poly, 0, 0, 0, 0);
-
-/* version 2
-    POLY3_SET_30(temp);
-    POLY3_MULTIPLY(temp, _q(rn, 3, 3));
-    poly3_add(poly, &temp);
-
-    POLY3_SET_21(temp);
-    POLY3_MULTIPLY(temp, _q(rn, 3, 2));
-    poly3_add(poly, &temp);
-
-    POLY3_SET_12(temp);
-    POLY3_MULTIPLY(temp, _q(rn, 3, 1));
-    poly3_add(poly, &temp);
-
-    POLY3_SET_03(temp);
-    POLY3_MULTIPLY(temp, _q(rn, 3, 0));
-    poly3_add(poly, &temp);
-*/
 
     if (HAVE_NTH(rn, 0)) POLY3_ADD_03(*poly);
     if (HAVE_NTH(rn, 1)) POLY3_ADD_12(*poly);
@@ -50,7 +25,9 @@ poly3_create(uint32_t rn) {
     return poly;
 }
 
-
+/* poly3_add : poly3 *a, poly3 *b
+ * Add the values of b into a.
+ */
 poly3 *
 poly3_add(poly3 *a, poly3 *b) {
     assert(a != NULL);
@@ -64,6 +41,7 @@ poly3_add(poly3 *a, poly3 *b) {
     return a;
 }
 
+/* Get the two possible maxima/minima. */
 pair_double *
 poly3_get_maximum(poly3 *poly, pair_double *answer) {
     double a;
@@ -123,7 +101,7 @@ poly3_eval(poly3 *poly, double x) {
             x * poly->coeff1 + poly->coeff0);
 }
 
-/* Not your best sort */
+/* TODO Not your best sort */
 static void sort(double *list, int length) {
     int i;
     int j;
@@ -143,7 +121,7 @@ static void sort(double *list, int length) {
 
 double
 find_break_even(uint32_t rn, int rank) {
-    poly3 *poly;
+    poly3 poly;
     pair_double possible;
     double p[4];
     int i;
@@ -167,20 +145,15 @@ find_break_even(uint32_t rn, int rank) {
         return 1.0;
     }
 
-    poly = poly3_create(rn);
+    poly3_create(rn, &poly);
 
-    /* this usually means ENOMEM : no memory */
-    assert(poly != NULL);
-
-    poly3_get_maximum(poly, &possible);
+    poly3_get_maximum(&poly, &possible);
 
     /* All possible maximum values for [0,1]. It may include points from o */
-    p[0] = poly3_eval(poly, 0);
-    p[1] = poly3_eval(poly, 1);
+    p[0] = poly3_eval(&poly, 0);
+    p[1] = poly3_eval(&poly, 1);
     p[2] = possible.first;
     p[3] = possible.last;
-
-    free(poly);
 
     /* The break even is the value of the polynomial at its maximum. */
 
