@@ -1,0 +1,10 @@
+To run,
+
+python ./athena.py [port]
+./athena.py [port]
+
+Dependencies are:
+    webpy (http://webpy.org/)
+    pyparsing (http://sourceforge.net/projects/pyparsing/)
+
+There is a shared object (which is has a Python interface) built on Linux.
