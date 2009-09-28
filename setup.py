@@ -21,6 +21,6 @@ setup(
     cmdclass={'build_ext': build_ext},
     package_dir={'athena': 'src', 'relation': 'src/relation'},
     packages=['athena', 'relation'],
-    requires=['Pyrex (>0.9.8)', 'pyparsing', 'web.py'],
+    requires=['Pyrex (>0.9.8)', 'pyparsing', 'gflags', 'web.py'],
     scripts=['scripts/athena.py'],
 )
