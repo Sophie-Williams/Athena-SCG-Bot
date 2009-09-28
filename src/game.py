@@ -23,8 +23,6 @@ class Game(object):
               self.ProvideTask, self.SolveTask]:
       x()
 
-  #TODO(wan): Actually accept good buys
-  #TODO(lee): Actually be able to solve good buys
   def AcceptTask(self):
     logging.debug('Running AcceptTask')
     otheroffers = list(self.context.their_offered)
@@ -51,7 +49,7 @@ class Game(object):
       if self.context.playerid != accepted.provider:
         continue
       p = problem.Problem.GenerateProblem(accepted.problemnumber,
-                                          6, accepted.offerid)
+                                          15, accepted.offerid)
       self.replies.append(p.GetProvide())
 
   def SolveTask(self):
@@ -68,28 +66,27 @@ class Game(object):
     first = None
     for x in [1,2]:
       while True:
-        problemno = random.randint(1,255) 
+        problemno = random.choice([22,6,8,10,12,14,16,18,20,24,26,28])
         if problemno in ouroffer or problemno == first:
           logging.debug('Can\'t offer %d, already offered by us' % problemno)
         elif problemno in theiroffer:
           logging.debug('Can\'t offer %d, already offered by them' % problemno)
         else:
           first = problemno
-          price = 1.0 - 0.001*random.random()
+          price = 0.5 - 1*10**-8
           logging.debug('Offering %d for %0.8f' % (problemno, price))
           self.replies.append('offer[( %d) %0.8f]' % (problemno, price))
           break
-                          
+
+  def HaveAcceptedOffer(self):
+    a = [x.actedon for x in self.context.their_offered]
+    return True in a
 
   def ReofferTask(self):
     logging.debug('Running ReofferTask')
-    otheroffers = (list(self.context.their_offered)
-                   + list(self.context.our_offered))
-    a = [x.actedon for x in self.context.their_offered]
-    if True in a:
-      return
-    else:
-      for offer in otheroffers:
+    if not self.HaveAcceptedOffer():
+      for offer in self.context.their_offered:
+        logging.debug('Reoffering their id %d' % offer.offerid)
         self.replies.append(offer.GetReoffer())
 
   def GenerateReply(self):

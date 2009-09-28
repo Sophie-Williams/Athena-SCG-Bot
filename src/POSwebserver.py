@@ -17,6 +17,7 @@ import types
 import urllib
 import uuid
 import gflags
+import logging
 
 import game
 
@@ -38,6 +39,9 @@ requests = {}
 skips = {}
 bytes = 0
 
+logging.basicConfig(level=logging.DEBUG,
+                    format=('%(asctime)s %(filename)s %(lineno)s'
+                            ' %(levelname)s %(message)s'))
 
 def htc(m):
   return chr(int(m.group(1),16))
@@ -57,23 +61,11 @@ class http_server(asyncore.dispatcher):
   def __init__(self, ip, port):
     self.ip= ip
     self.port = port
-    self.logfile = open('log', 'a')
 
     asyncore.dispatcher.__init__(self)
     self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
     self.bind((ip, port))
     self.listen(5)
-
-  def log(self, msg, console=True):
-    """Write a log line."""
-
-    l = '%s %s %s\n' %(datetime.datetime.now(), repr(self.addr), msg)
-    
-    if console:
-      sys.stdout.write(l)
-
-    self.logfile.write(l)
-    self.logfile.flush()
 
   def writable(self):
     return 0
@@ -89,16 +81,15 @@ class http_server(asyncore.dispatcher):
 
   def handle_accept(self):
     conn, addr = self.accept()
-    handler = http_handler(conn, addr, self.log)
+    handler = http_handler(conn, addr)
 
 
 class http_handler(asyncore.dispatcher):
   """Handle a single connection"""
 
-  def __init__(self, conn, addr, log):
+  def __init__(self, conn, addr):
     asyncore.dispatcher.__init__(self, sock=conn)
     self.addr = addr
-    self.log = log
 
     self.buffer = ''
 
@@ -122,7 +113,7 @@ class http_handler(asyncore.dispatcher):
 
     for line in rq.split('\n'):
       line = line.rstrip('\r')
-      self.log('REQUEST %s' % line, console=FLAGS.showrequest)
+      logging.debug('REQUEST %s' % line)
 
       try:
         if line.startswith('GET'):
@@ -150,11 +141,10 @@ class http_handler(asyncore.dispatcher):
 
 
     if file:
-      self.log('%s %s' %(method, file))
+      logging.debug('%s %s' %(method, file))
 
-      if method == 'POST' and post_data:
-        for l in post_data.split('\r\n'):
-          self.log('DATA %s' % l, console=FLAGS.showpost)
+      if method == 'POST' and post_data and FLAGS.showrequest:
+          logging.debug('POSTDATA %s' % l)
 
       # Top URL
       if file == '/player':
@@ -163,7 +153,7 @@ class http_handler(asyncore.dispatcher):
         self.senderror(404, '%s file not found' % file)
         self.close()
 
-    self.log('%d bytes queued' % len(self.buffer))
+    logging.debug('%d bytes queued' % len(self.buffer))
 
   def writable(self):
     return len(self.buffer) > 0
@@ -173,10 +163,14 @@ class http_handler(asyncore.dispatcher):
 
   def handleurl_player(self, post_data):
     """The top level page."""
+    post_data = post_data.replace('\r', '')
+    data = ''
     try:
-      post_data = post_data.replace('\r', '')
       data = game.Game.Play(post_data)
     except Exception, e:
+      logging.exception('Caught exception during gameplay')
+      open('/tmp/gameplay-exception', 'w').write('%s\n\n-----\n\n%s'
+                                                 % (post_data, data))
       self.senderror(500, 'Something Blew Up', str(e))
       self.close()
       return
@@ -216,13 +210,12 @@ class http_handler(asyncore.dispatcher):
     self.buffer += ('<html><head><title>MP3 server</title></head>'
                      '<body>%s</body>'
                      % fullmsg)
-    self.log('Sent %d error' % number)
+    logging.debug('Sent %d error' % number)
 
   def sendheaders(self, headers):
     """Send HTTP response headers."""
-
-    for l in headers.split('\r\n'):
-      self.log('RESPONSE %s' % l, console=FLAGS.showresponse)
+    if FLAGS.showresponse:
+      logging.debug('RESPONSE %s' % headers)
 
     self.buffer += headers
   
@@ -235,7 +228,7 @@ class http_handler(asyncore.dispatcher):
 
       self.buffer = self.buffer[sent:]
       if len(self.buffer) == 0:
-        self.log('HTTP request complete')
+        logging.debug('HTTP request complete')
 
         self.close()
 
@@ -257,19 +250,12 @@ def main(argv):
   server = http_server(FLAGS.ip, FLAGS.port)
 
   # Start the web server, which takes over this thread
-  print '%s Started listening on port %s' %(datetime.datetime.now(),
-                                            FLAGS.port)
+  logging.info('Started listening on port %d' % FLAGS.port)
 
   last_summary = time.time()
   while running:
     last_event = time.time()
     asyncore.loop(timeout=10.0, count=1)
-
-    if time.time() - last_event > 9.0:
-      # We are idle
-      print '%s ...' % datetime.datetime.now()
-      
-
 
 if __name__ == "__main__":
   main(sys.argv)

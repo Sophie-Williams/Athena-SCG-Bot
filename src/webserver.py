@@ -15,7 +15,9 @@ urls = (
 app = web.application(urls, globals())
 web.webapi.config.debug = False
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG,
+                    format=('%(asctime)s %(filename)s %(lineno)s'
+                            ' %(levelname)s %(message)s'))
 
 class RegisterHandler(object):
   def GET(self):
