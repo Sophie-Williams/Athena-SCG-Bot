@@ -12,6 +12,12 @@ poly_test: poly.o _relation.o poly_test.c
 poly.o: poly.c
 	$(CC) $(CFLAGS) -lm -fPIC -I. -c -o $@ poly.c
 
+solve_test: solve.o solve_test.c
+	$(CC) $(CFLAGS) -lm solve.o solve_test.c -o solve_test
+
+solve.o: solve.c
+	$(CC) $(CFLAGS) -c -o solve.o solve.c
+
 %.so: %.o
 	$(CC) $(CFLAGS) -shared $< -o $@
 
@@ -23,10 +29,10 @@ poly.o: poly.c
 
 all: relation.so
 
-test: all poly_test
+test: all poly_test solve_test
 	python tests.py
 	./poly_test
-
+	./solve_test
 
 clean:
-	$(RM) relation.c *.o *.so poly_test
+	$(RM) relation.c *.o *.so poly_test solve_test
