@@ -37,6 +37,13 @@ class Game(object):
       else:
         logging.info('%s is bad buy' % str(offer))
 
+    a = [x.actedon for x in self.context.their_offered]
+    if True not in a:
+      for offer in self.context.their_offered:
+        if offer.AvoidReoffer():
+          logging.info('%s shouldn\'t reoffer' % str(offer))
+          self.replies.append(offer.GetAccept())
+
   def ProvideTask(self):
     logging.debug('Running ProvideTask')
     otheroffers = list(self.context.accepted)
