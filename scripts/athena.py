@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
-from athena.webserver import app
+import sys
+#from athena.webserver import app
+from athena.POSwebserver import main
 
 if __name__ == '__main__':
-  app.run()
+  main(sys.argv)
