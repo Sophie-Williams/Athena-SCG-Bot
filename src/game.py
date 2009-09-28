@@ -49,7 +49,7 @@ class Game(object):
       if self.context.playerid != accepted.provider:
         continue
       p = problem.Problem.GenerateProblem(accepted.problemnumber,
-                                          15, accepted.offerid)
+                                          16, accepted.offerid)
       self.replies.append(p.GetProvide())
 
   def SolveTask(self):
@@ -66,6 +66,7 @@ class Game(object):
     first = None
     for x in [1,2]:
       while True:
+        # We should pick better relation numbers here
         problemno = random.choice([22,6,8,10,12,14,16,18,20,24,26,28])
         if problemno in ouroffer or problemno == first:
           logging.debug('Can\'t offer %d, already offered by us' % problemno)
