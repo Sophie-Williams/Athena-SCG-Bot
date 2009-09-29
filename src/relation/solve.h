@@ -29,15 +29,34 @@ typedef struct __clause {
 typedef struct __problem {
     char **vars;
     int num_vars;
-    clause **clauses;
+    clause *clauses;
     int num_clauses;
 } problem;
+
+problem *
+problem_create(char **vars, int num_vars, clause *clauses, int num_clauses);
+
+void
+problem_set(problem *problem, char **vars, int num_vars, clause *clauses,
+            int num_clauses);
+
+void
+problem_delete(problem *problem);
 
 solution *
 solution_create(problem *problem);
 
 void
-solution_delete(solution *s);
+solution_delete(solution *solution);
+
+clause *
+clause_create(uint32_t rn, int rank, int *vars);
+
+void
+clause_set(clause *clause, uint32_t rn, int rank, int *vars);
+
+void
+clause_delete(clause *clause);
 
 int
 solution_get(solution *solution, int name);

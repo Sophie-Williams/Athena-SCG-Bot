@@ -15,3 +15,4 @@ project/Admin/files/history/*
 scaffold
 build
 src/relation/relation.c
+*_test

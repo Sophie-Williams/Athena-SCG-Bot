@@ -4,7 +4,7 @@ CC = gcc
 CFLAGS = -std=c99 -O3 -fforce-addr -funroll-loops -frerun-cse-after-loop \
          -frerun-loop-opt -falign-functions=4 -Wall -pedantic
 
-relation.so: relation.o _relation.o poly.o
+relation.so: relation.o _relation.o poly.o solve.o
 
 poly_test: poly.o _relation.o poly_test.c
 	$(CC) $(CFLAGS) -lm -I. -o poly_test poly.o _relation.o poly_test.c

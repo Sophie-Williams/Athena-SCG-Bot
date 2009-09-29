@@ -2,7 +2,6 @@ import relation
 import gen
 import unittest
 
-
 class TestRelation(unittest.TestCase):
 
   def test_get_magic_number(self):
@@ -152,6 +151,16 @@ class TestRelation(unittest.TestCase):
     f = gen.permute3
     # for x in f(450):
     #   x
+
+  def test_solve(self):
+    clauses = [
+      [22, 'v1', 'v2', 'v3'],
+      [22, 'v2', 'v3', 'v4'],
+      [22, 'v3', 'v4', 'v5'],
+    ]
+    vars = ['v1', 'v2', 'v3', 'v4', 'v5']
+    c_p = relation.Problem(vars, clauses)
+    print c_p.solve()
 
 if __name__ == '__main__':
   unittest.main()
