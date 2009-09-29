@@ -29,7 +29,7 @@ class Offer(object):
     else:
       bep = relation.break_even(self.problemnumber, 3)
       logging.debug('Break even for %d is %08f' % (self.problemnumber, bep))
-      return (bep > self.price) or (abs(bep-self.price) < 0.25)
+      return (bep > self.price)
 
   def AvoidReoffer(self):
     return (self.price - 0.1) < 0

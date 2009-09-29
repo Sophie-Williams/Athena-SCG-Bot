@@ -14,7 +14,7 @@ class Game(object):
 
   def RunTasks(self):
     self.replies = []
-    logging.info('Current Balance: $%0.2f' % self.context.balance)
+    logging.info('Current Balance: $%0.4f' % self.context.balance)
     #logging.debug('Their Offered: %s' % str(self.context.their_offered))
     #logging.debug('Our Offered: %s' % str(self.context.our_offered))
     #logging.debug('Accepted: %s' % str(self.context.accepted))
@@ -50,7 +50,7 @@ class Game(object):
       if self.context.playerid != accepted.provider:
         continue
       p = problem.Problem.GenerateProblem(accepted.problemnumber,
-                                          20, accepted.offerid)
+                                          25, accepted.offerid)
       self.replies.append(p.GetProvide())
 
   def SolveTask(self):
@@ -75,10 +75,11 @@ class Game(object):
         else:
           first = problemno
           bep = relation.break_even(problemno, 3)
-          if bep + 0.2 >= 1:
+          markup=0.5
+          if bep + markup >= 1:
             price = 1
           else:
-            price = bep+0.2
+            price = bep+markup
           logging.debug('Offering %d for %0.8f' % (problemno, price))
           self.replies.append('offer[( %d) %0.8f]' % (problemno, price))
           break
