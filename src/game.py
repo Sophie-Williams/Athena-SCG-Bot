@@ -5,6 +5,7 @@ import random
 import playercontext
 import problem
 import proxysolver
+import relation.relation
 
 class Game(object):
   def __init__(self, initialdata):
@@ -55,8 +56,7 @@ class Game(object):
   def SolveTask(self):
     logging.debug('Running SolveTask')
     for problem in self.context.provided:
-      problem.Solve()
-      self.replies.append(proxysolver.ProxySolve(problem))
+      self.replies.append(problem.Solve())
 
   def OfferTask(self):
     logging.debug('Running OfferTask')
@@ -67,14 +67,14 @@ class Game(object):
     for x in [1,2]:
       while True:
         # We should pick better relation numbers here
-        problemno = random.choice([22,6,8,10,12,14,16,18,20,24,26,28])
+        problemno = random.randint(1,255)
         if problemno in ouroffer or problemno == first:
           logging.debug('Can\'t offer %d, already offered by us' % problemno)
         elif problemno in theiroffer:
           logging.debug('Can\'t offer %d, already offered by them' % problemno)
         else:
           first = problemno
-          price = 0.5 - 1*10**-8
+          price = 1
           logging.debug('Offering %d for %0.8f' % (problemno, price))
           self.replies.append('offer[( %d) %0.8f]' % (problemno, price))
           break

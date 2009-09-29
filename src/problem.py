@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 import logging
 
+import relation
 import relation.gen
+
+import csptree
 
 class Clause(object):
   def __init__(self, number, list_of_vars):
@@ -13,6 +16,9 @@ class Clause(object):
 
   def __repr__(self):
     return str(self)
+
+  def GetTuple(self):
+    return tuple([self.problemnumber]+self.vars)
 
   def GetProvideBlob(self):
     return '(%d %s )' % (self.problemnumber, ' '.join(self.vars))
@@ -58,6 +64,21 @@ class Problem(object):
 
   def Solve(self):
     logging.info('Solving offer %d' % self.challengeid)
+    if self.problemnumber%2:
+      logging.info('Special Case Solve: All False!')
+      values = [0]*len(self.vars)
+    elif self.problemnumber >= 128:
+      logging.info('Special Case Solve: All True!')
+      values = [1]*len(self.vars)
+    else:
+      c_p = relation.Problem(tuple(self.vars),
+                            [x.GetTuple() for x in self.clauses])
+      fsat, values = c_p.solve()
+      logging.info('Solved %d out of %d clauses' % (fsat, len(self.clauses)))
+      logging.info('Values are: %s' % str(values))
+
+    s = csptree.csptree.CreateSolution(self.vars, values)
+    return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
   @classmethod
   def GenerateProblem(cls, problemnumber, degree, offerid):
