@@ -4,8 +4,15 @@
 #include "_relation.h"
 
 
+/*
+ * defined in relation_consts.h
+ * MASKS = { 0x1, 0x3, 0xF, 0xFF, 0xFFFF, 0xFFFFFFFF }
+ */
 uint32_t
 _get_mask(int rank) {
+    assert(0 < rank);
+    assert(rank <= 5);
+
     return MASKS[rank];
 }
 

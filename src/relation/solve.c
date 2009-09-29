@@ -102,14 +102,17 @@ solution_delete(solution *s) {
 clause *
 clause_create(uint32_t rn, int rank, int *vars) {
     clause *c;
+    register size_t size;
 
     assert(vars != NULL);
+
+    size = sizeof(int) * rank;
 
     c = malloc(sizeof(clause));
     c->rn = rn;
     c->rank = rank;
-    c->vars = malloc(sizeof(int) * rank);
-    memcpy(c->vars, vars, sizeof(int) * rank);
+    c->vars = malloc(size);
+    memcpy(c->vars, vars, size);
 
     return c;
 }

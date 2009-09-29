@@ -82,19 +82,30 @@ typedef struct __poly3 {
 #define POLY3_SET_03(p) POLY3(p, COEFF03_3, COEFF03_2, \
                                  COEFF03_1, COEFF03_0)
 
+/* Create a polynomial of the third degree.
+ */
 poly3 *
 poly3_create(uint32_t rn, poly3 *poly);
 
-
+/* Add `b' to `a' and store in `a'
+ */
 poly3 *
 poly3_add(poly3 *a, poly3 *b);
 
+/* Get the maximum value of the polynomial within the range [0,1]
+ */
 pair_double *
 poly3_get_maximum(poly3 *poly, pair_double *answer);
 
+/* Evalutate the polynomial (of the third degree) with the given value
+ * as the variable.
+ */
 double
 poly3_eval(poly3 *poly, double x);
 
+/* Compute the break-even price of the polynomial.
+ * This is actually the minimum satisfiability.
+ */
 double
 find_break_even(uint32_t rn, int rank);
 

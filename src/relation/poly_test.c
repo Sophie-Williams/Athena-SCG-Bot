@@ -33,6 +33,7 @@ static char *test_poly3_create() {
 
 
 static char *test_poly3_get_maximum() {
+    pair_double pd;
     poly3 p1;
     poly3 p2;
     poly3 p3;
@@ -44,18 +45,23 @@ static char *test_poly3_get_maximum() {
     POLY3(p3, -1, 1, 0, 0);
     POLY3(p4, 1, 0, 0, 0);
     POLY3(p5, 0, -1, 1, 0);
-/*
+
+    poly3_get_maximum(&p1, &pd);
     mu_assert("The 03 case. (three 0's)",
-              IN_RANGE(poly3_get_maximum(&p1), 0.0));
+              IN_RANGE(pd.first, 0.0) || IN_RANGE(pd.last, 0.0));
+
+    poly3_get_maximum(&p2, &pd);
     mu_assert("The 12 case. (two 0's one 1's)",
-              IN_RANGE(poly3_get_maximum(&p2), 0.3333333));
+              IN_RANGE(pd.first, 0.148148) || IN_RANGE(pd.last, 0.148148));
+    poly3_get_maximum(&p3, &pd);
     mu_assert("The 21 case. (one 0's two 1's)",
-              IN_RANGE(poly3_get_maximum(&p3), 0.6666666));
+              IN_RANGE(pd.first, 0.148148) || IN_RANGE(pd.last, 0.148148));
+    poly3_get_maximum(&p4, &pd);
     mu_assert("The 30 case. (three 1's)",
-              IN_RANGE(poly3_get_maximum(&p4), 0.0));
+              IN_RANGE(pd.first, 0.0) || IN_RANGE(pd.last, 0.0));
+    poly3_get_maximum(&p5, &pd);
     mu_assert("10 -> 2^3 + 2^1 -> 001, 011",
-              IN_RANGE(poly3_get_maximum(&p5), 0.5));
-*/
+              IN_RANGE(pd.first, 0.25) || IN_RANGE(pd.last, 0.25));
     return NULL;
 }
 
@@ -88,8 +94,14 @@ static char *test_find_break_even() {
     uint32_t rn;
 
     /* Odd relationship numbers all have the same deal.
-     * XXX is this true? */
+     * Set everything to false. */
     for (rn = 1; rn < 256; rn += 2) {
+        mu_assert("broke, damn it",
+                  IN_RANGE(find_break_even(rn, 3), 1.0));
+    }
+    /* Relationship numbers above 128 all have the same deal.
+     * Set everything to true. */
+    for (rn = 128; rn < 256; rn++) {
         mu_assert("broke, damn it",
                   IN_RANGE(find_break_even(rn, 3), 1.0));
     }
@@ -156,7 +168,7 @@ void print_all_p3() {
 int main(int argc, char **argv) {
     char *result = all_tests();
 
-/*    print_all_p3(); */
+/*    print_all_p3();  */
 
     if (result != 0) {
         printf("%s\n", result);

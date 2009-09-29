@@ -116,29 +116,15 @@ cdef extern int __builtin_popcountl(unsigned long)
 # MAGIC_NUMBERS = ( 0x55555555, 0x33333333, 0x0F0F0F0F,
 #                   0x00FF00FF, 0x0000FFFF )
 def get_magic_number(int rank, int var_p, int value):
-#     cdef uint32_t mask
-#     cdef uint32_t col
-#     mask = get_mask(rank)
-#     col = ((MAGIC_NUMBERS[var_p]) & mask)
-#     if value == 1:
-#         return mask ^ col
-#     return col
     return _get_magic_number(rank, var_p, value)
 
 # defined in relation_consts.h
 # MASKS = ( 0x1, 0x3, 0xF, 0xFF, 0xFFFF, 0xFFFFFFFF )
 def get_mask(int rank):
-    # get_mask(rank) = (2 ** (2 ** rank)) - 1
-    # since rank is in the range [1, 5], the values are precomputed
-#     return MASKS[rank]
     return _get_mask(rank)
 
 
 def is_irrelevant(uint32_t rn, int rank, int var_p):
-    # True if the variable at a given position is irrelevant to the relation
-#     cdef uint32_t m
-#     m = get_magic_number(rank, var_p, 1)
-#     return ((rn & m) >> (1 << var_p)) == (rn & (~m))
     return _is_irrelevant(rn, rank, var_p)
 
 
@@ -147,18 +133,6 @@ def is_irrelevant(uint32_t rn, int rank, int var_p):
 # @param rank rank of the given relation
 # @return The number of relevant variables in the given relation
 def num_relevant_variables(uint32_t rn, int rank):
-#     # checkRank(rank);
-#     # checkRelationNumber(rn, rank);
-#    
-#     cdef int rel_vars
-#     cdef int i
-# 
-#     rel_vars = rank
-# 
-#     for 0 <= i < rank:
-#         if is_irrelevant(rn, rank, i):
-#             rel_vars -= 1
-#     return rel_vars
     return _num_relevant_variables(rn, rank)
 
 
@@ -170,10 +144,6 @@ def num_relevant_variables(uint32_t rn, int rank):
 #         1 if the given relation force the given variable to 1
 #         -1 given relation doesn't force the given variable
 def is_forced(uint32_t rn, int rank, int var_p):
-    # checkRank(rank);
-    # checkRelationNumber(rn, rank);
-    # checkVariablePosition(var_p, rank);
-    
     cdef uint32_t m
     cdef uint32_t rm
 
@@ -512,25 +482,9 @@ def generate_variables(uint32_t amount):
     return x
 
 
-def create_prob(uint32_t rn, int rank):
-#    vars = [v for v in generate_variables(1140)
-    return
-#     /** Create a random problem instance of the given ProblemType */
-#     Problem createProb(ProblemType t){
-#         final List<Integer> type = t.getType();
-#         return new Problem(vars, 
-#                 List.buildlist(new List.Build<Clause>(){
-#                     public Clause build(int i){
-#                         int v = Util.random(vars.length());
-#                         return new Clause(type.lookup(Util.random(type.length())),
-#                                 List.create(
-#                                         vars.lookup(v),
-#                                         vars.lookup((v+1)%vars.length()),
-#                                         vars.lookup((v+2)%vars.length())));
-#                     }
-#                 }, NUM_CLAUSES));
-#     }
-# 
+# def create_prob(uint32_t rn, int rank):
+#     vars = [v for v in generate_variables(1140)
+#     return
 
 
 cdef class Clause:
@@ -560,6 +514,9 @@ cdef class Problem:
 
         tmp = <clause *> malloc(sizeof(clause) * len(clauses))
 
+        # For all clauses, which is a list of the form
+        # [ <relation_number>, <var>, ... ]
+        # set it at the index `i'
         i = 0
         for c in clauses:
             j = 0
@@ -569,6 +526,7 @@ cdef class Problem:
             clause_set(tmp+i, c[0], j, var_tmp)
             i += 1
 
+        # Allocate spaces for the pointers to the variable names.
         c_vars = <char **> malloc(sizeof(char *) * len(vars))
 
         j = 0
@@ -587,6 +545,7 @@ cdef class Problem:
         s = solution_create(self.p)
         solve(self.p, s)
 
+        # copy over the solution.
         ret = []
         for 0 <= i < s[0].size:
             ret.append((s[0].values)[i])
@@ -599,13 +558,3 @@ cdef class Problem:
 
     def __dealloc__(self):
         problem_delete(self.p)
-
-
-# cdef class Solution:
-#     cdef solution *s
-# 
-#     def __cinit__(self, pr):
-#         self.s = solution_create(<problem *>pr.p)
-# 
-#     def __dealloc__(self):
-#         solution_delete(self.s)
