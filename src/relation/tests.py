@@ -154,13 +154,45 @@ class TestRelation(unittest.TestCase):
 
   def test_solve(self):
     clauses = [
-      [22, 'v1', 'v2', 'v3'],
-      [22, 'v2', 'v3', 'v4'],
-      [22, 'v3', 'v4', 'v5'],
+      (22, 'v1', 'v2', 'v3'),
+      (22, 'v2', 'v3', 'v4'),
+      (22, 'v3', 'v4', 'v5'),
     ]
-    vars = ['v1', 'v2', 'v3', 'v4', 'v5']
+    vars = ('v1', 'v2', 'v3', 'v4', 'v5')
     c_p = relation.Problem(vars, clauses)
-    print c_p.solve()
+    fsat, values = c_p.solve()
+
+    self.assertEquals(fsat, 3)
+    self.assertTrue(values in [
+        [0, 0, 1, 0, 0],
+        [1, 0, 0, 1, 0],
+        [1, 0, 0, 0, 1],
+        [0, 1, 0, 0, 1],
+    ])
+
+    clauses = [
+      (8, 'v0', 'v1', 'v2',),
+      (8, 'v1', 'v2', 'v3',),
+      (8, 'v1', 'v2', 'v3',),
+      (8, 'v2', 'v3', 'v4',),
+      (8, 'v2', 'v3', 'v4',),
+      (8, 'v1', 'v2', 'v3',),
+      (8, 'v1', 'v2', 'v3',),
+      (8, 'v2', 'v3', 'v4',),
+      (8, 'v0', 'v1', 'v2',),
+      (8, 'v1', 'v2', 'v3',),
+    ]
+    vars = ('v0', 'v1', 'v2', 'v3', 'v4')
+    c_p = relation.Problem(vars, clauses)
+    fsat, values = c_p.solve()
+
+    self.assertEquals(fsat, 5)
+    self.assertTrue(values in [
+        [1, 1, 1, 0, 1],
+        [1, 1, 1, 0, 0],
+        [0, 1, 1, 0, 1],
+        [0, 1, 1, 0, 0],
+    ])
 
 if __name__ == '__main__':
   unittest.main()

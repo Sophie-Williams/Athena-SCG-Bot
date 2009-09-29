@@ -10,7 +10,6 @@ int tests_run = 0;
 static char *test_solve() {
     problem *p;
     solution *s;
-    int i;
 
     p = malloc(sizeof(problem));
     p->vars = malloc(sizeof(char *) * 5);
@@ -43,11 +42,8 @@ static char *test_solve() {
     s = solution_create(p);
     solve(p, s);
 
-    for (i = 0; i < s->size; i++) {
-        printf("%d\n", *(s->values+i));
-    }
-
-    printf("fsat: %d\n", fsat(p, s));
+    solution_delete(s);
+    problem_delete(p);
 
     return NULL;
 }
@@ -137,10 +133,6 @@ static char *all_tests() {
 
 int main(int argc, char **argv) {
     char *result = all_tests();
-    
-    srand(time(NULL));
-
-    printf("%d\n", rand());
 
     if (result != 0) {
         printf("%s\n", result);

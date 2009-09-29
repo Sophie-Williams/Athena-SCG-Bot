@@ -61,16 +61,21 @@ clause_delete(clause *clause);
 int
 solution_get(solution *solution, int name);
 
+/* Returns the number of satisfied clauses. */
 int
 fsat(problem *problem, solution *solution);
 
+/* Tries to solve the problem and puts the answer in solution. Which should
+ * have been created by solution_create. */
 solution *
 solve(problem *problem, solution *solution);
 
+/* Return true or false based on the assignment. */
 int
 solve_value(clause *clause, int assignment);
 
+/* Convert the values into the row number. */
 int
-to_value(int *values, int rank);
+to_row_number(int *values, int rank);
 
 #endif

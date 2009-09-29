@@ -43,6 +43,7 @@ problem_create(char **vars, int num_vars, clause *clauses, int num_clauses) {
     return p;
 }
 
+/* Set values for a problem. */
 void
 problem_set(problem *problem, char **vars, int num_vars, clause *clauses,
             int num_clauses) {
@@ -87,6 +88,8 @@ solution_create(problem *problem) {
         return NULL;
     }
 
+    memset(s->values, '\0', sizeof(int) * problem->num_vars);
+
     return s;
 }
 
@@ -122,6 +125,11 @@ clause_set(clause *clause, uint32_t rn, int rank, int *vars) {
     clause->rn = rn;
     clause->rank = rank;
     clause->vars = malloc(size);
+
+    if (clause->vars == NULL) {
+        perror("malloc");
+        return;
+    }
     memcpy(clause->vars, vars, size);
 }
 
@@ -143,6 +151,7 @@ solution_get(solution *solution, int name) {
 
 /* END constructor/destructor */
 
+/* Returns the number of satisfied clauses. */
 int
 fsat(problem *problem, solution *solution) {
     int i, j;
@@ -156,11 +165,11 @@ fsat(problem *problem, solution *solution) {
     /* for c in clauses */
     for (i = 0; i < problem->num_clauses; i++) {
         c = problem->clauses+i;
-        /*  */
+        /* copy the values from the clause */
         for (j = 0; j < c->rank; j++) {
-            t_v[j] = *(solution->values + *(c->vars+j));
+            t_v[j] = *(solution->values + (c->vars)[j]);
         }
-        if (solve_value(c, to_value(t_v, c->rank))) {
+        if (solve_value(c, to_row_number(t_v, c->rank))) {
             count++;
         }
     }
@@ -169,7 +178,38 @@ fsat(problem *problem, solution *solution) {
 
 solution *
 solve(problem *p, solution *s) {
-    return random_solve(p, s);
+    int i;
+    int max;
+    int temp;
+    size_t size;
+    solution *final;
+    
+    /* Seed the random number generator. */
+    srand(time(NULL));
+
+    assert(s != NULL);
+
+    max = 0;
+    size = sizeof(int) * s->size;
+
+    if ((final = solution_create(p)) == NULL) {
+        perror("malloc");
+        return NULL;
+    }
+
+    for (i = 0; i < 5000000; i++) {
+        random_solve(p, s);
+        temp = fsat(p, s);
+        if (temp > max) {
+            max = temp;
+            memcpy(final->values, s->values, size);
+        }
+    }
+
+    memcpy(s->values, final->values, size);
+    solution_delete(final);
+
+    return s;
 }
 
 static solution *
@@ -179,18 +219,14 @@ random_solve(problem *problem, solution *solution) {
     assert(problem != NULL);
     assert(solution != NULL);
 
-    /* Seed the random number generator. */
-    srand(time(NULL));
-
     for (i = 0; i < problem->num_vars; i++) {
-        *(solution->values + i) = RAND2;
+        *(solution->values+i) = RAND2;
     }
 
     return solution;
 }
 
-/*
- * assignment is the row number 0-indexed == binary value.
+/* assignment is the row number 0-indexed == binary value.
  * e.g. rank 3
  * 000 -> 0, 001 -> 1, 010 -> 2, ..., 111 -> 7
  */
@@ -202,14 +238,16 @@ solve_value(clause *clause, int assignment) {
     return (clause->rn & (1 << assignment)) > 0;
 }
 
-
 int
-to_value(int *values, int rank) {
+to_row_number(int *values, int rank) {
     int i;
     int ret = 0;
 
+    assert(values != NULL);
+
     for(i = 0; i < rank; i++) {
-        ret += (1 << i) * (*(values+i));
+        ret += (1 << i) * (*(values+i) ? 1 : 0);
     }
+
     return ret;
 }

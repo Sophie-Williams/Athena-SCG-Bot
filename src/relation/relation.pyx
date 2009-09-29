@@ -100,6 +100,7 @@ cdef extern from "solve.c":
     cdef clause *clause_create(uint32_t rn, int rank, int *vars)
     cdef void clause_set(void *c, uint32_t rn, int rank, int *vars)
     cdef void clause_delete(clause *clause)
+    cdef int fsat(problem *p, solution *s)
 
 
 
@@ -590,12 +591,14 @@ cdef class Problem:
         for 0 <= i < s[0].size:
             ret.append((s[0].values)[i])
 
+        f = fsat(self.p, s)
+
         free(s)
-        return ret
+        
+        return (f, ret)
 
     def __dealloc__(self):
         problem_delete(self.p)
-
 
 
 # cdef class Solution:
