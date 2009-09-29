@@ -14,3 +14,4 @@ project/Admin/files/players.*
 project/Admin/files/history/*
 scaffold
 build
+*_test

@@ -36,6 +36,16 @@ The rank of a number is the number of variables a clause can have.
 """
 
 
+cdef extern from "stdlib.h":
+    ctypedef unsigned long int size_t
+    cdef void *malloc(size_t size)
+    cdef void free(void *ptr)
+
+
+cdef extern from "string.h":
+    cdef char *strcpy(char *s1, char *s2)
+
+
 cdef extern from "stdint.h":
     ctypedef unsigned long int uint32_t
 
@@ -58,6 +68,39 @@ cdef extern from "_relation.c":
 
 cdef extern from "poly.c":
     cdef double find_break_even(uint32_t rn, int rank)
+
+
+cdef extern from "solve.c":
+    cdef struct __solution:
+        int *values
+        int size
+    ctypedef __solution solution
+
+    cdef struct __clause:
+        uint32_t rn
+        int rank
+        int *vars
+    ctypedef __clause clause
+
+    cdef struct __problem:
+        char **vars
+        int num_vars
+        clause **clauses
+        int num_clauses
+    ctypedef __problem problem
+
+    cdef solution *solve(problem *problem, solution *solution)
+    cdef problem * problem_create(char **vars, int num_vars, clause *clauses,
+                                  int num_clauses)
+    cdef void problem_set(problem *problem, char **vars, int num_vars,
+                          clause *clauses, int num_clauses)
+    cdef void problem_delete(problem *problem)
+    cdef solution *solution_create(problem *problem)
+    cdef void solution_delete(solution *solution)
+    cdef clause *clause_create(uint32_t rn, int rank, int *vars)
+    cdef void clause_set(void *c, uint32_t rn, int rank, int *vars)
+    cdef void clause_delete(clause *clause)
+
 
 
 # for the module
@@ -459,7 +502,6 @@ def break_even(uint32_t rn, int rank):
     return find_break_even(rn, rank)
 
 
-
 def generate_variables(uint32_t amount):
     cdef uint32_t i
     x = list()
@@ -488,3 +530,79 @@ def create_prob(uint32_t rn, int rank):
 #                 }, NUM_CLAUSES));
 #     }
 # 
+
+
+cdef class Clause:
+    cdef clause *c
+
+    def __cinit__(self, rn, vars):
+        cdef int tmp[5]
+
+        for v in vars:
+            tmp[x] = v
+
+        self.c = clause_create(rn, len(vars), tmp)
+
+    def __dealloc__(self):
+        clause_delete(self.c)
+
+
+cdef class Problem:
+    cdef problem *p
+
+    def __cinit__(self, vars, clauses):
+        cdef clause *tmp
+        cdef int i
+        cdef int j
+        cdef int var_tmp[5]
+        cdef char **c_vars
+
+        tmp = <clause *> malloc(sizeof(clause) * len(clauses))
+
+        i = 0
+        for c in clauses:
+            j = 0
+            for v in c[1:]:
+                var_tmp[j] = vars.index(v)
+                j += 1
+            clause_set(tmp+i, c[0], j, var_tmp)
+            i += 1
+
+        c_vars = <char **> malloc(sizeof(char *) * len(vars))
+
+        j = 0
+        for v in vars:
+            c_vars[j] = <char *> malloc(len(v) + 1)
+            strcpy(c_vars[j], v)
+            j += 1
+
+        self.p = <problem *> malloc(sizeof(problem))
+        problem_set(self.p, c_vars, j, tmp, i)
+
+    def solve(self):
+        cdef solution *s
+        cdef int i
+
+        s = solution_create(self.p)
+        solve(self.p, s)
+
+        ret = []
+        for 0 <= i < s[0].size:
+            ret.append((s[0].values)[i])
+
+        free(s)
+        return ret
+
+    def __dealloc__(self):
+        problem_delete(self.p)
+
+
+
+# cdef class Solution:
+#     cdef solution *s
+# 
+#     def __cinit__(self, pr):
+#         self.s = solution_create(<problem *>pr.p)
+# 
+#     def __dealloc__(self):
+#         solution_delete(self.s)
