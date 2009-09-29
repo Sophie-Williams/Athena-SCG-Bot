@@ -1,4 +1,6 @@
 #include <assert.h>
+#include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
@@ -167,4 +169,48 @@ find_break_even(uint32_t rn, int rank) {
 
     /* Every maximum was out of range, so normalize. */
     return 1.0;
+}
+
+/* Functions for poly */
+
+poly *
+poly_create(int *coeffs, int degree) {
+    poly *p;
+
+    assert(coeffs != NULL);
+
+    if ((p = malloc(sizeof(poly))) == NULL) {
+        perror("malloc");
+        return NULL;
+    }
+
+    if ((p->coeffs = malloc(sizeof(int) * (degree + 1))) == NULL) {
+        perror("malloc");
+        free(p);
+        return NULL;
+    }
+    memcpy(p->coeffs, coeffs, sizeof(int) * (degree + 1));
+    return p;
+}
+
+void
+poly_delete(poly *p) {
+    free(p->coeffs);
+    free(p);
+}
+
+double
+poly_eval(poly *p, double value) {
+    double ret;
+    int i;
+
+    assert(p != NULL);
+    assert(p->coeffs != NULL);
+
+    ret = 0.0;
+    for (i = 0; i <= p->degree; i++) {
+        ret += pow(value, i) * p->coeffs[i];
+    }
+    
+    return ret;
 }

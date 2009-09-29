@@ -46,6 +46,11 @@ typedef struct __poly3 {
     int coeff0;
 } poly3;
 
+typedef struct __poly {
+    int degree;
+    int *coeffs;
+} poly;
+
 /* Convenience MACRO for assigning values to a poly3 */
 #define POLY3(p, c3, c2, c1, c0) do {\
     (p).coeff3 = c3; (p).coeff2 = c2; (p).coeff1 = c1; (p).coeff0 = c0; }\
@@ -108,5 +113,16 @@ poly3_eval(poly3 *poly, double x);
  */
 double
 find_break_even(uint32_t rn, int rank);
+
+/* Functions for poly */
+
+poly *
+poly_create(int *coeffs, int degree);
+
+void
+poly_delete(poly *p);
+
+double
+poly_eval(poly *p, double value);
 
 #endif
