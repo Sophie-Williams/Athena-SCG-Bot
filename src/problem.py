@@ -63,7 +63,8 @@ class Problem(object):
                self.challengeid, self.seller, self.problemnumber, self.price))
 
   def Solve(self):
-    logging.info('Solving offer %d' % self.challengeid)
+    logging.info('Solving offer %d relation %d' % (self.challengeid,
+                                                   self.problemnumber))
     if self.problemnumber%2:
       logging.info('Special Case Solve: All False!')
       values = [0]*len(self.vars)

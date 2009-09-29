@@ -15,10 +15,10 @@ class Game(object):
   def RunTasks(self):
     self.replies = []
     logging.info('Current Balance: $%0.2f' % self.context.balance)
-    logging.debug('Their Offered: %s' % str(self.context.their_offered))
-    logging.debug('Our Offered: %s' % str(self.context.our_offered))
-    logging.debug('Accepted: %s' % str(self.context.accepted))
-    logging.debug('Provided: %s' % str(self.context.provided))
+    #logging.debug('Their Offered: %s' % str(self.context.their_offered))
+    #logging.debug('Our Offered: %s' % str(self.context.our_offered))
+    #logging.debug('Accepted: %s' % str(self.context.accepted))
+    #logging.debug('Provided: %s' % str(self.context.provided))
     logging.info('Running all tasks...')
     for x in [self.OfferTask, self.AcceptTask, self.ReofferTask,
               self.ProvideTask, self.SolveTask]:
@@ -74,7 +74,11 @@ class Game(object):
           logging.debug('Can\'t offer %d, already offered by them' % problemno)
         else:
           first = problemno
-          price = 1
+          bep = relation.break_even(problemno, 3)
+          if bep + 0.2 >= 1:
+            price = 1
+          else:
+            price = bep+0.2
           logging.debug('Offering %d for %0.8f' % (problemno, price))
           self.replies.append('offer[( %d) %0.8f]' % (problemno, price))
           break
@@ -97,12 +101,11 @@ class Game(object):
       r += '    %s \n' % o
     r +=']\n'
     logging.info('Reply Size: %s' % len(r))
-    logging.info('Replying with: %s' % r)
     return r
 
   @classmethod
   def Play(cls, gamedata):
-    logging.debug('Got: %s' % gamedata)
+    #logging.debug('Got: %s' % gamedata)
     g = cls(gamedata)
     g.RunTasks()
     return g.GenerateReply()

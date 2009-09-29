@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import logging
 import random
 import relation.relation
 
@@ -19,8 +20,16 @@ class Offer(object):
     return str(self)
 
   def IsGoodBuy(self):
-    return ((relation.relation.break_even(self.problemnumber, 3) > self.price)
-            and True)
+    if not self.problemnumber:
+      return False
+    elif self.problemnumber%2:
+      return True
+    elif self.problemnumber >= 128:
+      return True
+    else:
+      bep = relation.break_even(self.problemnumber, 3)
+      logging.debug('Break even for %d is %08f' % (self.problemnumber, bep))
+      return (bep > self.price) or (abs(bep-self.price) < 0.25)
 
   def AvoidReoffer(self):
     return (self.price - 0.1) < 0
