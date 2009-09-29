@@ -49,7 +49,7 @@ class Game(object):
       if self.context.playerid != accepted.provider:
         continue
       p = problem.Problem.GenerateProblem(accepted.problemnumber,
-                                          16, accepted.offerid)
+                                          20, accepted.offerid)
       self.replies.append(p.GetProvide())
 
   def SolveTask(self):
@@ -92,7 +92,7 @@ class Game(object):
 
   def GenerateReply(self):
     logging.info('Generating Game Reply')
-    r = '\nplayertrans[\n    %d\n' % self.id
+    r = 'playertrans[\n    %d\n' % self.id
     for o in self.replies:
       r += '    %s \n' % o
     r +=']\n'
