@@ -37,6 +37,7 @@ class PlayerContext(object):
                our_offered=None, accepted=None, 
                provided=None, playerid=None, balance=None):
     self.their_offered = offer.Offer.GetOfferList(their_offered)
+    self.their_offered.sort()
     self.our_offered = offer.Offer.GetOfferList(our_offered)
     self.accepted = offer.AcceptedChallenge.GetAcceptedChallengeList(accepted)
     self.provided = problem.Problem.GetProblemList(provided)

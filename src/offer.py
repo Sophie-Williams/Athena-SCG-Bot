@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import logging
 import random
+
 import relation
+import problem
 
 class Offer(object):
   def __init__(self, offerid, playerid, problemnumber, price):
@@ -11,32 +13,28 @@ class Offer(object):
     self.price = float(price)
     self.actedon = False
     self.bep = relation.break_even(self.problemnumber, 3)
+    self.potential = (self.price -
+                      problem.Problem.GetReasonablePrice(self.problemnumber))
   
   def __str__(self):
     return 'Offer(id=%s, from=%s, problem=%s, price=%s)' % (self.offerid,
                                                             self.playerid,
                                                             self.problemnumber,
                                                             self.price)
+  def __cmp__(self, other):
+    return cmp(self.potential, other.potential)
+
   def __repr__(self):
     return str(self)
 
   def IsGoodBuy(self):
     if not self.problemnumber:
       return False
-    elif self.problemnumber%2:
-      if self.price < 1:
-        return True
-      else:
-        return random.choice([True, False])
-    elif self.problemnumber >= 128:
-      if self.price < 1:
-        return True
-      else:
-        return random.choice([True, False])
+    elif self.problemnumber >= 128 or self.problemnumber%2:
+      return self.price < 1
     else:
-      logging.debug('Break even for %d is %08f'
-                    % (self.problemnumber, self.bep))
-      return (self.bep > self.price)
+      return (problem.Problem.GetReasonablePrice(self.problemnumber) >
+              self.price+0.01)
 
   def AvoidReoffer(self):
     return (self.price - 0.1) < 0 or (abs(self.bep-self.price) < 0.3)
@@ -63,10 +61,8 @@ class Offer(object):
   def GenerateOffer(cls, ouroffered, theiroffered, justoffered):
     problemnumber = None
     while problemnumber is None:
-      possible = random.randint(0, 128)
-      if possible%2:
-        continue
-      elif possible in ouroffered:
+      possible = random.randint(0, 255)
+      if possible in ouroffered:
         continue
       elif possible in theiroffered:
         continue
@@ -74,8 +70,9 @@ class Offer(object):
         continue
       else:
         problemnumber = possible
-    bep = relation.break_even(problemnumber, 3)
-    markup = 0.5
+    logging.debug('Got problem number %d to generate' % problemnumber)
+    bep = problem.Problem.GetReasonablePrice(problemnumber)
+    markup = 0.05
     if bep+markup > 1:
       price = 1
     else:

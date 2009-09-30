@@ -25,7 +25,7 @@ class Game(object):
       x()
 
   def AcceptTask(self):
-    logging.debug('Running AcceptTask')
+    logging.info('Running AcceptTask')
     otheroffers = list(self.context.their_offered)
     for offer in self.context.their_offered:
       if offer.IsGoodBuy():
@@ -42,28 +42,31 @@ class Game(object):
         if offer.AvoidReoffer():
           logging.info('%s shouldn\'t reoffer' % str(offer))
           self.replies.append(offer.GetAccept())
+          break
 
   def ProvideTask(self):
-    logging.debug('Running ProvideTask')
+    logging.info('Running ProvideTask')
     otheroffers = list(self.context.accepted)
     for accepted in self.context.accepted:
       if self.context.playerid != accepted.provider:
         continue
-      p = problem.Problem.GenerateProblem(accepted.problemnumber,
-                                          25, accepted.offerid)
+      logging.info('Providing number %d for offer %d'
+                   % (accepted.problemnumber, accepted.offerid))
+      p = problem.Problem.Generate(accepted.problemnumber, accepted.offerid)
       self.replies.append(p.GetProvide())
 
   def SolveTask(self):
-    logging.debug('Running SolveTask')
+    logging.info('Running SolveTask')
     for problem in self.context.provided:
       self.replies.append(problem.Solve())
 
   def OfferTask(self):
-    logging.debug('Running OfferTask')
+    logging.info('Running OfferTask')
     ouroffer  = [x.problemnumber for x in self.context.our_offered]
     theiroffer  = [x.problemnumber for x in self.context.their_offered]
     justoffered = []
     for x in range(2):
+      logging.debug('Starting offer generation run')
       o = offer.Offer.GenerateOffer(ouroffer, theiroffer, justoffered)
       logging.debug('Offering %d for %0.8f' % (o.problemnumber, o.price))
       justoffered.append(o.problemnumber)
@@ -74,10 +77,10 @@ class Game(object):
     return True in a
 
   def ReofferTask(self):
-    logging.debug('Running ReofferTask')
+    logging.info('Running ReofferTask')
     if not self.HaveAcceptedOffer():
       for offer in self.context.their_offered:
-        logging.debug('Reoffering their id %d' % offer.offerid)
+        logging.info('Reoffering their id %d' % offer.offerid)
         self.replies.append(offer.GetReoffer())
 
   def GenerateReply(self):
@@ -93,6 +96,12 @@ class Game(object):
   @classmethod
   def Play(cls, gamedata):
     logging.debug('Got: %s' % gamedata)
-    g = cls(gamedata)
-    g.RunTasks()
-    return g.GenerateReply()
+    for runnumber in range(5):
+      try:
+        g = cls(gamedata)
+        g.RunTasks()
+        r = g.GenerateReply()
+        return r
+      except:
+        logging.exception('Encountered MAJOR error during gameplay')
+
