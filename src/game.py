@@ -2,10 +2,10 @@
 import logging
 import random
 
+import offer
 import playercontext
 import problem
-import proxysolver
-import relation.relation
+import relation
 
 class Game(object):
   def __init__(self, initialdata):
@@ -15,10 +15,10 @@ class Game(object):
   def RunTasks(self):
     self.replies = []
     logging.info('Current Balance: $%0.4f' % self.context.balance)
-    #logging.debug('Their Offered: %s' % str(self.context.their_offered))
-    #logging.debug('Our Offered: %s' % str(self.context.our_offered))
-    #logging.debug('Accepted: %s' % str(self.context.accepted))
-    #logging.debug('Provided: %s' % str(self.context.provided))
+    logging.debug('Their Offered: %s' % str(self.context.their_offered))
+    logging.debug('Our Offered: %s' % str(self.context.our_offered))
+    logging.debug('Accepted: %s' % str(self.context.accepted))
+    logging.debug('Provided: %s' % str(self.context.provided))
     logging.info('Running all tasks...')
     for x in [self.OfferTask, self.AcceptTask, self.ReofferTask,
               self.ProvideTask, self.SolveTask]:
@@ -62,27 +62,12 @@ class Game(object):
     logging.debug('Running OfferTask')
     ouroffer  = [x.problemnumber for x in self.context.our_offered]
     theiroffer  = [x.problemnumber for x in self.context.their_offered]
-    problemno = None
-    first = None
-    for x in [1,2]:
-      while True:
-        # We should pick better relation numbers here
-        problemno = random.randint(1,255)
-        if problemno in ouroffer or problemno == first:
-          logging.debug('Can\'t offer %d, already offered by us' % problemno)
-        elif problemno in theiroffer:
-          logging.debug('Can\'t offer %d, already offered by them' % problemno)
-        else:
-          first = problemno
-          bep = relation.break_even(problemno, 3)
-          markup=0.5
-          if bep + markup >= 1:
-            price = 1
-          else:
-            price = bep+markup
-          logging.debug('Offering %d for %0.8f' % (problemno, price))
-          self.replies.append('offer[( %d) %0.8f]' % (problemno, price))
-          break
+    justoffered = []
+    for x in range(2):
+      o = offer.Offer.GenerateOffer(ouroffer, theiroffer, justoffered)
+      logging.debug('Offering %d for %0.8f' % (o.problemnumber, o.price))
+      justoffered.append(o.problemnumber)
+      self.replies.append(o.GetOffer())
 
   def HaveAcceptedOffer(self):
     a = [x.actedon for x in self.context.their_offered]
@@ -102,11 +87,12 @@ class Game(object):
       r += '    %s \n' % o
     r +=']\n'
     logging.info('Reply Size: %s' % len(r))
+    logging.debug('Reply: %s' % r)
     return r
 
   @classmethod
   def Play(cls, gamedata):
-    #logging.debug('Got: %s' % gamedata)
+    logging.debug('Got: %s' % gamedata)
     g = cls(gamedata)
     g.RunTasks()
     return g.GenerateReply()

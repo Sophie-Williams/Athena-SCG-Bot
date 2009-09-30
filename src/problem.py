@@ -63,8 +63,8 @@ class Problem(object):
                self.challengeid, self.seller, self.problemnumber, self.price))
 
   def Solve(self):
-    logging.info('Solving offer %d relation %d' % (self.challengeid,
-                                                   self.problemnumber))
+    logging.debug('Solving offer %d relation %d cost %0.3f'
+                 % (self.challengeid, self.problemnumber, self.price))
     if self.problemnumber%2:
       logging.info('Special Case Solve: All False!')
       values = [0]*len(self.vars)
@@ -75,8 +75,14 @@ class Problem(object):
       c_p = relation.Problem(tuple(self.vars),
                             [x.GetTuple() for x in self.clauses])
       fsat, values = c_p.solve()
-      logging.info('Solved %d out of %d clauses' % (fsat, len(self.clauses)))
-      logging.info('Values are: %s' % str(values))
+      solperc = float(fsat)/float(len(self.clauses))
+      profit = solperc-self.price
+      logging.info('Solved %d out of %d clauses = %0.3f delta (%0.3f)'
+                   % (fsat, len(self.clauses),
+                      solperc, profit))
+      if profit < 0:
+        logging.error('Lost money on %s' % str(self))
+      logging.debug('Values are: %s' % str(values))
 
     s = csptree.csptree.CreateSolution(self.vars, values)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
