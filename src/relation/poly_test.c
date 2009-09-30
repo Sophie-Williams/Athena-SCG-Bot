@@ -146,11 +146,47 @@ static char *test_find_break_even() {
     return NULL;
 }
 
+/* poly tests */
+
+static char *test_poly_new() {
+    poly *p;
+
+    p = poly_new(3, 17, 3, 2, 1);
+    mu_assert("p == NULL", p != NULL);
+
+    mu_assert("p(0.0) != 17.0", IN_RANGE(poly_eval(p, 0), 17));
+    mu_assert("p(1.0) != 23.0", IN_RANGE(poly_eval(p, 1), 23));
+    mu_assert("p(2.0) != 39.0", IN_RANGE(poly_eval(p, 2), 39)); 
+
+    poly_delete(p);
+    return NULL;
+}
+
+static char *test_poly_synth_div() {
+    poly *p;
+
+    p = poly_new(5, -1, 0, 25, 0, 3, 2);
+    mu_assert("2x^5 + 3x^4 + 25x^2 - 1", poly_synth_div(p, -3) == -19);
+    poly_delete(p);
+
+    p = poly_new(3, 2, 1, -8, 1);
+    mu_assert("x^3 - 8x^2 + x + 2", poly_synth_div(p, 7) == -40);
+    poly_delete(p);
+
+    p = poly_new(2, 1, 2, 1);
+    mu_assert("(x+1)(x+1)", poly_synth_div(p, -1) == 0);
+    poly_delete(p);
+
+    return NULL;
+}
+
 static char *all_tests() {
     mu_run_test(test_poly3_get_maximum);
     mu_run_test(test_poly3_create);
     mu_run_test(test_poly3_eval);
     mu_run_test(test_find_break_even);
+    mu_run_test(test_poly_new);
+    mu_run_test(test_poly_synth_div);
     return NULL;
 }
 

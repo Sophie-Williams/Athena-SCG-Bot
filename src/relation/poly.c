@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdarg.h>
 #include <math.h>
 
 #include "poly.h"
@@ -214,3 +215,50 @@ poly_eval(poly *p, double value) {
     
     return ret;
 }
+
+poly *
+poly_new(int degree, ...) {
+    int i;
+    va_list argptr;
+    poly *p;
+
+    /* Allocate. */
+    if ((p = malloc(sizeof(poly))) == NULL) {
+        perror("malloc");
+        return NULL;
+    }
+
+    /* A polynomial of degree n has n+1 coefficients for each term in [n,0] */
+    if ((p->coeffs = malloc(sizeof(int) * (degree + 1))) == NULL) {
+        perror("malloc");
+        free(p);
+        return NULL;
+    }
+
+    p->degree = degree; /* Set the degree of the polynomial */
+
+    /* Copy the list. */
+    va_start(argptr, degree);
+    for(i = 0; i <= degree; i++) {
+        *(p->coeffs+i) = va_arg(argptr, int);
+    }
+    va_end(argptr);
+
+    return p;
+}
+
+int
+poly_synth_div(poly *p, int q) {
+    int i;
+    int r;
+
+    assert(p != NULL);
+
+    r = *(p->coeffs+p->degree);
+    for (i = p->degree - 1; i >= 0; i--) {
+        r = *(p->coeffs+i) + (r * q);
+    }
+
+    return r;
+}
+

@@ -116,6 +116,14 @@ find_break_even(uint32_t rn, int rank);
 
 /* Functions for poly */
 
+/* Create a polynomial of the given degree with variable length.
+ * e.g.
+ *      poly_new(3, 4, 3, 2, 1) = 4 + 3*x + 2*x^2 + x^3
+ *      poly_new(2, 3, 2, 1)    = 3 + 2*x^2 + x^3
+ */
+poly *
+poly_new(int degree, ...);
+
 poly *
 poly_create(int *coeffs, int degree);
 
@@ -124,5 +132,10 @@ poly_delete(poly *p);
 
 double
 poly_eval(poly *p, double value);
+
+/* Do synthetic division on the polynomial and return the remainder.
+ */
+int
+poly_synth_div(poly *p, int q);
 
 #endif
