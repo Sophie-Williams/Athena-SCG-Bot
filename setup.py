@@ -7,7 +7,7 @@ from distutils.core import setup, Extension
 from Pyrex.Distutils import build_ext
 import os
 
-os.environ['CFLAGS'] = '-std=c99'
+os.environ['CFLAGS'] = '-std=c99 -I./src/relation/include'
 
 setup(
     name='Athena',
