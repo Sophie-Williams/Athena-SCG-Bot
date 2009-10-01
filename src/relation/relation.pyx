@@ -368,7 +368,7 @@ def renme(uint32_t rn, int rank, int perm_semantics, permutation):
 
     if perm_semantics == C_SOURCE:
         for x in permutation:
-            new_rn += rn & (1 << x)
+            new_rn = new_rn + (rn & (1 << x))
         return new_rn
 
     # sort dimensions
@@ -479,7 +479,7 @@ def generate_variables(uint32_t amount):
     x = list()
 
     for 0 < i < amount:
-        x += 'alamo%dalamo' % i
+        x = x + 'alamo%dalamo' % i
     return x
 
 
@@ -523,9 +523,9 @@ cdef class Problem:
             j = 0
             for v in c[1:]:
                 var_tmp[j] = vars.index(v)
-                j += 1
+                j = j + 1
             clause_set(tmp+i, c[0], j, var_tmp)
-            i += 1
+            i = i + 1
 
         # Allocate spaces for the pointers to the variable names.
         c_vars = <char **> malloc(sizeof(char *) * len(vars))
@@ -534,7 +534,7 @@ cdef class Problem:
         for v in vars:
             c_vars[j] = <char *> malloc(len(v) + 1)
             strcpy(c_vars[j], v)
-            j += 1
+            j = j + 1
 
         self.p = <problem *> malloc(sizeof(problem))
         problem_set(self.p, c_vars, j, tmp, i)

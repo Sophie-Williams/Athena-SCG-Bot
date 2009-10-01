@@ -1,2 +1,4 @@
-Compiles with Pyrex version 0.9.8.5
-the version in the Ubuntu repo didn't work.
+Should compile with the current Ubuntu Pyrex version (0.9.7.2-0.1ubuntu1)
+
+run `make` to build the shared object.
+run `make test` to run the tests.
