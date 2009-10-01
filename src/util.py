@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import gflags
 import logging
 import urllib
 import urllib2
@@ -7,6 +8,11 @@ import time
 
 import constants
 
+gflags.DEFINE_enum('loglevel', 'info',
+                   ['debug', 'info', 'warning', 'error', 'critical'],
+                   'Display this level and higher to the console')
+
+FLAGS = gflags.FLAGS
 
 def DoRegistration(server, ourport, ourteam, ourpass):
   reghost = '%s:%s' % (server, constants.GAMEREG_PORT)
@@ -35,7 +41,10 @@ def setuplogging():
                       filemode='w')
   # define a Handler which writes INFO messages or higher to the sys.stderr
   console = logging.StreamHandler()
-  console.setLevel(logging.INFO)
+  levelmap = {'debug':logging.DEBUG, 'info':logging.INFO,
+              'warning':logging.WARNING, 'error':logging.ERROR,
+              'critical':logging.CRITICAL}
+  console.setLevel(levelmap[FLAGS.loglevel])
   # set a format which is simpler for console use
   formatter = logging.Formatter(msgformat)
   # tell the handler to use this format

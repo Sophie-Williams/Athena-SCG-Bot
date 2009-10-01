@@ -13,8 +13,7 @@ class Offer(object):
     self.price = float(price)
     self.actedon = False
     self.bep = relation.break_even(self.problemnumber, 3)
-    self.potential = (self.price -
-                      problem.Problem.GetReasonablePrice(self.problemnumber))
+    self.potential = 0
   
   def __str__(self):
     return 'Offer(id=%s, from=%s, problem=%s, price=%s)' % (self.offerid,
@@ -28,13 +27,7 @@ class Offer(object):
     return str(self)
 
   def IsGoodBuy(self):
-    if not self.problemnumber:
-      return False
-    elif self.problemnumber >= 128 or self.problemnumber%2:
-      return self.price < 1
-    else:
-      return (problem.Problem.GetReasonablePrice(self.problemnumber) >
-              self.price+0.01)
+    return relation.break_even(self.problemnumber, 3) > self.price
 
   def AvoidReoffer(self):
     return (self.price - 0.1) < 0 or (abs(self.bep-self.price) < 0.3)
@@ -58,26 +51,33 @@ class Offer(object):
     return outputlist
 
   @classmethod
-  def GenerateOffer(cls, ouroffered, theiroffered, justoffered):
-    problemnumber = None
-    while problemnumber is None:
-      possible = random.randint(0, 255)
-      if possible in ouroffered:
-        continue
-      elif possible in theiroffered:
-        continue
-      elif possible in justoffered:
-        continue
-      else:
-        problemnumber = possible
-    logging.debug('Got problem number %d to generate' % problemnumber)
-    bep = problem.Problem.GetReasonablePrice(problemnumber)
-    markup = 0.05
-    if bep+markup > 1:
-      price = 1
+  def GetGenerateOffer(cls, ouroffered, theiroffered, justoffered, 
+                       problemnumber):
+    if problemnumber in ouroffered:
+      return False
+    elif problemnumber in theiroffered:
+      return False
+    elif problemnumber in justoffered:
+      return False
     else:
-      price = bep+markup
-    return cls(-1, -1, problemnumber, price)
+      logging.debug('Got problem number %d to generate' % problemnumber)
+      price = 1
+      return cls(-1, -1, problemnumber, price)
+
+  @classmethod
+  def GenerateOffer(cls, ouroffered, theiroffered, justoffered):
+    goodones = filter(lambda x: not x%2, range(128))
+    badones = filter(lambda x: x%2, range(128)) + range(128,256)
+    for problemnumber in goodones:
+      x = cls.GetGenerateOffer(ouroffered, theiroffered, justoffered,
+                               problemnumber)
+      if x:
+        return x
+    for problemnumber in badones:
+      x = cls.GetGenerateOffer(ouroffered, theiroffered, justoffered,
+                               problemnumber)
+      if x:
+        return x
 
 class AcceptedChallenge(object):
   def __init__(self, acceptor, offerid, provider, problemnumber, price):

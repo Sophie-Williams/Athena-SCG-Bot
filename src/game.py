@@ -14,7 +14,7 @@ class Game(object):
 
   def RunTasks(self):
     self.replies = []
-    logging.info('Current Balance: $%0.4f' % self.context.balance)
+    logging.info('Starting Balance: $%0.4f' % self.context.balance)
     logging.debug('Their Offered: %s' % str(self.context.their_offered))
     logging.debug('Our Offered: %s' % str(self.context.our_offered))
     logging.debug('Accepted: %s' % str(self.context.accepted))
@@ -23,26 +23,20 @@ class Game(object):
     for x in [self.OfferTask, self.AcceptTask, self.ReofferTask,
               self.ProvideTask, self.SolveTask]:
       x()
+    logging.info('Ending Balance: $%0.4f' % self.context.endbalance)
 
   def AcceptTask(self):
     logging.info('Running AcceptTask')
     otheroffers = list(self.context.their_offered)
     for offer in self.context.their_offered:
-      if offer.IsGoodBuy():
+      if offer.price > self.context.endbalance:
+        logging.info('%s is out of budget' % str(offer))
+      elif offer.IsGoodBuy():
         logging.info('%s is good buy' % str(offer))
         self.replies.append(offer.GetAccept())
-      elif offer.price > self.context.balance:
-        logging.info('%s is out of budget' % str(offer))
+        self.context.endbalance -= offer.price
       else:
         logging.info('%s is bad buy' % str(offer))
-
-    a = [x.actedon for x in self.context.their_offered]
-    if True not in a:
-      for offer in self.context.their_offered:
-        if offer.AvoidReoffer():
-          logging.info('%s shouldn\'t reoffer' % str(offer))
-          self.replies.append(offer.GetAccept())
-          break
 
   def ProvideTask(self):
     logging.info('Running ProvideTask')

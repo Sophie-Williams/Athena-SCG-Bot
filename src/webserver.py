@@ -1,9 +1,17 @@
 #!/usr/bin/env python
+import gflags
 import logging
+import sys
 import web
+from web import wsgiserver
 
 import game
 import util
+
+if __name__ == '__main__':
+  gflags.DEFINE_string('ip', '0.0.0.0', 'IP to listen on')
+  gflags.DEFINE_integer('port', 8080, 'Port number to listen on')
+FLAGS = gflags.FLAGS
 
 urls = (
   '/player', 'GameHandler',
@@ -12,7 +20,7 @@ urls = (
   '/register', 'RegisterHandler',
 )
 
-app = web.application(urls, globals())
+app = web.application(urls, globals()).wsgifunc()
 web.webapi.config.debug = False
 
 
@@ -43,5 +51,8 @@ class OkHandler(object):
 
 
 if __name__ == '__main__':
+  FLAGS(sys.argv)
   util.setuplogging()
-  app.run()
+  s = wsgiserver.CherryPyWSGIServer((FLAGS.ip, FLAGS.port), app,
+                                    server_name='cs4500.server')
+  s.start()

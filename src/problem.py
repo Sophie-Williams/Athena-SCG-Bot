@@ -2,10 +2,11 @@
 import logging
 import random
 
-import relation
-import relation.gen
 
 import csptree
+import proxysolver
+import relation
+import relation.gen
 
 class Clause(object):
   def __init__(self, number, list_of_vars):
@@ -81,6 +82,7 @@ class Problem(object):
   def Solve(self):
     logging.debug('Solving offer %d relation %d cost %0.3f'
                  % (self.challengeid, self.problemnumber, self.price))
+    return proxysolver.ProxySolve(self)
     fsat, values = self.RealSolve()
     numclauses = float(len(self.clauses))
     solperc = float(fsat)/numclauses
@@ -92,7 +94,7 @@ class Problem(object):
     logging.debug('Values are: %s' % str(values))
 
     s = csptree.csptree.CreateSolution(self.vars, values)
-    return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
+    #return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
   @classmethod
   def GenerateReasonablePrice(cls, problemnumber):
@@ -104,82 +106,10 @@ class Problem(object):
     logging.debug('Solved %d clauses of %d' % (solved, numclauses))
     return float(solved) / numclauses
 
-  @staticmethod
-  def GetReasonablePrice(problemnumber):
-    lookup = {
-      0:0.000000000000000000,
-      2:0.599999999999999978,
-      4:0.400000000000000022,
-      6:0.599999999999999978,
-      8:0.599999999999999978,
-      10:0.900000000000000022,
-      12:0.599999999999999978,
-      14:0.900000000000000022,
-      16:0.599999999999999978,
-      18:0.599999999999999978,
-      20:0.599999999999999978,
-      22:0.599999999999999978,
-      24:0.599999999999999978,
-      26:0.900000000000000022,
-      28:0.699999999999999956,
-      30:0.900000000000000022,
-      32:0.400000000000000022,
-      34:0.599999999999999978,
-      36:0.500000000000000000,
-      38:0.699999999999999956,
-      40:0.599999999999999978,
-      42:0.900000000000000022,
-      44:0.699999999999999956,
-      46:0.900000000000000022,
-      48:0.599999999999999978,
-      50:0.900000000000000022,
-      52:0.699999999999999956,
-      54:0.900000000000000022,
-      56:0.699999999999999956,
-      58:0.900000000000000022,
-      60:0.699999999999999956,
-      62:0.900000000000000022,
-      64:0.599999999999999978,
-      66:0.599999999999999978,
-      68:0.599999999999999978,
-      70:0.699999999999999956,
-      72:0.599999999999999978,
-      74:0.900000000000000022,
-      76:0.900000000000000022,
-      78:0.900000000000000022,
-      80:0.900000000000000022,
-      82:0.900000000000000022,
-      84:0.900000000000000022,
-      86:0.900000000000000022,
-      88:0.900000000000000022,
-      90:0.900000000000000022,
-      92:0.900000000000000022,
-      94:0.900000000000000022,
-      96:0.599999999999999978,
-      98:0.699999999999999956,
-      100:0.699999999999999956,
-      102:0.699999999999999956,
-      104:0.599999999999999978,
-      106:0.900000000000000022,
-      108:0.900000000000000022,
-      110:0.900000000000000022,
-      112:0.900000000000000022,
-      114:0.900000000000000022,
-      116:0.900000000000000022,
-      118:0.900000000000000022,
-      120:0.900000000000000022,
-      122:0.900000000000000022,
-      124:0.900000000000000022,
-      126:0.900000000000000022 }
-    if problemnumber%2 or problemnumber >= 128:
-      return 1.0
-    else:
-      return lookup[problemnumber]
-
   @classmethod
   def Generate(cls, problemnumber, offerid, degree=None):
     if not degree:
-      degree = random.randint(10,20)
+      degree = random.randint(4, 6)
     p = cls(0, ['v%d' % x for x in range(0, degree)], [], offerid, 0,
             problemnumber, 0)
     for i, j, k in relation.gen.permute3(degree):

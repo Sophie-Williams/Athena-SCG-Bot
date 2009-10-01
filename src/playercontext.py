@@ -44,6 +44,7 @@ class PlayerContext(object):
     self.config = config
     self.playerid = int(playerid)
     self.balance = float(balance)
+    self.endbalance = float(self.balance)
 
   @classmethod
   def FromString(cls, input):
