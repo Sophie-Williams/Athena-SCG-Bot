@@ -48,29 +48,6 @@ static char *test_solve() {
     return NULL;
 }
 
-
-static char *test_solution_get() {
-    solution s;
-    s.values = malloc(sizeof(int) * 5);
-    s.size = 5;
-
-    *(s.values+0) = 2;
-    *(s.values+1) = 3;
-    *(s.values+2) = 5;
-    *(s.values+3) = 7;
-    *(s.values+4) = 11;
-
-    mu_assert("Checking index 0", (solution_get(&s, 0) == 2));
-    mu_assert("Checking index 1", (solution_get(&s, 1) == 3));
-    mu_assert("Checking index 2", (solution_get(&s, 2) == 5));
-    mu_assert("Checking index 3", (solution_get(&s, 3) == 7));
-    mu_assert("Checking index 4", (solution_get(&s, 4) == 11));
-    free(s.values);
-
-    return NULL;
-}
-
-
 static char *test_solve_value() {
     clause c;
     c.rn = 22;
@@ -126,7 +103,6 @@ static char *test_solve_value() {
 
 static char *all_tests() {
     mu_run_test(test_solve_value);
-    mu_run_test(test_solution_get);
     mu_run_test(test_solve);
     return NULL;
 }

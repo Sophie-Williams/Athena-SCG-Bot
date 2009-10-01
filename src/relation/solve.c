@@ -3,14 +3,25 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <pthread.h>
 #include <time.h>
 #include <math.h>
+
 #include "solve.h"
 
 #define RAND2 (rand() % 2)
 
+static void *
+solve_it(void *problem);
+
 static solution *
-random_solve(problem *problem, solution *solution);
+random_solve(const problem * restrict problem, solution *solution);
+
+static solution *
+solve_naive(const problem * restrict p, solution *s, int loopy);
+
+static solution *
+solve_naive_threaded(const problem * restrict p, solution *s, int num_threads);
 
 /* START constructor/destructor */
 
@@ -68,7 +79,7 @@ problem_delete(problem *p) {
 }
 
 solution *
-solution_create(problem *problem) {
+solution_create(const problem * restrict problem) {
     solution *s;
 
     assert(problem != NULL);
@@ -143,20 +154,11 @@ clause_delete(clause *clause) {
     free(clause);
 }
 
-int
-solution_get(solution *solution, int name) {
-    assert(solution != NULL);
-    assert(name >= 0);
-    assert(name < solution->size);
-
-    return *(solution->values + name);
-}
-
 /* END constructor/destructor */
 
 /* Returns the number of satisfied clauses. */
 int
-fsat(problem *problem, solution *solution) {
+fsat(const problem * restrict problem, solution *solution) {
     int i, j;
     int count = 0;
     int t_v[5];
@@ -180,12 +182,103 @@ fsat(problem *problem, solution *solution) {
 }
 
 solution *
-solve(problem *p, solution *s) {
+solve(const problem * restrict p, solution *s) {
+    return solve_naive(p, s, 5000000);
+    /* Proof of concept threaded solver thing. Slower than the above.
+    return solve_naive_threaded(p, s, 2);
+     */
+}
+
+static solution *
+solve_naive_threaded(const problem * restrict p, solution *s, int num_threads) {
+    int rc;
+    int i;
+    int clauses_satisfied;
+    int max;
+    pthread_t *tids;
+    pthread_attr_t *attrs;
+    solution *x;
+    solution *best;
+
+    assert(p != NULL);
+    assert(s != NULL);
+    assert(num_threads > 1);
+    assert(num_threads <= 8);
+
+    if ((tids = malloc(sizeof(pthread_t) * num_threads)) == NULL) {
+        perror("malloc");
+        return NULL;
+    }
+
+    if ((attrs = malloc(sizeof(pthread_attr_t) * num_threads)) == NULL) {
+        perror("malloc");
+        free(tids);
+        return NULL;
+    }
+
+    for (i = 0; i < num_threads; i++) {
+        pthread_attr_init(attrs+i);
+        pthread_attr_setdetachstate(attrs+i, PTHREAD_CREATE_JOINABLE);
+        
+        if ((rc = pthread_create(tids+i, attrs+i, solve_it, (void *)p)) != 0) {
+            printf("ERROR return code from pthread_create() is %d\n", rc);
+            exit(-1);
+        }
+    }
+
+    /* Keep track of the best solution. */
+    max = 0;
+    best = NULL;
+
+    for (i = 0; i < num_threads; i++) {
+        /* Wait for the threads */
+        if ((rc = pthread_join(tids[i], (void *) &x) != 0)) {
+            printf("ERROR return code from pthread_join() is %d\n", rc);
+            exit(-1);
+        }
+        pthread_attr_destroy(attrs+i);
+        clauses_satisfied = fsat(p, x);
+        if (clauses_satisfied > max) {
+            if (best != NULL) {
+                solution_delete(best);
+            }
+            best = x;
+        }
+    }
+
+    free(tids);
+    free(attrs);
+
+    memcpy(s->values, best->values, sizeof(int) * s->size);
+    
+/* XXX   pthread_exit((void *) best); */
+
+    return best;
+}
+
+static void *
+solve_it(void *p) {
+    solution *s;
+
+    assert(p != NULL);
+    
+    s = solution_create((problem *) p);
+    solve_naive((problem *)p, s, 2500000);
+
+    pthread_exit((void *) s);
+    return NULL; /* Not reached? */
+}
+
+/* The naive solver. */
+static solution *
+solve_naive(const problem * restrict p, solution *s, int loopy) {
     int i;
     int max;
     int temp;
     size_t size;
     solution *final;
+
+    assert(loopy > 0);
     
     /* Seed the random number generator. */
     srand(time(NULL));
@@ -200,7 +293,7 @@ solve(problem *p, solution *s) {
         return NULL;
     }
 
-    for (i = 0; i < 5000000; i++) {
+    for (i = 0; i < loopy; i++) {
         random_solve(p, s);
         temp = fsat(p, s);
         if (temp > max) {
@@ -216,7 +309,7 @@ solve(problem *p, solution *s) {
 }
 
 static solution *
-random_solve(problem *problem, solution *solution) {
+random_solve(const problem * restrict problem, solution *solution) {
     int i;
 
     assert(problem != NULL);

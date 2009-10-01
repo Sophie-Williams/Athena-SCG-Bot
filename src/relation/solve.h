@@ -33,6 +33,8 @@ typedef struct __problem {
     int num_clauses;
 } problem;
 
+/* Constructor, Setters, Destructors */
+
 problem *
 problem_create(char **vars, int num_vars, clause *clauses, int num_clauses);
 
@@ -44,7 +46,7 @@ void
 problem_delete(problem *problem);
 
 solution *
-solution_create(problem *problem);
+solution_create(const problem * restrict problem);
 
 void
 solution_delete(solution *solution);
@@ -58,17 +60,16 @@ clause_set(clause *clause, uint32_t rn, int rank, int *vars);
 void
 clause_delete(clause *clause);
 
-int
-solution_get(solution *solution, int name);
+/* More useful methods. */
 
 /* Returns the number of satisfied clauses. */
 int
-fsat(problem *problem, solution *solution);
+fsat(const problem * restrict problem, solution *solution);
 
 /* Tries to solve the problem and puts the answer in solution. Which should
  * have been created by solution_create. */
 solution *
-solve(problem *problem, solution *solution);
+solve(const problem * restrict problem, solution *solution);
 
 /* Return true or false based on the assignment. */
 int

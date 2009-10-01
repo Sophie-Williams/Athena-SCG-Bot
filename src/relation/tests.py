@@ -160,6 +160,7 @@ class TestRelation(unittest.TestCase):
     ]
     vars = ('v1', 'v2', 'v3', 'v4', 'v5')
     c_p = relation.Problem(vars, clauses)
+
     fsat, values = c_p.solve()
 
     self.assertEquals(fsat, 3)

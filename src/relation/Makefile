@@ -2,7 +2,9 @@
 
 CC = gcc
 CFLAGS = -std=c99 -O3 -fforce-addr -funroll-loops -frerun-cse-after-loop \
-         -frerun-loop-opt -falign-functions=4 -Wall -pedantic
+         -frerun-loop-opt -falign-functions=4 -Wall -pedantic -lpthread
+
+all: relation.so
 
 relation.so: relation.o _relation.o poly.o solve.o
 
@@ -26,8 +28,6 @@ solve.o: solve.c
 	
 %.c: %.pyx
 	pyrexc $< -o $@
-
-all: relation.so
 
 test: all poly_test solve_test
 	python tests.py
