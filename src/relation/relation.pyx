@@ -58,49 +58,51 @@ cdef extern from "relation_consts.h":
     cdef int C_TARGET "TARGET"
 
 
-cdef extern from "_relation.c":
-    cdef int _is_irrelevant(uint32_t rn, int rank, int var_p)
-    cdef uint32_t _get_mask(int rank)
-    cdef uint32_t _get_magic_number(int rank, int var_p, int value)
-    cdef int _ones(uint32_t rn, int rank)
-    cdef int _num_relevant_variables(uint32_t rn, int rank)
+cdef extern from "_relation.h":
+    int c_is_irrelevant "is_irrelevant" (uint32_t rn, int rank, int var_p)
+    uint32_t c_get_mask "get_mask" (int rank)
+    uint32_t c_get_magic_number "get_magic_number" (int rank, int var_p,
+                                                    int value)
+    int c_ones "ones" (uint32_t rn, int rank)
+    int c_num_relevant_variables "num_relevant_variables" (uint32_t rn,
+                                                           int rank)
 
 
-cdef extern from "poly.c":
+cdef extern from "poly.h":
     cdef double find_break_even(uint32_t rn, int rank)
 
 
-cdef extern from "solve.c":
-    cdef struct __solution:
+cdef extern from "solve.h":
+    struct __solution:
         int *values
         int size
     ctypedef __solution solution
 
-    cdef struct __clause:
+    struct __clause:
         uint32_t rn
         int rank
         int *vars
     ctypedef __clause clause
 
-    cdef struct __problem:
+    struct __problem:
         char **vars
         int num_vars
         clause **clauses
         int num_clauses
     ctypedef __problem problem
 
-    cdef solution *solve(problem *problem, solution *solution)
-    cdef problem * problem_create(char **vars, int num_vars, clause *clauses,
-                                  int num_clauses)
-    cdef void problem_set(problem *problem, char **vars, int num_vars,
-                          clause *clauses, int num_clauses)
-    cdef void problem_delete(problem *problem)
-    cdef solution *solution_create(problem *problem)
-    cdef void solution_delete(solution *solution)
-    cdef clause *clause_create(uint32_t rn, int rank, int *vars)
-    cdef void clause_set(void *c, uint32_t rn, int rank, int *vars)
-    cdef void clause_delete(clause *clause)
-    cdef int fsat(problem *p, solution *s)
+    solution *solve(problem *problem, solution *solution)
+    problem * problem_create(char **vars, int num_vars, clause *clauses,
+                             int num_clauses)
+    void problem_set(problem *problem, char **vars, int num_vars,
+                     clause *clauses, int num_clauses)
+    void problem_delete(problem *problem)
+    solution *solution_create(problem *problem)
+    void solution_delete(solution *solution)
+    clause *clause_create(uint32_t rn, int rank, int *vars)
+    void clause_set(void *c, uint32_t rn, int rank, int *vars)
+    void clause_delete(clause *clause)
+    int fsat(problem *p, solution *s)
 
 
 
@@ -116,16 +118,17 @@ cdef extern int __builtin_popcountl(unsigned long)
 # MAGIC_NUMBERS = ( 0x55555555, 0x33333333, 0x0F0F0F0F,
 #                   0x00FF00FF, 0x0000FFFF )
 def get_magic_number(int rank, int var_p, int value):
-    return _get_magic_number(rank, var_p, value)
+    return c_get_magic_number(rank, var_p, value)
+
 
 # defined in relation_consts.h
 # MASKS = ( 0x1, 0x3, 0xF, 0xFF, 0xFFFF, 0xFFFFFFFF )
 def get_mask(int rank):
-    return _get_mask(rank)
+    return c_get_mask(rank)
 
 
 def is_irrelevant(uint32_t rn, int rank, int var_p):
-    return _is_irrelevant(rn, rank, var_p)
+    return c_is_irrelevant(rn, rank, var_p)
 
 
 # Counts the number of relevant variables in the given relation
@@ -133,7 +136,7 @@ def is_irrelevant(uint32_t rn, int rank, int var_p):
 # @param rank rank of the given relation
 # @return The number of relevant variables in the given relation
 def num_relevant_variables(uint32_t rn, int rank):
-    return _num_relevant_variables(rn, rank)
+    return c_num_relevant_variables(rn, rank)
 
 
 # Checks if the given relation forces the given var_p
@@ -403,7 +406,7 @@ def renme(uint32_t rn, int rank, int perm_semantics, permutation):
 # @param rank
 # @return the number of 1-bits in rn limited by rank
 def ones(uint32_t rn, int rank):
-    return _ones(rn, rank)
+    return c_ones(rn, rank)
 # The slower version.
 #
 # def ones(uint32_t rn, int rank):
@@ -442,8 +445,6 @@ def q(uint32_t rn, int rank, int num_true_vars):
 # @param num_true_vars
 # @return an integer representing the relation number which is true
 #         only when the given number of vars is true
-
-
 # this is in relation_consts.h
 # TRUE_VARS = (
 #     (),
