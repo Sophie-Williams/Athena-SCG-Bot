@@ -3,6 +3,7 @@ import gflags
 import logging
 import sys
 import web
+import os
 from web import wsgiserver
 
 import game
@@ -18,11 +19,17 @@ urls = (
   '/start', 'OkHandler',
   '/end', 'OkHandler',
   '/register', 'RegisterHandler',
+  '/diediedie', 'DieHandler',
 )
 
 app = web.application(urls, globals()).wsgifunc()
 web.webapi.config.debug = False
 
+
+class DieHandler(object):
+  def GET(self):
+    logging.info('Killed by DieHandler')
+    os.abort()
 
 class RegisterHandler(object):
   def GET(self):
