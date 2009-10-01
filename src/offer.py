@@ -21,13 +21,16 @@ class Offer(object):
                                                             self.problemnumber,
                                                             self.price)
   def __cmp__(self, other):
-    return cmp(self.potential, other.potential)
+    return cmp(self.BEPDiff(), other.BEPDiff())
 
   def __repr__(self):
     return str(self)
 
   def IsGoodBuy(self):
-    return relation.break_even(self.problemnumber, 3) > self.price
+    return self.bep > self.price
+
+  def BEPDiff(self):
+    return abs(self.bep-self.price)
 
   def AvoidReoffer(self):
     return (self.price - 0.1) < 0 or (abs(self.bep-self.price) < 0.3)
