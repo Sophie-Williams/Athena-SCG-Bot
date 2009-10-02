@@ -9,6 +9,8 @@ import relation
 import relation.gen
 
 gflags.DEFINE_boolean('useproxysolve', True, 'Should proxy solve requests?')
+gflags.DEFINE_integer('problemdegree', 12, 'Degree of generated problems')
+
 FLAGS = gflags.FLAGS
 
 class Clause(object):
@@ -113,7 +115,7 @@ class Problem(object):
   @classmethod
   def Generate(cls, problemnumber, offerid, degree=None):
     if not degree:
-      degree = random.randint(4, 6)
+      degree = FLAGS.problemdegree
     p = cls(0, ['v%d' % x for x in range(0, degree)], [], offerid, 0,
             problemnumber, 0)
     for i, j, k in relation.gen.permute3(degree):
