@@ -27,6 +27,11 @@ class Game(object):
 
   def AcceptTask(self):
     logging.info('Running AcceptTask')
+
+    # Don't buy at the end of the game
+    if self.context.config.numrounds == self.context.currentround:
+      return
+
     otheroffers = list(self.context.their_offered)
     for offer in self.context.their_offered:
       if offer.price > self.context.endbalance:
