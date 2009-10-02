@@ -27,7 +27,12 @@ class Offer(object):
     return str(self)
 
   def IsGoodBuy(self):
-    return self.bep > self.price
+    if self.bep == 1:
+      return True
+    elif not self.bep:
+      return False
+    else:
+      return self.bep < self.price
 
   def BEPDiff(self):
     return abs(self.bep-self.price)
