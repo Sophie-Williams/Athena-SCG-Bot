@@ -62,4 +62,10 @@ q(uint32_t rn, int rank, int num_true_vars);
 uint32_t
 x_true_vars(int rank, int num_true_vars);
 
+
+/* Reduce a given relationship number by assigning.
+ */
+uint32_t
+reduce(uint32_t rn, int rank, int var_p, int value);
+
 #endif

@@ -8,6 +8,8 @@
 #include <math.h>
 
 #include "solve.h"
+#include "_relation.h" /* relation numbers, etc.*/
+#include "relation_consts.h"
 
 #define RAND2 (rand() % 2)
 
@@ -132,15 +134,17 @@ void
 clause_set(clause *clause, uint32_t rn, int rank, int *vars) {
     register size_t size;
     assert(clause != NULL);
-    assert(vars != NULL);
 
     size = sizeof(int) * rank;
 
     clause->rn = rn;
     clause->rank = rank;
-    clause->vars = malloc(size);
 
-    if (clause->vars == NULL) {
+    /* Short-circuit if vars is not going to change. */
+    if (vars == NULL)
+        return;
+
+    if ((clause->vars = malloc(size)) == NULL) {
         perror("malloc");
         return;
     }
@@ -159,27 +163,67 @@ clause_delete(clause *clause) {
 /* Returns the number of satisfied clauses. */
 int
 fsat(const problem * restrict problem, solution *solution) {
-    int i, j;
+    int i;
     int count = 0;
-    int t_v[5];
-    clause *c;
 
     assert(problem != NULL);
     assert(solution != NULL);
 
     /* for c in clauses */
     for (i = 0; i < problem->num_clauses; i++) {
-        c = problem->clauses+i;
         /* copy the values from the clause */
-        for (j = 0; j < c->rank; j++) {
-            t_v[j] = *(solution->values + (c->vars)[j]);
-        }
-        if (solve_value(c, to_row_number(t_v, c->rank))) {
+        if (clause_is_satisfied(problem->clauses+i, solution)) {
             count++;
         }
     }
     return count;
 }
+
+int
+clause_is_satisfied(const clause * restrict c, const solution * restrict s) {
+    int i;
+    int t_v[MAX_RANK];
+
+    assert(c != NULL);
+    assert(s != NULL);
+
+    /* copy the values from the clause */
+    for (i = 0; i < c->rank; i++) {
+        t_v[i] = CLAUSE_GET_VAR(c, s, i);
+    }
+
+    return solve_value(c, to_row_number(t_v, c->rank));
+}
+
+/* The version below should be absolutely correct as its algorithm derives
+ * from the reduce method in the edu.neu.ccs.evergreen package (Java). */
+#if 0
+int
+clause_is_satisfied_v0(const clause * restrict c, const solution * restrict s) {
+    int i;
+    uint32_t rn_temp;
+
+    assert(c != NULL);
+    assert(s != NULL);
+
+    /* 0 is not valid. */
+    if (c->rn == 0) {
+        return 0;
+    }
+
+    rn_temp = c->rn;
+
+    for (i = 0; i < c->rank; i++) {
+        rn_temp = reduce(rn_temp, c->rank, i, *(s->values+*(c->vars+i)));
+
+        if (rn_temp == get_mask(c->rank)) {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+#endif
 
 solution *
 solve(const problem * restrict p, solution *s) {
@@ -327,7 +371,7 @@ random_solve(const problem * restrict problem, solution *solution) {
  * 000 -> 0, 001 -> 1, 010 -> 2, ..., 111 -> 7
  */
 int
-solve_value(clause *clause, int assignment) {
+solve_value(const clause * restrict clause, int assignment) {
     assert(clause != NULL);
     assert(assignment >= 0);
     assert(assignment < (1 << clause->rank));
