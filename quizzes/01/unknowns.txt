@@ -1,0 +1,19 @@
+UNKNOWN # | VALUE |
+1 | Bc |
+2 | int i |
+3 |
+Cons<Variable> combine(List<Variable> c, Variable v) {
+    if (c.isEmpty()) {
+        /* Empty case (reached the end) append "dontcare" */
+        Variable dontcare = new Variable(new ident("dontcare"));
+        return new Cons<Variable>(dontcare, c);
+    }
+    else {
+        /* Recursive case, turtles all the way down. */
+        Cons<Variable> t = (Cons<Variable>)c;
+        return new Cons<Variable>(t.getFirst(),
+                                  combine(t.getRest(), v));
+    } |
+4 | Traversal |
+5 | parse |
+6 | print |

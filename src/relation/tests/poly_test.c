@@ -195,16 +195,16 @@ void print_all_p3() {
     int i;
     poly3 p;
 
-    for (i = 1; i < 256; i++) {
+    for (i = 0; i < 23; i++) {
         poly3_create(i, &p);
-        printf("%03d %12lf\n", i, find_break_even(i, 3));
+        printf("%03d %12lf\n", 2*i, find_break_even(2*i, 3));
     }
 }
 
 int main(int argc, char **argv) {
     char *result = all_tests();
 
-/*    print_all_p3();  */
+    print_all_p3();
 
     if (result != 0) {
         printf("%s\n", result);

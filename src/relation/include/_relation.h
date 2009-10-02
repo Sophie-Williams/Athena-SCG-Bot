@@ -68,4 +68,28 @@ x_true_vars(int rank, int num_true_vars);
 uint32_t
 reduce(uint32_t rn, int rank, int var_p, int value);
 
+/* Swaps two variables in a relation. When variables are swapped, The truth
+ * table order gets scrambled rows of the truth table needs to be reordered
+ * to restore the correct truth table order. Here are two exmples showing
+ * how the swap method works for two relations: 
+ *      (22 x y z) x => z
+ * We are swapping variables at positions 0, 2 i.e: x, z
+ * 
+ * (22 x y z), swap x, z
+ * x=>z
+ *   original relations   scrambled truth table   restored truth table
+ * old# x y z  22  x=>z  ||  z y x  22  x=>z  ||  z y x   22  x=>z  old#
+ * ----------------------||-------------------||-------------------------
+ * 0    0 0 0   0   1    ||  0 0 0   0   1    ||  0 0 0    0   1      0
+ * 1    0 0 1   1   1    ||  1 0 0   1   1    ||  0 0 1    1   0      4
+ * 2    0 1 0   1   1    ||  0 1 0   1   1    ||  0 1 0    1   1      2
+ * 3    0 1 1   0   1    ||  1 1 0   0   1    ||  0 1 1    0   0      6
+ * 4    1 0 0   1   0    ||  0 0 1   1   0    ||  1 0 0    1   1      1
+ * 5    1 0 1   0   1    ||  1 0 1   0   1    ||  1 0 1    0   1      5
+ * 6    1 1 0   0   0    ||  0 1 1   0   0    ||  1 1 0    0   1      3
+ * 7    1 1 1   0   1    ||  1 1 1   0   1    ||  1 1 1    0   1      7
+ */
+uint32_t
+swap(uint32_t rn, int rank, int var_p1, int var_p2);
+
 #endif
