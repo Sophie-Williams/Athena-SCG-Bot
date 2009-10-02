@@ -26,6 +26,8 @@ class Config(object):
     ps = parser.Config.searchString(input)
     if ps:
       return cls.FromParsed(ps[0])
+    else:
+      raise Exception('Configuration not found in input string')
 
   @classmethod
   def FromParsed(cls, parse_obj):
@@ -35,7 +37,8 @@ class Config(object):
 class PlayerContext(object):
   def __init__(self, config=None, their_offered=None,
                our_offered=None, accepted=None, 
-               provided=None, playerid=None, balance=None):
+               provided=None, playerid=None, currentround=None,
+               balance=None):
     self.their_offered = offer.Offer.GetOfferList(their_offered)
     self.their_offered.sort()
     self.our_offered = offer.Offer.GetOfferList(our_offered)
@@ -43,6 +46,7 @@ class PlayerContext(object):
     self.provided = problem.Problem.GetProblemList(provided)
     self.config = config
     self.playerid = int(playerid)
+    self.currentround = int(currentround)
     self.balance = float(balance)
     self.endbalance = float(self.balance)
 
@@ -51,6 +55,8 @@ class PlayerContext(object):
     ps = parser.PlayerContext.searchString(input)
     if ps:
       return cls.FromParsed(ps[0])
+    else:
+      raise Exception('PlayerContext not found in input string')
 
   @classmethod
   def FromParsed(cls, parsed):
@@ -58,4 +64,5 @@ class PlayerContext(object):
                their_offered=parsed.their_offered,
                our_offered=parsed.our_offered,
                accepted=parsed.accepted, provided=parsed.provided,
-               playerid=parsed.playerid, balance=parsed.balance)
+               playerid=parsed.playerid, currentround=parsed.currentround,
+               balance=parsed.balance)
