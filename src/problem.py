@@ -1,12 +1,15 @@
 #!/usr/bin/env python
+import gflags
 import logging
 import random
-
 
 import csptree
 import proxysolver
 import relation
 import relation.gen
+
+gflags.DEFINE_boolean('useproxysolve', True, 'Should proxy solve requests?')
+FLAGS = gflags.FLAGS
 
 class Clause(object):
   def __init__(self, number, list_of_vars):
@@ -82,7 +85,8 @@ class Problem(object):
   def Solve(self):
     logging.debug('Solving offer %d relation %d cost %0.3f'
                  % (self.challengeid, self.problemnumber, self.price))
-    return proxysolver.ProxySolve(self)
+    if FLAGS.useproxysolve:
+      return proxysolver.ProxySolve(self)
     fsat, values = self.RealSolve()
     numclauses = float(len(self.clauses))
     solperc = float(fsat)/numclauses
@@ -94,7 +98,7 @@ class Problem(object):
     logging.debug('Values are: %s' % str(values))
 
     s = csptree.csptree.CreateSolution(self.vars, values)
-    #return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
+    return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
   @classmethod
   def GenerateReasonablePrice(cls, problemnumber):

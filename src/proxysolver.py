@@ -1,8 +1,15 @@
 #!/usr/bin/env python
+import gflags
 import urllib
 import urllib2
 import urlparse
 import socket
+
+gflags.DEFINE_string('proxysolvehost', 'login-linux.ccs.neu.edu',
+                     'Machine to proxy solve requests to')
+gflags.DEFINE_integer('proxysolveport', 7001,
+                     'Machine to proxy solve requests to')
+FLAGS = gflags.FLAGS
 
 TEMPLATE="""context[
     config[
@@ -24,10 +31,10 @@ TEMPLATE="""context[
     (%s)
 ]"""
 
-HOST="login-linux:7001"
 
 def ProxySolve(problem):
-  regurl = urlparse.urlunparse(('http', HOST, '/player', '', '', ''))
+  solvehost = '%s:%d' % (FLAGS.proxysolvehost, FLAGS.proxysolveport)
+  regurl = urlparse.urlunparse(('http', solvehost, '/player', '', '', ''))
   data = TEMPLATE % problem.GetProvided()
   s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
   s.connect(('login-linux.ccs.neu.edu', 7001))
