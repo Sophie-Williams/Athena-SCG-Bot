@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 import unittest
-import parser
+import cspparser
 import playercontext
 
-class ParserTestCase(unittest.TestCase):
+class cspparserTestCase(unittest.TestCase):
 
   def test_config(self):
     s = '''config[
@@ -17,7 +17,7 @@ class ParserTestCase(unittest.TestCase):
         numrounds: 10000
         profitfactor: 1.0
         otrounds: 2]'''
-    cfg = parser.Config.searchString(s)[0]
+    cfg = cspparser.Config.searchString(s)[0]
     self.assertEqual(cfg['gamekind'], 'CSP')
     self.assertEqual(cfg['turnduration'], '60')
     self.assertEqual(cfg['initacc'], '100.0')
@@ -50,7 +50,7 @@ class ParserTestCase(unittest.TestCase):
         ()
         ()
     ]'''
-    pctx = parser.PlayerContext.searchString(s)[0]
+    pctx = cspparser.PlayerContext.searchString(s)[0]
     self.assertTrue(len(pctx) > 0)
     self.assertEqual(pctx['gamekind'], 'CSP')
     self.assertEqual(pctx['turnduration'], '60')

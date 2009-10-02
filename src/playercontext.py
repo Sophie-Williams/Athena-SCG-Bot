@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 import offer
-import parser
+import cspparser
 import problem
 
 class Config(object):
@@ -23,7 +23,7 @@ class Config(object):
 
   @classmethod
   def FromString(cls, input):
-    ps = parser.Config.searchString(input)
+    ps = cspparser.Config.searchString(input)
     if ps:
       return cls.FromParsed(ps[0])
     else:
@@ -52,7 +52,7 @@ class PlayerContext(object):
 
   @classmethod
   def FromString(cls, input):
-    ps = parser.PlayerContext.searchString(input)
+    ps = cspparser.PlayerContext.searchString(input)
     if ps:
       return cls.FromParsed(ps[0])
     else:
