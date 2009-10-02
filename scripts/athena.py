@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from athena.webserver import app
+from athena.webserver import apprunner
 
 if __name__ == '__main__':
-  app.run()
+  apprunner()
