@@ -5,7 +5,7 @@ Where a binary number is represented from MSB to LSB, e.g.
 
         10010110 == 2^1 + 2^2 + 2^4 + 2^7
 
-the rows represented by this (binary) number are (1, 4, 7)
+the rows represented by this (binary) number are (1, 2, 4, 7)
 
                   row | binary  | number
                   -----------------------
