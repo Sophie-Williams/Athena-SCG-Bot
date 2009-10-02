@@ -6,6 +6,12 @@ import web
 import os
 from web import wsgiserver
 
+## For Django Templating
+from django.template.loader import render_to_string
+from django.conf import settings
+settings.configure(TEMPLATE_DIRS=(os.path.join(os.getcwd(), 'static'),))
+
+import constants
 import game
 import util
 
@@ -21,10 +27,6 @@ urls = (
   '/diediedie', 'DieHandler',
 )
 
-app = web.application(urls, globals()).wsgifunc()
-web.webapi.config.debug = False
-
-
 class DieHandler(object):
   def GET(self):
     logging.info('Killed by DieHandler')
@@ -32,7 +34,9 @@ class DieHandler(object):
 
 class RegisterHandler(object):
   def GET(self):
-    raise web.seeother('/static/register.html')
+    return render_to_string('register.html',
+                            {'host': constants.GAMEREG_HOST,
+                             'teamname': constants.TEAM_NAME})
 
   def POST(self):
     req = web.input(host='', team='', password='')
@@ -58,6 +62,8 @@ class OkHandler(object):
 def apprunner(args=sys.argv):
   FLAGS(args)
   util.setuplogging()
+  web.webapi.config.debug = False
+  app = web.application(urls, globals()).wsgifunc()
   s = wsgiserver.CherryPyWSGIServer((FLAGS.ip, FLAGS.port), app,
                                     server_name='cs4500.server')
   s.start()
