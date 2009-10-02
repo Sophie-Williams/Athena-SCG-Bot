@@ -7,6 +7,10 @@
 #define SOURCE 0
 #define TARGET 1
 
+#define MIN_RANK 1
+#define MAX_RANK 5
+#define VALID_RANK(x) (MIN_RANK <= (x) && (x) <= MAX_RANK)
+
 
 static const uint32_t MAGIC_NUMBERS[] = {
     0x55555555, 0x33333333,

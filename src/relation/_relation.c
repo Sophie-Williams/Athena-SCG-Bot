@@ -69,3 +69,16 @@ x_true_vars(int rank, int num_true_vars) {
     assert(0 <= num_true_vars && num_true_vars < 6);
     return TRUE_VARS[rank][num_true_vars];
 }
+
+uint32_t
+reduce(uint32_t rn, int rank, int var_p, int value) {
+    uint32_t magic_num;
+    uint32_t rn_masked;
+
+    magic_num = get_magic_number(rank, var_p, value);
+    rn_masked = (rn & get_magic_number(rank, var_p, value));
+
+    if (!value)
+        return rn_masked | (rn_masked << (1 << var_p));
+    return rn_masked | (rn_masked >> (1 << var_p));
+}

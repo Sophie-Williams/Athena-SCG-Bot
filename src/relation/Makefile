@@ -18,8 +18,8 @@ poly_test: poly.o _relation.o tests/poly_test.c
 poly.o: poly.c
 	$(CC) $(CFLAGS) -lm -fPIC -I. -c -o $@ poly.c
 
-solve_test: solve.o tests/solve_test.c
-	$(CC) $(CFLAGS) -lm solve.o tests/solve_test.c -o solve_test
+solve_test: solve.o _relation.o tests/solve_test.c
+	$(CC) $(CFLAGS) -lm solve.o _relation.o tests/solve_test.c -o solve_test
 
 solve.o: solve.c
 	$(CC) $(CFLAGS) -c -o solve.o solve.c

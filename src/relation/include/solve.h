@@ -10,6 +10,11 @@
 #define IS_FALSE(x) ((x) == FALSE)
 #define IS_UNKNOWN(x) ((x) == UNKNOWN)
 
+/* CLAUSE_GET_VAR : clause *, solution *, int
+ *     returns the value of the n-th variable of the clause
+ *     according to the solution. */
+#define CLAUSE_GET_VAR(c, s, n) *((*(s)).values + ((*(c)).vars)[n])
+
 /* Data defs */
 
 /* The index of the value is corresponds to the index of the list of
@@ -54,6 +59,9 @@ solution_delete(solution *solution);
 clause *
 clause_create(uint32_t rn, int rank, int *vars);
 
+/* Set the values of a clause already in memory (or stack).
+ * If vars == NULL, vars is not changed.
+ */
 void
 clause_set(clause *clause, uint32_t rn, int rank, int *vars);
 
@@ -66,6 +74,10 @@ clause_delete(clause *clause);
 int
 fsat(const problem * restrict problem, solution *solution);
 
+/* Returns true if the clause is satisfied by the clause.  */
+int
+clause_is_satisfied(const clause * restrict c, const solution * restrict s);
+
 /* Tries to solve the problem and puts the answer in solution. Which should
  * have been created by solution_create. */
 solution *
@@ -73,7 +85,7 @@ solve(const problem * restrict problem, solution *solution);
 
 /* Return true or false based on the assignment. */
 int
-solve_value(clause *clause, int assignment);
+solve_value(const clause * restrict clause, int assignment);
 
 /* Convert the values into the row number. */
 int

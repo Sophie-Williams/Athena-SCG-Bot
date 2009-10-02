@@ -101,9 +101,62 @@ static char *test_solve_value() {
 }
 
 
+static char *test_clause_is_satisfied() {
+    clause *c;
+    solution *s;
+
+    int vars[3] = { 0, 1, 2 };
+    c = clause_create(22, 3, vars);
+    s = malloc(sizeof(solution));
+    s->values = malloc(sizeof(int) * 3);
+    *(s->values+0) = TRUE;
+    *(s->values+1) = FALSE;
+    *(s->values+2) = FALSE;
+    /* Relation Number is 22 (1in3) */
+    mu_assert("(22 v0 v1 v2) with ((v0 true) (v1 false) (v2 false) ...)",
+              clause_is_satisfied(c, s));
+    *(s->values+0) = TRUE;
+    *(s->values+1) = TRUE;
+    *(s->values+2) = FALSE;
+    mu_assert("(22 v0 v1 v2) with ((v0 true) (v1 true) (v2 false) ...)",
+              !clause_is_satisfied(c, s));
+
+    /* Relation Number is 2 (first variable is true in 3) */
+    c->rn = 2;
+    *(s->values+0) = TRUE;
+    *(s->values+1) = FALSE;
+    *(s->values+2) = FALSE;
+    mu_assert("(2 v0 v1 v2) with ((v0 true) (v1 false) (v2 false) ...)",
+              clause_is_satisfied(c, s));
+    *(s->values+0) = FALSE;
+    *(s->values+1) = TRUE;
+    *(s->values+2) = FALSE;
+    mu_assert("(2 v0 v1 v2) with ((v0 false) (v1 true) (v2 false) ...)",
+              !clause_is_satisfied(c, s));
+    
+    /* Relation Number is 16 (last variable is true in 3) */
+    c->rn = 16;
+    *(s->values+0) = TRUE;
+    *(s->values+1) = TRUE;
+    *(s->values+2) = FALSE;
+    mu_assert("(8 v0 v1 v2) with ((v0 true) (v1 true) (v2 false) ...)",
+              !clause_is_satisfied(c, s));
+    *(s->values+0) = FALSE;
+    *(s->values+1) = FALSE;
+    *(s->values+2) = TRUE;
+    mu_assert("(8 v0 v1 v2) with ((v0 false) (v1 false) (v2 true) ...)",
+              clause_is_satisfied(c, s));
+
+    clause_delete(c);
+    solution_delete(s);
+    
+    return NULL;
+}
+
 static char *all_tests() {
     mu_run_test(test_solve_value);
     mu_run_test(test_solve);
+    mu_run_test(test_clause_is_satisfied);
     return NULL;
 }
 
