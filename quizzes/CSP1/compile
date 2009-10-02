@@ -1,3 +1,0 @@
-#
-java DemeterF --build --dgp:Display:Print:ToStr program.cd program.beh ./gen
-javac *.java

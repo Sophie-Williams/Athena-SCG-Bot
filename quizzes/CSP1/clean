@@ -1,2 +1,0 @@
-rm gen/*.java
-rm gen/*.class
