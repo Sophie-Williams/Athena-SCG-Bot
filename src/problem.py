@@ -84,11 +84,7 @@ class Problem(object):
       fsat, values = c_p.solve()
     return fsat, values
 
-  def Solve(self):
-    logging.debug('Solving offer %d relation %d cost %0.3f'
-                 % (self.challengeid, self.problemnumber, self.price))
-    if FLAGS.useproxysolve:
-      return proxysolver.ProxySolve(self)
+  def GetSolution(self):
     fsat, values = self.RealSolve()
     numclauses = float(len(self.clauses))
     solperc = float(fsat)/numclauses
@@ -102,15 +98,13 @@ class Problem(object):
     s = csptree.csptree.CreateSolution(self.vars, values)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
-  @classmethod
-  def GenerateReasonablePrice(cls, problemnumber):
-    logging.debug('Generating problem for price determination')
-    p = cls.Generate(problemnumber, -1, 5)
-    logging.debug('Solving problem')
-    solved = p.RealSolve()[0]
-    numclauses = float(len(p.clauses))
-    logging.debug('Solved %d clauses of %d' % (solved, numclauses))
-    return float(solved) / numclauses
+  def Solve(self):
+    logging.debug('Solving offer %d relation %d cost %0.3f'
+                 % (self.challengeid, self.problemnumber, self.price))
+    if FLAGS.useproxysolve:
+      return proxysolver.ProxySolve(self)
+    else:
+      return self.GetSolution()
 
   @classmethod
   def Generate(cls, problemnumber, offerid, degree=None):
