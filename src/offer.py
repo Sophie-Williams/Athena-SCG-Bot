@@ -32,7 +32,7 @@ class Offer(object):
     elif not self.bep:
       return False
     else:
-      return self.bep < self.price
+      return self.bep+0.15 >= self.price
 
   def BEPDiff(self):
     return abs(self.bep-self.price)

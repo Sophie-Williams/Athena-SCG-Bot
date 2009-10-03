@@ -6,7 +6,7 @@ Parses messages to be exchanged between the player and the admin.
 __author__ = "Will Nowak <wan@ccs.neu.edu>"
 
 from pyparsing import (nums, alphanums, Word, Combine, Suppress, Literal,
-                       ZeroOrMore, QuotedString, LineEnd, Or, Group)
+                       ZeroOrMore, QuotedString, LineEnd, Or, Group, Forward)
 
 def sup_lit(expr):
   """A Suppressed Literal"""
@@ -87,7 +87,12 @@ Objective = Literal("[]")
 Predicate = Literal("[]")
 ChallengeList = wrap(List(Challenge), "(", ")")
 
-
+TrueFalse = Or([Literal('true'), Literal('false')])
+TreeColor = Or([Literal('red'), Literal('black')])
+TreeNode = Forward()
+TreeNode << wrap(sup_lit("node") + TreeColor +
+                  Group(wrap(Var + sup_lit('->') + TrueFalse, '(',')'))
+                 + ZeroOrMore(TreeNode) + ZeroOrMore(TreeNode), '(', ')')
 # Describes the five transactions
 OfferTrans = Suppress("offer") + wrap(ProblemType("pred") + Double("price"))
 AcceptTrans = Suppress("accept") + wrap(Integer("challengeid"))

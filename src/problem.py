@@ -9,7 +9,8 @@ import proxysolver
 import relation
 import relation.gen
 
-gflags.DEFINE_boolean('useproxysolve', False, 'Should proxy solve requests?')
+gflags.DEFINE_enum('solver', 'python', ['proxy', 'python', 'c'],
+                   'Problem solver to use')
 gflags.DEFINE_integer('problemdegree', 12, 'Degree of generated problems')
 
 FLAGS = gflags.FLAGS
@@ -51,22 +52,6 @@ class Problem(object):
   def __repr__(self):
     return str(self)
 
-  def GetVariableValue(self, var, solution):
-    ind = self.vars.index(var)
-    return solution[ind]
-
-  def IsClauseSat(self, clause, solution):
-    relnum = clause.problemnumber
-    i = 0
-    for var in clause.vars:
-      if relnum == 0:
-        return False
-      if relnum == 255:
-        return True
-      val = self.GetVariableValue(var, solution)
-      relnum = relation.reduce(relnum, 3, i, val)
-      i += 1
-
   def AddClauses(self, clauselist):
     for clause in clauselist:
       self.AddClause(Clause(clause[0], clause[1:]))
@@ -106,28 +91,46 @@ class Problem(object):
         
     return fsat, values
 
+  def GetVariableValue(self, var, solution):
+    ind = self.vars.index(var)
+    return solution[ind]
+
+  def IsClauseSat(self, clause, solution):
+    relnum = clause.problemnumber
+    i = 0
+    for var in clause.vars:
+      val = self.GetVariableValue(var, solution)
+      relnum = relation.reduce(relnum, 3, i, val)
+      if relnum == 0:
+        return False
+      if relnum == 255:
+        return True
+      i += 1
+
   def PercentSat(self, solution):
-    totalsat = 0.0
+    totalsat = 0
     for clause in self.clauses:
       if self.IsClauseSat(clause, solution):
         totalsat += 1
-    return float(totalsat)/float(len(self.clauses))
+    return (totalsat, len(self.clauses))
 
   def PySolve(self):
     best = None
     for solution in itertools.product(range(2), repeat=len(self.vars)):
-      perc = self.PercentSat(solution)
+      sat, tot = self.PercentSat(solution)
+      perc = float(sat)/float(tot)
       if best is None:
-        best = (perc, solution)
+        best = (perc, sat, solution)
       elif perc > best[0]: 
-        best = (perc, solution)
+        best = (perc, sat, solution)
     return best
 
   def GetPySolution(self):
-    perc, solution = self.PySolve()
+    perc, sat, solution = self.PySolve()
     profit = perc-self.price
-    logging.info('Solved %0.3f%% (%0.3f - %0.3f = %0.3f profit)'
-                  % (perc, perc, self.price, profit))
+    logging.info('Solved %d %0.3f%% (%0.3f - %0.3f = %0.3f profit)'
+                  % (sat, perc*100, perc, self.price, profit))
+    logging.info('Using solution: %s' % str(solution))
     if profit < 0:
       logging.error('Lost money on %s' % str(self))
     s = csptree.csptree.CreateSolution(self.vars, solution)
@@ -150,7 +153,9 @@ class Problem(object):
   def Solve(self):
     logging.debug('Solving offer %d relation %d cost %0.3f'
                  % (self.challengeid, self.problemnumber, self.price))
-    if FLAGS.useproxysolve:
+    if FLAGS.solver == 'c':
+      return self.GetSolution()
+    elif FLAGS.solver == 'proxy':
       return proxysolver.ProxySolve(self)
     else:
       return self.GetPySolution()
