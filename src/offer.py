@@ -20,11 +20,14 @@ class Offer(object):
                                                             self.playerid,
                                                             self.problemnumber,
                                                             self.price)
+  def __repr__(self):
+    return str(self)
+
   def __cmp__(self, other):
     return cmp(self.BEPDiff(), other.BEPDiff())
 
-  def __repr__(self):
-    return str(self)
+  def BEPDiff(self):
+    return abs(self.bep-self.price)
 
   def IsGoodBuy(self):
     if self.bep == 1:
@@ -33,9 +36,6 @@ class Offer(object):
       return False
     else:
       return self.bep+0.15 >= self.price
-
-  def BEPDiff(self):
-    return abs(self.bep-self.price)
 
   def AvoidReoffer(self):
     return (self.price - 0.1) < 0 or (abs(self.bep-self.price) < 0.3)

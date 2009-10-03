@@ -32,7 +32,8 @@ class Clause(object):
 
   def __eq__(self, other):
     try:
-      return self.GetTuple() == other.GetTuple()
+      return (self.vars == other.vars
+              and self.problemnumber == other.problemnumber)
     except:
       return False
 
