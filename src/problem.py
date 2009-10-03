@@ -12,6 +12,8 @@ import relation.gen
 gflags.DEFINE_enum('solver', 'c', ['proxy', 'python', 'c'],
                    'Problem solver to use')
 gflags.DEFINE_integer('problemdegree', 13, 'Degree of generated problems')
+gflags.DEFINE_float('pricemarkup', 0.29999,
+                    'What markup to add to our maxsat for offers')
 gflags.DEFINE_string('showproxysolution', False,
                      'Show proxy solution and real solution messages')
 
@@ -227,7 +229,7 @@ class Problem(object):
     fsat, values = p.RealSolve()
     numclauses = float(len(p.clauses))
     perc = float(fsat)/numclauses
-    newprice = float(perc) + 0.29999
+    newprice = float(perc) + FLAGS.pricemarkup
     if newprice >= 1:
       return 1.0
     else:

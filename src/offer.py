@@ -1,9 +1,15 @@
 #!/usr/bin/env python
+import gflags
 import logging
 import random
 
 import relation
 import problem
+
+gflags.DEFINE_float('bepbump', 0.15, 'Buy offers where `price <= bep+this`')
+gflags.DEFINE_float('avoidreofferdiff', 0.3,
+                    'Avoid reoffer if abs(bep-price) <= this')
+FLAGS = gflags.FLAGS
 
 class Offer(object):
   def __init__(self, offerid, playerid, problemnumber, price):
@@ -35,10 +41,11 @@ class Offer(object):
     elif not self.bep:
       return False
     else:
-      return self.bep+0.15 >= self.price
+      return self.bep+FLAGS.bepbump >= self.price
 
-  def AvoidReoffer(self):
-    return (self.price - 0.1) < 0 or (abs(self.bep-self.price) < 0.3)
+  def AvoidReoffer(self, mindecrement=0.1):
+    return ((self.price - mindecrement) < 0
+            or (abs(self.bep-self.price) <= FLAGS.avoidreofferdiff))
 
   def GetReoffer(self, decrement=0.1):
     return 'reoffer[%d %0.18f]' % (self.offerid, self.price - decrement)

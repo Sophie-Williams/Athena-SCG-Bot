@@ -8,7 +8,7 @@ import socket
 gflags.DEFINE_string('proxysolvehost', 'login-linux.ccs.neu.edu',
                      'Machine to proxy solve requests to')
 gflags.DEFINE_integer('proxysolveport', 7001,
-                     'Machine to proxy solve requests to')
+                     'TCP port to proxy solve requests to')
 FLAGS = gflags.FLAGS
 
 TEMPLATE="""context[
