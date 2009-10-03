@@ -6,15 +6,16 @@ import problem
 class Config(object):
 
   def __init__(self, gamekind=None, turnduration=None, mindecrement=None,
-               initacc=None, objective=None, predicate=None, numrounds=None,
-               profitfactor=None, otrounds=None):
-    """
-    A Config object with type enforcement.
-    """
+               initacc=None, maxOffers=None, objective=None, predicate=None,
+               numrounds=None, profitfactor=None, otrounds=None,
+               maxClauses=None):
+    """A Config object with type enforcement."""
     self.gamekind = gamekind
     self.turnduration = int(turnduration)
     self.mindecrement = float(mindecrement)
     self.initacc = float(initacc)
+    self.maxoffers = int(maxOffers)
+    self.maxclauses = int(maxClauses)
     self.objective = objective
     self.predicate = predicate
     self.numrounds = int(numrounds)

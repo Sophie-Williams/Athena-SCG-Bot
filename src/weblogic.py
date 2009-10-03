@@ -67,6 +67,3 @@ def apprunner(args=sys.argv):
   s = wsgiserver.CherryPyWSGIServer((FLAGS.ip, FLAGS.port), app,
                                     server_name='cs4500.server')
   s.start()
-
-if __name__ == '__main__':
-  apprunner()

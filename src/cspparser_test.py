@@ -12,8 +12,9 @@ class cspparserTestCase(unittest.TestCase):
         turnduration: 60
         mindecrement: 0.01
         initacc: 100.0
+        maxOffers: 5
         objective: []
-        predicate: []
+        predicate: [2000]
         numrounds: 10000
         profitfactor: 1.0
         otrounds: 2]'''
@@ -21,7 +22,7 @@ class cspparserTestCase(unittest.TestCase):
     self.assertEqual(cfg['gamekind'], 'CSP')
     self.assertEqual(cfg['turnduration'], '60')
     self.assertEqual(cfg['initacc'], '100.0')
-    self.assertEqual(cfg['predicate'], '[]')
+    self.assertEqual(cfg['predicate']['maxClauses'], '2000')
     self.assertEqual(cfg['objective'], '[]')
     self.assertEqual(cfg['numrounds'], '10000')
     self.assertEqual(cfg['profitfactor'], '1.0')
@@ -37,8 +38,9 @@ class cspparserTestCase(unittest.TestCase):
         turnduration: 60
         mindecrement: 0.01
         initacc: 100.0
+        maxOffers: 5
         objective: []
-        predicate: []
+        predicate: [2000]
         numrounds: 10000
         profitfactor: 1.0
         otrounds: 2]
@@ -56,8 +58,9 @@ class cspparserTestCase(unittest.TestCase):
     self.assertEqual(pctx['turnduration'], '60')
     self.assertEqual(pctx['mindecrement'], '0.01')
     self.assertEqual(pctx['initacc'], '100.0')
-    self.assertEqual(pctx[4], '[]')
-    self.assertEqual(pctx[5], '[]')
+    self.assertEqual(pctx['maxOffers'], '5')
+    self.assertEqual(pctx['objective'], '[]')
+    self.assertEqual(pctx['predicate']['maxClauses'], '2000')
     self.assertEqual(pctx['numrounds'], '10000')
     self.assertEqual(pctx['otrounds'], '2')
     self.assertEqual(pctx['playerid'], '101')

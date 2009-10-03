@@ -84,7 +84,7 @@ Challenge = ( Or([OfferedChallenge, AcceptedChallenge, ProvidedChallenge,
                   SolvedChallenge]) )
 
 Objective = Literal("[]")
-Predicate = Literal("[]")
+Predicate = wrap(Integer("maxClauses"))
 ChallengeList = wrap(List(Challenge), "(", ")")
 
 TrueFalse = Or([Literal('true'), Literal('false')])
@@ -94,7 +94,7 @@ TreeNode << wrap(sup_lit("node") + TreeColor +
                   Group(wrap(Var + sup_lit('->') + TrueFalse, '(',')'))
                  + ZeroOrMore(TreeNode) + ZeroOrMore(TreeNode), '(', ')')
 # Describes the five transactions
-OfferTrans = Suppress("offer") + wrap(ProblemType("pred") + Double("price"))
+OfferTrans = Suppress("offer") + wrap(Integer("challengeid") + ProblemType("pred") + Double("price"))
 AcceptTrans = Suppress("accept") + wrap(Integer("challengeid"))
 ProvideTrans = Suppress("provide") + wrap(Integer("challengeid"))
 SolveTrans = Suppress("solve") + wrap(Integer("challengeid"))
@@ -114,6 +114,7 @@ Config = (sup_lit("config") + wrap(L
           + KeyAndValue("turnduration", Integer) + L
           + KeyAndValue("mindecrement", Double) + L
           + KeyAndValue("initacc", Double) + L
+          + KeyAndValue("maxOffers", Integer) + L
           + KeyAndValue("objective", Objective) + L
           + KeyAndValue("predicate", Predicate) + L
           + KeyAndValue("numrounds", Integer) + L

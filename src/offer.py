@@ -48,14 +48,25 @@ class Offer(object):
             or (abs(self.bep-self.price) <= FLAGS.avoidreofferdiff))
 
   def GetReoffer(self, decrement=0.1):
+    """Generate a ReofferTrans from this offer.
+    
+    Args:
+       decrement: (float) Reoffer at the current price minus this number
+    """
     return 'reoffer[%d %0.18f]' % (self.offerid, self.price - decrement)
 
   def GetAccept(self):
+    """Generate an AcceptTrans from this offer.
+    Also set actedon to true so we can find out if we accepted any offers.
+    """
     self.actedon = True
     return 'accept[%d]' % (self.offerid)
 
   def GetOffer(self):
-    return 'offer[( %d) %0.8f]' % (self.problemnumber, self.price)
+    """Generate an OfferTrans from this offer.
+    Note: -1 is a fake constant, it gets replaced by the Admin.
+    """
+    return 'offer[-1 ( %d) %0.8f]' % (self.problemnumber, self.price)
 
   @classmethod
   def GetOfferList(cls, parsedlist):
