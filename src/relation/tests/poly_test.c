@@ -4,6 +4,7 @@
 #include "poly.h"
 
 int tests_run = 0;
+int asserts = 0;
 
 #define DELTA 0.001
 #define IN_RANGE(actual, expected) \
@@ -15,22 +16,18 @@ static char *test_poly3_create() {
 
     poly3_create(10, &p);
     POLY3(test, 0, -1, 1, 0); 
-    mu_assert("RN 10 -> 001 + 011",
-              POLY3_EQUAL(p, test));
+    mu_assert("RN 10 -> 001 + 011", POLY3_EQUAL(p, test));
 
     poly3_create(78, &p);
     POLY3(test, 0, -2, 2, 0);
-    mu_assert("RN 78 -> 101 011 010 001",
-              POLY3_EQUAL(p, test));
+    mu_assert("RN 78 -> 101 011 010 001", POLY3_EQUAL(p, test));
 
     poly3_create(255, &p);
     POLY3(test, 0, 0, 0, 1);
-    mu_assert("RN 255 -> ALL",
-              POLY3_EQUAL(p, test));
+    mu_assert("RN 255 -> ALL", POLY3_EQUAL(p, test));
 
     return NULL;
 }
-
 
 static char *test_poly3_get_maximum() {
     pair_double pd;
@@ -53,18 +50,20 @@ static char *test_poly3_get_maximum() {
     poly3_get_maximum(&p2, &pd);
     mu_assert("The 12 case. (two 0's one 1's)",
               IN_RANGE(pd.first, 0.148148) || IN_RANGE(pd.last, 0.148148));
+
     poly3_get_maximum(&p3, &pd);
     mu_assert("The 21 case. (one 0's two 1's)",
               IN_RANGE(pd.first, 0.148148) || IN_RANGE(pd.last, 0.148148));
+
     poly3_get_maximum(&p4, &pd);
     mu_assert("The 30 case. (three 1's)",
               IN_RANGE(pd.first, 0.0) || IN_RANGE(pd.last, 0.0));
+
     poly3_get_maximum(&p5, &pd);
     mu_assert("10 -> 2^3 + 2^1 -> 001, 011",
               IN_RANGE(pd.first, 0.25) || IN_RANGE(pd.last, 0.25));
     return NULL;
 }
-
 
 static char *test_poly3_eval() {
     poly3 p;
@@ -180,7 +179,7 @@ static char *test_poly_synth_div() {
     return NULL;
 }
 
-static char *all_tests() {
+char *all_tests() {
     mu_run_test(test_poly3_get_maximum);
     mu_run_test(test_poly3_create);
     mu_run_test(test_poly3_eval);
@@ -188,31 +187,4 @@ static char *all_tests() {
     mu_run_test(test_poly_new);
     mu_run_test(test_poly_synth_div);
     return NULL;
-}
-
-void print_all_p3();
-void print_all_p3() {
-    int i;
-    poly3 p;
-
-    for (i = 0; i < 23; i++) {
-        poly3_create(i, &p);
-        printf("%03d %12lf\n", 2*i, find_break_even(2*i, 3));
-    }
-}
-
-int main(int argc, char **argv) {
-    char *result = all_tests();
-
-/*    print_all_p3();*/
-
-    if (result != 0) {
-        printf("%s\n", result);
-    }
-    else {
-        printf("ALL TESTS PASSED\n");
-    }
-    printf("Tests run: %d\n", tests_run);
-
-    return result != 0;
 }

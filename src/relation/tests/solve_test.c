@@ -6,6 +6,7 @@
 #include "solve.h"
 
 int tests_run = 0;
+int asserts = 0;
 
 static char *test_solve() {
     problem *p;
@@ -54,52 +55,41 @@ static char *test_solve_value() {
     c.rank = 3;
     c.vars = NULL;
 
-    mu_assert("RN 22, assign 0 (000)",
-              solve_value(&c, 0) == 0);
-    mu_assert("RN 22, assign 1 (001)",
-              solve_value(&c, 1) == 1);
-    mu_assert("RN 22, assign 2 (010)",
-              solve_value(&c, 2) == 1);
-    mu_assert("RN 22, assign 3 (011)",
-              solve_value(&c, 3) == 0);
-    mu_assert("RN 22, assign 4 (100)",
-              solve_value(&c, 4) == 1);
-    mu_assert("RN 22, assign 5 (101)",
-              solve_value(&c, 5) == 0);
-    mu_assert("RN 22, assign 6 (110)",
-              solve_value(&c, 6) == 0);
-    mu_assert("RN 22, assign 7 (111)",
-              solve_value(&c, 7) == 0);
+    mu_assert("RN 22, assign 0 (000)", solve_value(&c, 0) == 0);
+    mu_assert("RN 22, assign 1 (001)", solve_value(&c, 1) == 1);
+    mu_assert("RN 22, assign 2 (010)", solve_value(&c, 2) == 1);
+    mu_assert("RN 22, assign 3 (011)", solve_value(&c, 3) == 0);
+    mu_assert("RN 22, assign 4 (100)", solve_value(&c, 4) == 1);
+    mu_assert("RN 22, assign 5 (101)", solve_value(&c, 5) == 0);
+    mu_assert("RN 22, assign 6 (110)", solve_value(&c, 6) == 0);
+    mu_assert("RN 22, assign 7 (111)", solve_value(&c, 7) == 0);
 
     c.rn = 60;
     c.rank = 3;
     
-    mu_assert("RN 60, assign 0 (000)",
-              solve_value(&c, 0) == 0);
-    mu_assert("RN 60, assign 1 (001)",
-              solve_value(&c, 1) == 0);
-    mu_assert("RN 60, assign 2 (010)",
-              solve_value(&c, 2) == 1);
-    mu_assert("RN 60, assign 3 (011)",
-              solve_value(&c, 3) == 1);
-    mu_assert("RN 60, assign 4 (100)",
-              solve_value(&c, 4) == 1);
-    mu_assert("RN 60, assign 5 (101)",
-              solve_value(&c, 5) == 1);
-    mu_assert("RN 60, assign 6 (110)",
-              solve_value(&c, 6) == 0);
-    mu_assert("RN 60, assign 7 (111)",
-              solve_value(&c, 7) == 0);
+    mu_assert("RN 60, assign 0 (000)", solve_value(&c, 0) == 0);
+    mu_assert("RN 60, assign 1 (001)", solve_value(&c, 1) == 0);
+    mu_assert("RN 60, assign 2 (010)", solve_value(&c, 2) == 1);
+    mu_assert("RN 60, assign 3 (011)", solve_value(&c, 3) == 1);
+    mu_assert("RN 60, assign 4 (100)", solve_value(&c, 4) == 1);
+    mu_assert("RN 60, assign 5 (101)", solve_value(&c, 5) == 1);
+    mu_assert("RN 60, assign 6 (110)", solve_value(&c, 6) == 0);
+    mu_assert("RN 60, assign 7 (111)", solve_value(&c, 7) == 0);
 
     c.rn = 1;
     c.rank = 3;
     
-    mu_assert("RN 1, assign 0 (000)",
-              solve_value(&c, 0) == 1);
+    mu_assert("RN 1, assign 0 (000)", solve_value(&c, 0) == 1);
+    mu_assert("RN 1, assign 1 (001)", solve_value(&c, 1) == 0);
+    mu_assert("RN 1, assign 2 (010)", solve_value(&c, 2) == 0);
+    mu_assert("RN 1, assign 3 (011)", solve_value(&c, 3) == 0);
+    mu_assert("RN 1, assign 4 (100)", solve_value(&c, 4) == 0);
+    mu_assert("RN 1, assign 5 (101)", solve_value(&c, 5) == 0);
+    mu_assert("RN 1, assign 6 (110)", solve_value(&c, 6) == 0);
+    mu_assert("RN 1, assign 7 (111)", solve_value(&c, 7) == 0);
 
     return NULL;
 }
-
 
 static char *test_clause_is_satisfied() {
     clause *c;
@@ -153,23 +143,9 @@ static char *test_clause_is_satisfied() {
     return NULL;
 }
 
-static char *all_tests() {
+char *all_tests() {
     mu_run_test(test_solve_value);
     mu_run_test(test_solve);
     mu_run_test(test_clause_is_satisfied);
     return NULL;
-}
-
-int main(int argc, char **argv) {
-    char *result = all_tests();
-
-    if (result != 0) {
-        printf("%s\n", result);
-    }
-    else {
-        printf("ALL TESTS PASSED\n");
-    }
-    printf("Tests run: %d\n", tests_run);
-
-    return result != 0;
 }
