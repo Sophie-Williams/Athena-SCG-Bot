@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import gflags
+import itertools
 import logging
 import random
 
@@ -8,7 +9,7 @@ import proxysolver
 import relation
 import relation.gen
 
-gflags.DEFINE_boolean('useproxysolve', True, 'Should proxy solve requests?')
+gflags.DEFINE_boolean('useproxysolve', False, 'Should proxy solve requests?')
 gflags.DEFINE_integer('problemdegree', 12, 'Degree of generated problems')
 
 FLAGS = gflags.FLAGS
@@ -34,7 +35,7 @@ class Problem(object):
   def __init__(self, buyer, list_of_vars, clauselist, challengeid, seller,
                problemnumber, price):
     self.buyer = int(buyer)
-    self.vars = list_of_vars
+    self.vars = list(list_of_vars)
     self.clauses = []
     self.AddClauses(clauselist)
     self.challengeid = int(challengeid)
@@ -50,6 +51,22 @@ class Problem(object):
   def __repr__(self):
     return str(self)
 
+  def GetVariableValue(self, var, solution):
+    ind = self.vars.index(var)
+    return solution[ind]
+
+  def IsClauseSat(self, clause, solution):
+    relnum = clause.problemnumber
+    i = 0
+    for var in clause.vars:
+      if relnum == 0:
+        return False
+      if relnum == 255:
+        return True
+      val = self.GetVariableValue(var, solution)
+      relnum = relation.reduce(relnum, 3, i, val)
+      i += 1
+
   def AddClauses(self, clauselist):
     for clause in clauselist:
       self.AddClause(Clause(clause[0], clause[1:]))
@@ -60,13 +77,13 @@ class Problem(object):
   def GetProvide(self):
     return ('provide[%s %s %d]'
             % (' '.join(self.vars),
-                ' '.join([x.GetProvideBlob() for x in self.clauses]),
-                self.challengeid))
+               ' '.join([x.GetProvideBlob() for x in self.clauses]),
+               self.challengeid))
 
   def GetProvided(self):
     return ('provided[%d %s %s %d %d (%d ) %0.8f]'
             % (self.buyer, ' '.join(self.vars),
-                ' '.join([x.GetProvideBlob() for x in self.clauses]),
+               ' '.join([x.GetProvideBlob() for x in self.clauses]),
                self.challengeid, self.seller, self.problemnumber, self.price))
 
   def RealSolve(self):
@@ -82,7 +99,39 @@ class Problem(object):
       c_p = relation.Problem(tuple(self.vars),
                             [x.GetTuple() for x in self.clauses])
       fsat, values = c_p.solve()
+      fsat = 0
+      for x in self.clauses:
+        if self.IsClauseSat(x, values):
+          fsat += 1
+        
     return fsat, values
+
+  def PercentSat(self, solution):
+    totalsat = 0.0
+    for clause in self.clauses:
+      if self.IsClauseSat(clause, solution):
+        totalsat += 1
+    return float(totalsat)/float(len(self.clauses))
+
+  def PySolve(self):
+    best = None
+    for solution in itertools.product(range(2), repeat=len(self.vars)):
+      perc = self.PercentSat(solution)
+      if best is None:
+        best = (perc, solution)
+      elif perc > best[0]: 
+        best = (perc, solution)
+    return best
+
+  def GetPySolution(self):
+    perc, solution = self.PySolve()
+    profit = perc-self.price
+    logging.info('Solved %0.3f%% (%0.3f - %0.3f = %0.3f profit)'
+                  % (perc, perc, self.price, profit))
+    if profit < 0:
+      logging.error('Lost money on %s' % str(self))
+    s = csptree.csptree.CreateSolution(self.vars, solution)
+    return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
   def GetSolution(self):
     fsat, values = self.RealSolve()
@@ -104,7 +153,7 @@ class Problem(object):
     if FLAGS.useproxysolve:
       return proxysolver.ProxySolve(self)
     else:
-      return self.GetSolution()
+      return self.GetPySolution()
 
   @classmethod
   def Generate(cls, problemnumber, offerid, degree=None):

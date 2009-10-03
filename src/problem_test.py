@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 import unittest
+import logging
+
 import problem
+logging.basicConfig(level=logging.DEBUG)
 
 #TODO(wan): Write tests.
 class ProblemTestCase(unittest.TestCase):
