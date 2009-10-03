@@ -9,9 +9,9 @@ import proxysolver
 import relation
 import relation.gen
 
-gflags.DEFINE_enum('solver', 'python', ['proxy', 'python', 'c'],
+gflags.DEFINE_enum('solver', 'c', ['proxy', 'python', 'c'],
                    'Problem solver to use')
-gflags.DEFINE_integer('problemdegree', 12, 'Degree of generated problems')
+gflags.DEFINE_integer('problemdegree', 13, 'Degree of generated problems')
 gflags.DEFINE_string('showproxysolution', False,
                      'Show proxy solution and real solution messages')
 
@@ -217,6 +217,21 @@ class Problem(object):
     for i, j, k in relation.gen.permute3(degree):
       p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
     return p
+ 
+  @classmethod
+  def MarkupOffer(cls, problemnumber):
+    if problemnumber == 1 or problemnumber%2 or problemnumber <= 128:
+      return 1.0
+    p = cls.Generate(problemnumber, -1)
+    #perc, _, _ = p.PySolve()
+    fsat, values = p.RealSolve()
+    numclauses = float(len(p.clauses))
+    perc = float(fsat)/numclauses
+    newprice = float(perc) + 0.29999
+    if newprice >= 1:
+      return 1.0
+    else:
+      return newprice
 
   @classmethod
   def GetProblemList(cls, parsedlist):

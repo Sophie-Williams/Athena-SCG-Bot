@@ -69,7 +69,7 @@ class Offer(object):
       return False
     else:
       logging.debug('Got problem number %d to generate' % problemnumber)
-      price = 1
+      price = problem.Problem.MarkupOffer(problemnumber)
       return cls(-1, -1, problemnumber, price)
 
   @classmethod
