@@ -12,24 +12,53 @@ import relation.gen
 gflags.DEFINE_enum('solver', 'python', ['proxy', 'python', 'c'],
                    'Problem solver to use')
 gflags.DEFINE_integer('problemdegree', 12, 'Degree of generated problems')
+gflags.DEFINE_string('showproxysolution', False,
+                     'Show proxy solution and real solution messages')
 
 FLAGS = gflags.FLAGS
 
 class Clause(object):
+  """Represents a CSP problem clause."""
+
   def __init__(self, number, list_of_vars):
+    """Initialize a clause.
+
+    Args:
+       number: (int) problem (relation) number
+       list_of_vars: (list) list of clause variables like v1, v2, v3
+    """
     self.problemnumber = int(number)
     self.vars = list_of_vars
 
+  def __eq__(self, other):
+    try:
+      return self.GetTuple() == other.GetTuple()
+    except:
+      return False
+
   def __str__(self):
+    """Get a human readable string representing this clause."""
     return 'Clause(num=%d, vars=%s)' % (self.problemnumber, str(self.vars))
 
   def __repr__(self):
+    """Get a human readable representation of this clause."""
     return str(self)
 
   def GetTuple(self):
+    """Get a Tuple representing this clause.
+
+    Returns:
+      A tuple in the form (problemnumber, var1, var2, var3, ...)
+    """
     return tuple([self.problemnumber]+self.vars)
 
   def GetProvideBlob(self):
+    """Get a provide[] blob representing this clause.
+
+    Used by the Problem class to generate problem provide messages.
+    Returns:
+      A string in the form "(problemnumber var1 var2 var3 ...)"
+    """
     return '(%d %s )' % (self.problemnumber, ' '.join(self.vars))
 
 class Problem(object):
@@ -119,10 +148,17 @@ class Problem(object):
     for solution in itertools.product(range(2), repeat=len(self.vars)):
       sat, tot = self.PercentSat(solution)
       perc = float(sat)/float(tot)
-      if best is None:
+
+      # if we satisfy everything, don't keep looping
+      if sat == tot:
+        return (perc, sat, solution)
+
+      elif best is None:
         best = (perc, sat, solution)
+
       elif perc > best[0]: 
         best = (perc, sat, solution)
+
     return best
 
   def GetPySolution(self):
@@ -133,14 +169,10 @@ class Problem(object):
     logging.info('Using solution: %s' % str(solution))
     if profit < 0:
       logging.error('Lost money on %s' % str(self))
-      f = cspparser.TreeNode.searchString(proxysolver.ProxySolve(self))
-      p = filter(lambda x: type(x) == type([]), f.asList()[0])
-      p.sort()
-      logging.info('Proxy solution was: %s' % str(p))
     s = csptree.csptree.CreateSolution(self.vars, solution)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
-  def GetSolution(self):
+  def GetCSolution(self):
     fsat, values = self.RealSolve()
     numclauses = float(len(self.clauses))
     solperc = float(fsat)/numclauses
@@ -154,21 +186,25 @@ class Problem(object):
     s = csptree.csptree.CreateSolution(self.vars, values)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
+  def GetProxySolution(self):
+    return proxysolver.ProxySolve(self)
+
   def DoSolve(self):
     logging.debug('Solving offer %d relation %d cost %0.3f'
                  % (self.challengeid, self.problemnumber, self.price))
     if FLAGS.solver == 'c':
-      return self.GetSolution()
+      return self.GetCSolution()
     elif FLAGS.solver == 'proxy':
-      return proxysolver.ProxySolve(self)
+      return self.GetProxySolution()
     else:
       return self.GetPySolution()
 
   def Solve(self):
-    ps = proxysolver.ProxySolve(self)
     rs = self.DoSolve()
-    logging.info('Proxy solution: %s' % ps)
-    logging.info('Real solution: %s' % rs)
+    if FLAGS.showproxysolution:
+      logging.debug('Real solution: %s' % rs)
+      ps = proxysolver.ProxySolve(self)
+      logging.debug('Proxy solution: %s' % ps)
     return rs
 
   @classmethod
