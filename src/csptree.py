@@ -1,9 +1,8 @@
 import rbtree
 
-vars1 = ['v1', 'v2', 'v3', 'v4']
-data1 = [1,0,1,1]
+COLORMAP = {0: 'black', 1: 'red'}
 
-class cspnode(rbtree.rbnode):
+class CSPNode(rbtree.rbnode):
   def __init__(self, key, value):
     rbtree.rbnode.__init__(self, key)
     self._value = value
@@ -11,22 +10,18 @@ class cspnode(rbtree.rbnode):
   value = property(fget=lambda self: self._value, doc="value data")
 
   def __str__(self):
-    clrmap = {0:'black', 1:'red'}
-    if str(self._right) == 'None':
-      r = ''
-    else:
-      r = str(self._right)
-    if str(self._left) == 'None':
-      l = ''
-    else:
+    l = r = ''
+    if str(self._left) != 'None':
       l = str(self._left)
+    if str(self._right) != 'None':
+      r = str(self._right)
     return ('(node %s (%s -> %s) %s %s)'
-            % (clrmap[self._red], self._key, self._value, l, r))
+            % (COLORMAP[self._red], self._key, self._value, l, r))
 
-class csptree(rbtree.rbtree):
+class CSPTree(rbtree.rbtree):
 
   def insert_keyvalue(self, key, value):
-    self.insert_node(cspnode(key, value))
+    self.insert_node(CSPNode(key, value))
 
   @classmethod
   def CreateSolution(cls, vars, data):
@@ -39,5 +34,3 @@ class csptree(rbtree.rbtree):
 
   def __str__(self):
     return str(self.root)
-
-s = csptree.CreateSolution(vars1, data1)

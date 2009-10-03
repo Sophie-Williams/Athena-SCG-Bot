@@ -172,7 +172,7 @@ class Problem(object):
     logging.info('Using solution: %s' % str(solution))
     if profit < 0:
       logging.error('Lost money on %s' % str(self))
-    s = csptree.csptree.CreateSolution(self.vars, solution)
+    s = csptree.CSPTree.CreateSolution(self.vars, solution)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
   def GetCSolution(self):
@@ -186,7 +186,7 @@ class Problem(object):
       logging.error('Lost money on %s' % str(self))
     logging.debug('Values are: %s' % str(values))
 
-    s = csptree.csptree.CreateSolution(self.vars, values)
+    s = csptree.CSPTree.CreateSolution(self.vars, values)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
   def GetProxySolution(self):
