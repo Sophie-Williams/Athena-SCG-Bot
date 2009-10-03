@@ -14,11 +14,17 @@ gflags.DEFINE_enum('loglevel', 'info',
 
 FLAGS = gflags.FLAGS
 
-def DoRegistration(server, ourport, ourteam, ourpass):
+def GetPlayerSpec(teamname, teamport):
+  return 'playerspec["%s" "auto" %d]' % (teamname, teamport)
+
+def GetRegistrationURL(server, password):
   reghost = '%s:%s' % (server, constants.GAMEREG_PORT)
-  regurl = urlparse.urlunparse(('http', reghost, '/register', '',
-                                urllib.urlencode({'password': ourpass}), ''))
-  regdata = 'playerspec["%s" "auto" %d]' % (ourteam, ourport)
+  return urlparse.urlunparse(('http', reghost, '/register', '',
+                              urllib.urlencode({'password': password}), ''))
+
+def DoRegistration(server, ourport, ourteam, ourpass):
+  regdata = GetPlayerSpec(ourteam, ourport)
+  regurl  = GetRegistrationURL(server, ourpass)
   req = urllib2.Request(regurl, regdata)
   try:
     resp = urllib2.urlopen(req).read()
