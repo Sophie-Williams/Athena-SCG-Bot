@@ -21,7 +21,7 @@ class cspnode(rbtree.rbnode):
     else:
       l = str(self._left)
     return ('(node %s (%s -> %s) %s %s)'
-            % (clrmap[self._red], self._key, self._value, r, l))
+            % (clrmap[self._red], self._key, self._value, l, r))
 
 class csptree(rbtree.rbtree):
 

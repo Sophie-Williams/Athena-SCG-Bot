@@ -133,6 +133,10 @@ class Problem(object):
     logging.info('Using solution: %s' % str(solution))
     if profit < 0:
       logging.error('Lost money on %s' % str(self))
+      f = cspparser.TreeNode.searchString(proxysolver.ProxySolve(self))
+      p = filter(lambda x: type(x) == type([]), f.asList()[0])
+      p.sort()
+      logging.info('Proxy solution was: %s' % str(p))
     s = csptree.csptree.CreateSolution(self.vars, solution)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
@@ -150,7 +154,7 @@ class Problem(object):
     s = csptree.csptree.CreateSolution(self.vars, values)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
-  def Solve(self):
+  def DoSolve(self):
     logging.debug('Solving offer %d relation %d cost %0.3f'
                  % (self.challengeid, self.problemnumber, self.price))
     if FLAGS.solver == 'c':
@@ -159,6 +163,13 @@ class Problem(object):
       return proxysolver.ProxySolve(self)
     else:
       return self.GetPySolution()
+
+  def Solve(self):
+    ps = proxysolver.ProxySolve(self)
+    rs = self.DoSolve()
+    logging.info('Proxy solution: %s' % ps)
+    logging.info('Real solution: %s' % rs)
+    return rs
 
   @classmethod
   def Generate(cls, problemnumber, offerid, degree=None):
