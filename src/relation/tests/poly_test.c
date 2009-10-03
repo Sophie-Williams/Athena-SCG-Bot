@@ -204,7 +204,7 @@ void print_all_p3() {
 int main(int argc, char **argv) {
     char *result = all_tests();
 
-    print_all_p3();
+/*    print_all_p3();*/
 
     if (result != 0) {
         printf("%s\n", result);

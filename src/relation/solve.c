@@ -25,6 +25,9 @@ solve_naive(const problem * restrict p, solution *s, int loopy);
 static solution *
 solve_naive_threaded(const problem * restrict p, solution *s, int num_threads);
 
+static solution *
+solve_iterate(const problem * restrict p, solution *s);
+
 /* START constructor/destructor */
 
 problem *
@@ -227,10 +230,13 @@ clause_is_satisfied_v0(const clause * restrict c, const solution * restrict s) {
 
 solution *
 solve(const problem * restrict p, solution *s) {
+    /*
     return solve_naive(p, s, 5000000);
-    /* Proof of concept threaded solver thing. Slower than the above.
+     * Proof of concept threaded solver thing. Slower than the above.
     return solve_naive_threaded(p, s, 2);
      */
+    /* FIXME filter unused variables */
+    return solve_iterate(p, s);
 }
 
 static solution *
@@ -364,6 +370,41 @@ random_solve(const problem * restrict problem, solution *solution) {
     }
 
     return solution;
+}
+
+solution *
+solve_iterate(const problem * restrict p, solution *s) {
+    int i;
+    int k;
+    int max;
+    int temp;
+    solution *max_solution;
+
+    assert(p != NULL);
+    assert(s != NULL);
+
+    max = 0;
+    max_solution = solution_create(p);
+
+    for (i = 0; i < (1 << p->num_vars); i++) {
+        for (k = 0; k < s->size; k++) {
+            *(s->values+k) = i & (1 << k) ? TRUE : FALSE;
+        }
+        temp = fsat(p, s);
+        if (temp > max) {
+            max = temp;
+            memcpy(max_solution->values, s->values, sizeof(int) * s->size);
+        }
+
+        if (max == p->num_clauses) {
+            break;
+        }
+    }
+
+    memcpy(s->values, max_solution->values, sizeof(int) * s->size);
+    solution_delete(max_solution);
+
+    return s;
 }
 
 /* assignment is the row number 0-indexed == binary value.
