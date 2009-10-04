@@ -17,8 +17,9 @@ TEMPLATE="""context[
     turnduration: 60
     mindecrement: 0.01
     initacc: 100.0
+    maxOffers: 5
     objective: []
-    predicate: []
+    predicate: [2000]
     numrounds: 15
     profitfactor: 1.0
     otrounds: 2]
