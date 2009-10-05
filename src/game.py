@@ -1,4 +1,5 @@
 #!/usr/bin/python
+import gflags
 import logging
 import random
 
@@ -6,6 +7,10 @@ import offer
 import playercontext
 import problem
 import relation
+
+gflags.DEFINE_boolean('allowreoffer', True,
+                      'Don\'t force buys to allow reoffer')
+FLAGS = gflags.FLAGS
 
 class Game(object):
   def __init__(self, initialdata):
@@ -43,16 +48,22 @@ class Game(object):
       else:
         logging.info('%s is bad buy' % str(offer))
 
+    
     a = [x.actedon for x in self.context.their_offered]
-    if True not in a:
-      noreoffer = []
-      for offer in self.context.their_offered:
-        if offer.AvoidReoffer():
-          logging.info('%s shouldn\'t reoffer' % str(offer))
-          noreoffer.append(offer)
-      if noreoffer:
-        noreoffer.sort()
-        self.replies.append(noreoffer[0].GetAccept())
+    if True not in a and self.context.their_offered:
+      if FLAGS.allowreoffer:
+        noreoffer = []
+        for offer in self.context.their_offered:
+          if offer.AvoidReoffer():
+            logging.info('%s shouldn\'t reoffer' % str(offer))
+            noreoffer.append(offer)
+        if noreoffer:
+          noreoffer.sort()
+          self.replies.append(noreoffer[0].GetAccept())
+      else:
+        l = list(self.context.their_offered)
+        l.sort()
+        self.replies.append(l[0].GetAccept())
 
   def ProvideTask(self):
     logging.info('Running ProvideTask')
