@@ -86,7 +86,7 @@ class Game(object):
     ouroffer  = [x.problemnumber for x in self.context.our_offered]
     theiroffer  = [x.problemnumber for x in self.context.their_offered]
     justoffered = []
-    for x in range(random.randint(2, self.context.config.maxoffers)):
+    for x in range(self.context.config.maxoffers):
       logging.debug('Starting offer generation run')
       o = offer.Offer.GenerateOffer(ouroffer, theiroffer, justoffered)
       logging.debug('Offering %d for %0.8f' % (o.problemnumber, o.price))
