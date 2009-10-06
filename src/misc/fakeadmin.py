@@ -5,6 +5,7 @@ import urllib
 import urllib2
 
 gflags.DEFINE_string('hostport', '', 'Host:port to connect to')
+gflags.DEFINE_string('filename', '', 'filename to send')
 
 FLAGS = gflags.FLAGS
 data1 = """context[
@@ -55,6 +56,7 @@ if __name__ == '__main__':
   if not FLAGS.hostport:
     print 'You need to supply a hostport!'
     sys.exit(1)
+  data = open(FLAGS.filename).read()
   req = urllib2.Request('http://%s/player' % (FLAGS.hostport), data)
   resp = urllib2.urlopen(req)
   print 'Sending Request:'

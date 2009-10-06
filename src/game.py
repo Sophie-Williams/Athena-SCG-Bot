@@ -34,8 +34,9 @@ class Game(object):
     logging.info('Running AcceptTask')
 
     # Don't buy at the end of the game
-    if self.context.config.numrounds == self.context.currentround:
-      return
+    #if self.context.config.numrounds == self.context.currentround:
+    #  logging.warning('End of game, not buying')
+    #  return
 
     otheroffers = list(self.context.their_offered)
     for offer in self.context.their_offered:
