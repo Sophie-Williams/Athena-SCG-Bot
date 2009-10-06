@@ -488,19 +488,19 @@ def generate_variables(uint32_t amount):
 #     return
 
 
-cdef class Clause:
-    cdef clause *c
-
-    def __cinit__(self, rn, vars):
-        cdef int tmp[5]
-
-        for v in vars:
-            tmp[x] = v
-
-        self.c = clause_create(rn, len(vars), tmp)
-
-    def __dealloc__(self):
-        clause_delete(self.c)
+# cdef class Clause:
+#     cdef clause *c
+# 
+#     def __cinit__(self, rn, vars):
+#         cdef int tmp[5]
+# 
+#         for v in vars:
+#             tmp[x] = v
+# 
+#         self.c = clause_create(rn, len(vars), tmp)
+# 
+#     def __dealloc__(self):
+#         clause_delete(self.c)
 
 
 cdef class Problem:

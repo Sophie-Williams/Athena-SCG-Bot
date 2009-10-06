@@ -165,3 +165,59 @@ swap(uint32_t rn, int rank, int var_p1, int var_p2) {
 }
 
 
+
+uint32_t
+renme(uint32_t rn, int rank, int perm_semantics, int *permutation) {
+    uint32_t new_rn;
+    int i;
+    int j;
+    int min;
+    int tmp;
+
+    assert(VALID_RANK(rank));
+    /*
+    # checkRelationNumber(rn, rank)
+    # checkPermutation(rank, permutation)
+    # checkPermutationSemantics(perm_semantics)
+     */
+
+    new_rn = 0;
+
+    if (perm_semantics == SOURCE) {
+        for (i = 0; i < rank; i++) {
+            new_rn += (rn & (1 << *(permutation+i)));
+        }
+        return new_rn;
+    }
+
+    // sort dimensions
+
+    for (i = 0; i < rank - 1; i++) {
+        min = i;
+        for (j = i + 1; j < rank; j++) {
+            if (permutation[j] < permutation[min]) {
+                // if min greater,
+                min = j;
+            }
+
+            // swap elements at min, i
+            // permutation[i], permutation[min] = permutation[min], permutation[i]
+            tmp = permutation[i];
+            permutation[i] = permutation[min];
+            permutation[min] = tmp;
+
+            if (perm_semantics == SOURCE) {
+                rn = swap(rn, rank, permutation[min], permutation[i]);
+            }
+            else if (perm_semantics == TARGET) {
+                rn = swap(rn, rank, min, i);
+            }
+            else {
+                //pass # error
+            }
+        }
+    }
+
+    return rn;
+}
+

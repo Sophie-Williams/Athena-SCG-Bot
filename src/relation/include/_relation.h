@@ -105,4 +105,27 @@ reduce(uint32_t rn, int rank, int var_p, int value);
 uint32_t
 swap(uint32_t rn, int rank, int var_p1, int var_p2);
 
+/**
+ * @param rn The relation number
+ * @param rank The rank of the given relation.
+ * @param perm_semantics specifies how the permutation should be applied.
+ *                       Either SOURCE or TARGET.
+ * for example:
+ *    for the relation: R(v2,v1,v0)
+ *    and the permutation {1,2,0} 
+ *    SOURCE semantics means that v0 goes to position1, v1 goes to position2,
+ *           v2 goes to position 0
+ *    TARGET semantics means that position0 gets v1, position1 gets v2,
+ *           position2 gets v0
+ * @param permutation an array of variable positions describing the desired
+ *                    location of every variables
+ * For example:
+ *    for the relation: R(v2,v1,v0)
+ *    and the permutation {1,2,0} means v0 goes to position1, v1 goes to
+ *        position2, v2 goes to position 0
+ * @return the modified rn
+ */
+uint32_t
+renme(uint32_t rn, int rank, int perm_semantics, int *permutation);
+
 #endif

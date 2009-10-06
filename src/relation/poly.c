@@ -277,4 +277,3 @@ poly_synth_div(poly *p, int q) {
 
     return r;
 }
-
