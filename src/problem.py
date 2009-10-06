@@ -25,9 +25,8 @@ class Clause(object):
   def __init__(self, number, list_of_vars):
     """Initialize a clause.
 
-    Args:
-       number: (int) problem (relation) number
-       list_of_vars: (list) list of clause variables like v1, v2, v3
+    :param number: (int) problem (relation) number
+    :param list_of_vars: (list) list of clause variables like v1, v2, v3
     """
     self.problemnumber = int(number)
     self.vars = list_of_vars
@@ -65,6 +64,7 @@ class Clause(object):
     return '(%d %s )' % (self.problemnumber, ' '.join(self.vars))
 
 class Problem(object):
+  """Describes a problem instance."""
   def __init__(self, buyer, list_of_vars, clauselist, challengeid, seller,
                problemnumber, price):
     self.buyer = int(buyer)
@@ -85,25 +85,36 @@ class Problem(object):
     return str(self)
 
   def AddClauses(self, clauselist):
+    """Add Clauses to this Problem instance.
+
+    :param clauselist: list of iterables where i[0] is the problemnumber
+    """
     for clause in clauselist:
       self.AddClause(Clause(clause[0], clause[1:]))
 
   def AddClause(self, clause):
+    """Add a Clause to this Problem instance.
+
+    :param clause: A single clause object
+    """
     self.clauses.append(clause)
 
   def GetProvide(self):
+    """Get a 'provide' blob to send to the administrator for this problem."""
     return ('provide[%s %s %d]'
             % (' '.join(self.vars),
                ' '.join([x.GetProvideBlob() for x in self.clauses]),
                self.challengeid))
 
   def GetProvided(self):
+    """Get a 'provided' blob to send to the proxysolve backend."""
     return ('provided[%d %s %s %d %d (%d ) %0.8f]'
             % (self.buyer, ' '.join(self.vars),
                ' '.join([x.GetProvideBlob() for x in self.clauses]),
                self.challengeid, self.seller, self.problemnumber, self.price))
 
   def RealSolve(self):
+    """Solve this Problem instance using the C solver."""
     if self.problemnumber%2:
       logging.info('Special Case Solve: All False!')
       values = [0]*len(self.vars)
@@ -124,10 +135,17 @@ class Problem(object):
     return fsat, values
 
   def GetVariableValue(self, var, solution):
+    """Get the value of a variable for a given solution.
+    
+    :param var: string variable name
+    :param solution: list of [1, 0]
+    :rtype: Boolean value of the variable
+    """
     ind = self.vars.index(var)
     return solution[ind]
 
   def IsClauseSat(self, clause, solution):
+    """Given a clause and solution, determine if it is satisfied."""
     relnum = clause.problemnumber
     i = 0
     for var in clause.vars:
@@ -140,6 +158,7 @@ class Problem(object):
       i += 1
 
   def PercentSat(self, solution):
+    """Calculate the number of solved clauses for a given solution."""
     totalsat = 0
     for clause in self.clauses:
       if self.IsClauseSat(clause, solution):
