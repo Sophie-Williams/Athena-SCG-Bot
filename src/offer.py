@@ -36,7 +36,9 @@ class Offer(object):
     return abs(self.bep-self.price)
 
   def IsGoodBuy(self):
-    if self.bep == 1:
+    if self.problemnumber % 2 or self.problemnumber >= 128:
+      return True
+    elif self.bep == 1:
       return True
     elif not self.bep:
       return False
