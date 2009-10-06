@@ -15,8 +15,8 @@ get_mask(int rank) {
 
 uint32_t
 get_magic_number(int rank, int var_p, int value) {
-    uint32_t mask = get_mask(rank);
-    uint32_t col = ((MAGIC_NUMBERS[var_p]) & mask);
+    register uint32_t mask = get_mask(rank);
+    register uint32_t col = ((MAGIC_NUMBERS[var_p]) & mask);
     if (value == 1)
         return mask ^ col;
     return col;
@@ -24,15 +24,15 @@ get_magic_number(int rank, int var_p, int value) {
 
 int
 is_irrelevant(uint32_t rn, int rank, int var_p) {
-    uint32_t m = get_magic_number(rank, var_p, 1);
+    register uint32_t m = get_magic_number(rank, var_p, 1);
 
     return ((rn & m) >> (1 << var_p)) == (rn & (~m));
 }
 
 int
 num_relevant_variables(uint32_t rn, int rank) {
-    int rel_vars;
-    int i;
+    register int rel_vars;
+    register int i;
 
     rel_vars = rank;
     for (i = 0; i < rank; i++) {
@@ -82,10 +82,8 @@ x_true_vars(int rank, int num_true_vars) {
 
 uint32_t
 reduce(uint32_t rn, int rank, int var_p, int value) {
-    uint32_t magic_num;
-    uint32_t rn_masked;
+    register uint32_t rn_masked;
 
-    magic_num = get_magic_number(rank, var_p, value);
     rn_masked = (rn & get_magic_number(rank, var_p, value));
 
     if (!value)

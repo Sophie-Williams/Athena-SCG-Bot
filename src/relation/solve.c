@@ -40,8 +40,7 @@ problem_create(char **vars, int num_vars, clause *clauses, int num_clauses) {
     assert(vars != NULL);
     assert(clauses != NULL);
 
-    p = malloc(sizeof(problem));
-    if (p == NULL) {
+    if((p = malloc(sizeof(problem))) == NULL) {
         perror("malloc");
         return NULL;
     }
@@ -239,6 +238,12 @@ solve(const problem * restrict p, solution *s) {
     return solve_iterate(p, s);
 }
 
+/**
+ * @param p The problem instance.
+ * @param s The solution.
+ * @param num_threads The number of threads to spawn. [2-8]
+ * @return The best solution.
+ */
 static solution *
 solve_naive_threaded(const problem * restrict p, solution *s, int num_threads) {
     int rc;
@@ -306,6 +311,11 @@ solve_naive_threaded(const problem * restrict p, solution *s, int num_threads) {
     return best;
 }
 
+/**
+ * Helper function for pthreads.
+ * @param p The problem instance.
+ * @return The solution.
+ */
 static void *
 solve_it(void *p) {
     solution *s;
@@ -319,7 +329,12 @@ solve_it(void *p) {
     return NULL; /* Not reached? */
 }
 
-/* The naive solver. */
+/**
+ * The naive solver. Runs random_solve `loopy` times.
+ * @param p The problem instance
+ * @param s The solution.
+ * @return The best solution.
+ */
 static solution *
 solve_naive(const problem * restrict p, solution *s, int loopy) {
     int i;
@@ -358,6 +373,12 @@ solve_naive(const problem * restrict p, solution *s, int loopy) {
     return s;
 }
 
+/**
+ * Do a random assignment.
+ * @param problem The problem instance.
+ * @param solution The solution.
+ * @return The given solution with new answers.
+ */
 static solution *
 random_solve(const problem * restrict problem, solution *solution) {
     int i;
@@ -416,7 +437,16 @@ solve_value(const clause * restrict clause, int assignment) {
     assert(clause != NULL);
     assert(assignment >= 0);
     assert(assignment < (1 << clause->rank));
-    return (clause->rn & (1 << assignment)) > 0;
+    /* The assignment is represented as a binary number whose length is the
+     * rank. So, the assignment number represents a row contained by the
+     * relation numbers. Thus, to check if the relation number is satisfied
+     * is the same as checking if the row is represented in the relation
+     * number.
+     *
+     * A binary (or logical) AND of the number that represents the row and the
+     * relation number should not be 0 if the clause is satisfied.
+     */
+    return (clause->rn & (1 << assignment)) != 0;
 }
 
 int
@@ -427,7 +457,7 @@ to_row_number(int *values, int rank) {
     assert(values != NULL);
 
     for(i = 0; i < rank; i++) {
-        ret += (1 << i) * (*(values+i) ? 1 : 0);
+        ret += (1 << i) * (*(values+i) ? TRUE : FALSE);
     }
 
     return ret;

@@ -21,6 +21,16 @@ poly3_create(uint32_t rn, poly3 *poly) {
 
     POLY3(*poly, 0, 0, 0, 0);
 
+    /*
+     * 0 -> 000
+     * 1 -> 001
+     * 2 -> 010
+     * 3 -> 011
+     * 4 -> 100
+     * 5 -> 101
+     * 6 -> 110
+     * 7 -> 111
+     */
     if (HAVE_NTH(rn, 0)) POLY3_ADD_03(*poly);
     if (HAVE_NTH(rn, 1)) POLY3_ADD_12(*poly);
     if (HAVE_NTH(rn, 2)) POLY3_ADD_12(*poly);

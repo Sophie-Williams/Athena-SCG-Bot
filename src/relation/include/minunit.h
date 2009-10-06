@@ -31,11 +31,13 @@ int main(int argc, char **argv) {
     sec = tv_end.tv_sec - tv_start.tv_sec;
     usec = tv_end.tv_usec - tv_start.tv_usec;
 
+    /* Carry. */
     if (usec < 0) {
         sec -= 1;
         usec += NUM_MICROSECONDS_IN_SECOND;
     }
 
+    /* The number of seconds. */
     real = sec + (((double) usec) / NUM_MICROSECONDS_IN_SECOND);
 
     if (result != 0)
