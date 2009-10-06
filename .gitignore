@@ -16,3 +16,4 @@ scaffold
 build
 src/relation/relation.c
 *_test
+src/relation/doc

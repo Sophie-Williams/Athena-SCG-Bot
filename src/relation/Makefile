@@ -36,4 +36,4 @@ test: all poly_test solve_test
 	./solve_test
 
 clean:
-	$(RM) relation.c *.o *.so poly_test solve_test
+	$(RM) relation.c *.o *.so *.pyc poly_test solve_test

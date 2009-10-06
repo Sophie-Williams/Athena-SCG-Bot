@@ -29,25 +29,37 @@
 
 /* Data defs */
 
+/**
+ */
 typedef struct __pair_double {
+    /** First in a pair. */
     double first;
+    /** Last in a pair.  */
     double last;
 } pair_double;
 
-typedef struct __polynomial {
-    int coefficient;
-    int degree;
-} polynomial;
-
+/**
+ * A poly nomial of degree 3.
+ */
 typedef struct __poly3 {
+    /** The coefficient of the cubic term. */
     int coeff3;
+    /** The coefficient of the square term. */
     int coeff2;
+    /** The coefficient of the first degree term. */
     int coeff1;
+    /** The constant term. */
     int coeff0;
 } poly3;
 
+/**
+ * A generic polynomial.
+ */
 typedef struct __poly {
+    /** The degree of the polynomial. */
     int degree;
+    /** The list of coefficients. Ordered from the constant term to the nth
+        degree term (where n == degree). */
     int *coeffs;
 } poly;
 
@@ -87,53 +99,96 @@ typedef struct __poly {
 #define POLY3_SET_03(p) POLY3(p, COEFF03_3, COEFF03_2, \
                                  COEFF03_1, COEFF03_0)
 
-/* Create a polynomial of the third degree.
+/**
+ * Creates a polynomial of the third degree that corresponds to the relation
+ * number.
+ * @param rn The relation number.
+ * @param poly The pointer to the polynomial.
+ * @return a polynomial of the third degree.
  */
 poly3 *
 poly3_create(uint32_t rn, poly3 *poly);
 
-/* Add `b' to `a' and store in `a'
+/**
+ * Add `b' to `a' and store in `a'
+ * @param a A polynomial.
+ * @param b A polynomial.
+ * @return a + b
  */
 poly3 *
 poly3_add(poly3 *a, poly3 *b);
 
-/* Get the maximum value of the polynomial within the range [0,1]
+/**
+ * Get the maximum value of the polynomial within the range [0,1]
+ * @param poly The polynomial to solve.
+ * @param answer The address of the answer.
+ * @return the values of the maxima (or minima)
  */
 pair_double *
 poly3_get_maximum(poly3 *poly, pair_double *answer);
 
-/* Evalutate the polynomial (of the third degree) with the given value
+/**
+ * Evalutate the polynomial (of the third degree) with the given value
  * as the variable.
+ * @param poly The polynomial f(x).
+ * @param x The value x.
+ * @return The polynomial evaluated at x.
  */
 double
 poly3_eval(poly3 *poly, double x);
 
-/* Compute the break-even price of the polynomial.
+/**
+ * Compute the break-even price of the polynomial.
  * This is actually the minimum satisfiability.
+ * @param rn The relation number.
+ * @param rank The rank of the relation number.
  */
 double
 find_break_even(uint32_t rn, int rank);
 
 /* Functions for poly */
 
-/* Create a polynomial of the given degree with variable length.
+/**
+ * Create a polynomial of the given degree with variable length.
  * e.g.
  *      poly_new(3, 4, 3, 2, 1) = 4 + 3*x + 2*x^2 + x^3
  *      poly_new(2, 3, 2, 1)    = 3 + 2*x^2 + x^3
+ * @param degree The degree of the polynomial.
+ * @return The newly created polynomial.
  */
 poly *
 poly_new(int degree, ...);
 
+/**
+ * Create a polynomial from a list of coefficients.
+ * @param coeffs The coefficients.
+ * @param degree The degree of the polynomial.
+ * @return The newly created polynomial.
+ */
 poly *
 poly_create(int *coeffs, int degree);
 
+/**
+ * Free the polynomial.
+ * @param p The polynomial to free.
+ */
 void
 poly_delete(poly *p);
 
+/**
+ * Evaluate the polynomial.
+ * @param p The polynomial.
+ * @param x The value.
+ * @return p(x)
+ */
 double
-poly_eval(poly *p, double value);
+poly_eval(poly *p, double x);
 
-/* Do synthetic division on the polynomial and return the remainder.
+/**
+ * Do synthetic division on the polynomial and return the remainder.
+ * @param p The polynomial.
+ * @param q The quotient for the synthetic division.
+ * @return the remainder
  */
 int
 poly_synth_div(poly *p, int q);

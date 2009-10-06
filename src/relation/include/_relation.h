@@ -3,25 +3,29 @@
 
 #include <stdint.h>
 
-/* Defined in relation_consts.h
+/**
+ * Defined in relation_consts.h
  * MASKS = { 0x1, 0x3, 0xF, 0xFF, 0xFFFF, 0xFFFFFFFF }
  */
 uint32_t
 get_mask(int rank);
 
-/* Defined in relation_consts.h
+/**
+ * Defined in relation_consts.h
  * MAGIC_NUMBERS = { 0x55555555, 0x33333333, 0x0F0F0F0F,
  *                   0x00FF00FF, 0x0000FFFF }
  */
 uint32_t
 get_magic_number(int rank, int var_p, int value);
 
-/* True if the variable position is irrelevant to the (rn, rank)
+/**
+ * True if the variable position is irrelevant to the (rn, rank)
  */
 int
 is_irrelevant(uint32_t rn, int rank, int var_p);
 
-/* Counts the number of relevant variables in the given relation
+/**
+ * Counts the number of relevant variables in the given relation
  * @param rn the relation number whose number of relevant variables is to be counted
  * @param rank rank of the given relation
  * @return The number of relevant variables in the given relation
@@ -29,7 +33,8 @@ is_irrelevant(uint32_t rn, int rank, int var_p);
 int
 num_relevant_variables(uint32_t rn, int rank);
 
-/* Returns the number of 1-bits in the given rn masked by the rank.
+/**
+ * Returns the number of 1-bits in the given rn masked by the rank.
  * m = 2 ** (2 ** rank)
  * So, the 1-bits of (rn & m)
  * @param rn
@@ -39,7 +44,7 @@ num_relevant_variables(uint32_t rn, int rank);
 int
 ones(uint32_t rn, int rank);
 
-/*
+/**
  * @param rn
  * @param rank
  * @param num_true_vars used to identify a set of rows in the truth table
@@ -49,7 +54,8 @@ ones(uint32_t rn, int rank);
 int
 q(uint32_t rn, int rank, int num_true_vars);
 
-/* In relation_consts.h
+/**
+ * In relation_consts.h
  * TRUE_VARS = {
  *     {},
  *     {1, 2},
@@ -63,12 +69,19 @@ uint32_t
 x_true_vars(int rank, int num_true_vars);
 
 
-/* Reduce a given relationship number by assigning.
+/**
+ * Reduce a given relationship number by assigning.
+ * @param rn The relation number.
+ * @param rank The rank of the relation number.
+ * @param var_p The position (index) of the variable.
+ * @param value The value (1 or 0) in which to set the variable.
+ * @return The new reduced relation number.
  */
 uint32_t
 reduce(uint32_t rn, int rank, int var_p, int value);
 
-/* Swaps two variables in a relation. When variables are swapped, The truth
+/**
+ * Swaps two variables in a relation. When variables are swapped, The truth
  * table order gets scrambled rows of the truth table needs to be reordered
  * to restore the correct truth table order. Here are two exmples showing
  * how the swap method works for two relations: 

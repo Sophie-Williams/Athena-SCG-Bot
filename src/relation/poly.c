@@ -10,6 +10,11 @@
 
 #define HAVE_NTH(x, nth) (((x >> nth) % 2) == 1)
 
+/**
+ * @param rn The relation number.
+ * @param poly The reference to a polynomial.
+ * @return The polynomial corresponding to the relation number.
+ */
 poly3 *
 poly3_create(uint32_t rn, poly3 *poly) {
     assert(poly != NULL);
@@ -28,7 +33,8 @@ poly3_create(uint32_t rn, poly3 *poly) {
     return poly;
 }
 
-/* poly3_add : poly3 *a, poly3 *b
+/**
+ * poly3_add : poly3 *a, poly3 *b
  * Add the values of b into a.
  */
 poly3 *
@@ -44,7 +50,7 @@ poly3_add(poly3 *a, poly3 *b) {
     return a;
 }
 
-/* Get the two possible maxima/minima. */
+/** Get the two possible maxima/minima. */
 pair_double *
 poly3_get_maximum(poly3 *poly, pair_double *answer) {
     double a;
@@ -104,7 +110,7 @@ poly3_eval(poly3 *poly, double x) {
             x * poly->coeff1 + poly->coeff0);
 }
 
-/* TODO Not your best sort */
+/** TODO Not your best sort */
 static void sort(double *list, int length) {
     int i;
     int j;

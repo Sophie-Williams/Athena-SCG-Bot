@@ -9,9 +9,7 @@
  */
 uint32_t
 get_mask(int rank) {
-    assert(0 < rank);
-    assert(rank <= 5);
-
+    assert(VALID_RANK(rank));
     return MASKS[rank];
 }
 
@@ -47,9 +45,9 @@ num_relevant_variables(uint32_t rn, int rank) {
 
 int
 ones(uint32_t rn, int rank) {
-    #ifdef __GNUC__
+#ifdef __GNUC__
     return __builtin_popcountl(rn & get_mask(rank));
-    #else
+#else
     /* The slower version */
     int c;
     int i;
@@ -60,7 +58,7 @@ ones(uint32_t rn, int rank) {
             c++;
     }
     return c
-    #endif
+#endif
 }
 
 int
