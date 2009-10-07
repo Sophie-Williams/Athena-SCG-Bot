@@ -6,7 +6,7 @@ import random
 import relation
 import problem
 
-gflags.DEFINE_float('bepbump', 0.15, 'Buy offers where `price <= bep+this`')
+gflags.DEFINE_float('bepbump', 0.03, 'Buy offers where `price <= bep+this`')
 gflags.DEFINE_float('avoidreofferdiff', 0.3,
                     'Avoid reoffer if abs(bep-price) <= this')
 FLAGS = gflags.FLAGS
