@@ -131,26 +131,76 @@ class TestRelation(unittest.TestCase):
 
   def test_break_even(self):
     f = relation.break_even
-    for rn in range(1, 255, 2):
+    for rn in range(1, 256, 2):
+      self.assertEqual(f(rn, 3), 1.0)
+    for rn in range(128, 256, 1):
       self.assertEqual(f(rn, 3), 1.0)
 
+    self.assertAlmostEqual(f(0, 3), 0.000000000000)
     self.assertAlmostEqual(f(2, 3), 0.148148148148)
     self.assertAlmostEqual(f(4, 3), 0.148148148148)
     self.assertAlmostEqual(f(6, 3), 0.296296296296)
     self.assertAlmostEqual(f(8, 3), 0.148148148148)
-    self.assertAlmostEqual(f(10, 3), 0.25)
-    self.assertAlmostEqual(f(12, 3), 0.25)
-    self.assertAlmostEqual(f(14, 3), 0.384900179)
+    self.assertAlmostEqual(f(10, 3), 0.250000000000)
+    self.assertAlmostEqual(f(12, 3), 0.250000000000)
+    self.assertAlmostEqual(f(14, 3), 0.384900179460)
     self.assertAlmostEqual(f(16, 3), 0.148148148148)
     self.assertAlmostEqual(f(18, 3), 0.296296296296)
     self.assertAlmostEqual(f(20, 3), 0.296296296296)
     self.assertAlmostEqual(f(22, 3), 0.444444444444)
-    # XXX more test cases?
-
-  def test_gen_permute3(self):
-    f = gen.permute3
-    # for x in f(450):
-    #   x
+    self.assertAlmostEqual(f(24, 3), 0.250000000000)
+    self.assertAlmostEqual(f(26, 3), 0.384900179460)
+    self.assertAlmostEqual(f(28, 3), 0.384900179460)
+    self.assertAlmostEqual(f(30, 3), 0.528152947731)
+    self.assertAlmostEqual(f(32, 3), 0.148148148148)
+    self.assertAlmostEqual(f(34, 3), 0.250000000000)
+    self.assertAlmostEqual(f(36, 3), 0.250000000000)
+    self.assertAlmostEqual(f(38, 3), 0.384900179460)
+    self.assertAlmostEqual(f(40, 3), 0.296296296296)
+    self.assertAlmostEqual(f(42, 3), 0.384900179460)
+    self.assertAlmostEqual(f(44, 3), 0.384900179460)
+    self.assertAlmostEqual(f(46, 3), 0.500000000000)
+    self.assertAlmostEqual(f(48, 3), 0.250000000000)
+    self.assertAlmostEqual(f(50, 3), 0.384900179460)
+    self.assertAlmostEqual(f(52, 3), 0.384900179460)
+    self.assertAlmostEqual(f(54, 3), 0.528152947731)
+    self.assertAlmostEqual(f(56, 3), 0.384900179460)
+    self.assertAlmostEqual(f(58, 3), 0.500000000000)
+    self.assertAlmostEqual(f(60, 3), 0.500000000000)
+    self.assertAlmostEqual(f(62, 3), 0.631130309441)
+    self.assertAlmostEqual(f(64, 3), 0.148148148148)
+    self.assertAlmostEqual(f(66, 3), 0.250000000000)
+    self.assertAlmostEqual(f(68, 3), 0.250000000000)
+    self.assertAlmostEqual(f(70, 3), 0.384900179460)
+    self.assertAlmostEqual(f(72, 3), 0.296296296296)
+    self.assertAlmostEqual(f(74, 3), 0.384900179460)
+    self.assertAlmostEqual(f(76, 3), 0.384900179460)
+    self.assertAlmostEqual(f(78, 3), 0.500000000000)
+    self.assertAlmostEqual(f(80, 3), 0.250000000000)
+    self.assertAlmostEqual(f(82, 3), 0.384900179460)
+    self.assertAlmostEqual(f(84, 3), 0.384900179460)
+    self.assertAlmostEqual(f(86, 3), 0.528152947731)
+    self.assertAlmostEqual(f(88, 3), 0.384900179460)
+    self.assertAlmostEqual(f(90, 3), 0.500000000000)
+    self.assertAlmostEqual(f(92, 3), 0.500000000000)
+    self.assertAlmostEqual(f(94, 3), 0.631130309441)
+    self.assertAlmostEqual(f(96, 3), 0.296296296296)
+    self.assertAlmostEqual(f(98, 3), 0.384900179460)
+    self.assertAlmostEqual(f(100, 3), 0.384900179460)
+    self.assertAlmostEqual(f(102, 3), 0.500000000000)
+    self.assertAlmostEqual(f(104, 3), 0.444444444444)
+    self.assertAlmostEqual(f(106, 3), 0.528152947731)
+    self.assertAlmostEqual(f(108, 3), 0.528152947731)
+    self.assertAlmostEqual(f(110, 3), 0.631130309441)
+    self.assertAlmostEqual(f(112, 3), 0.384900179460)
+    self.assertAlmostEqual(f(114, 3), 0.500000000000)
+    self.assertAlmostEqual(f(116, 3), 0.500000000000)
+    self.assertAlmostEqual(f(118, 3), 0.631130309441)
+    self.assertAlmostEqual(f(120, 3), 0.528152947731)
+    self.assertAlmostEqual(f(122, 3), 0.631130309441)
+    self.assertAlmostEqual(f(124, 3), 0.631130309441)
+    self.assertAlmostEqual(f(126, 3), 0.750000000000)
+    # XXX More than rank 3?
 
   def test_solve(self):
     clauses = [
@@ -194,6 +244,20 @@ class TestRelation(unittest.TestCase):
         [0, 1, 1, 0, 1],
         [0, 1, 1, 0, 0],
     ])
+
+class TestGen(unittest.TestCase):
+
+  def test_gen_permute3(self):
+    f = gen.permute3
+    # for x in f(450):
+    #   x
+
+  def test_max_vars(self):
+    f = gen.max_vars
+
+    self.assertEquals(f(2000, rank=3), 13)
+    self.assertEquals(f(2700, rank=3), 14)
+    self.assertEquals(f(2800, rank=3), 15)
 
 if __name__ == '__main__':
   unittest.main()
