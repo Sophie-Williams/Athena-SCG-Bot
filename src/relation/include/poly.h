@@ -185,6 +185,15 @@ double
 poly_eval(poly *p, double x);
 
 /**
+ * @param p The polynomial.
+ * @param left The lower bound to the range.
+ * @param right The upper bound to the range.
+ * @return The maximum value in the range.
+ */
+double
+poly_maxima(poly *p, double left, double right);
+
+/**
  * Do synthetic division on the polynomial and return the remainder.
  * @param p The polynomial.
  * @param q The quotient for the synthetic division.

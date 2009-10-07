@@ -179,6 +179,39 @@ static char *test_poly_synth_div() {
     return NULL;
 }
 
+static char *test_poly_maxima() {
+    poly *p;
+
+    p = poly_new(4, 0, 0, 0, 0, 1);
+    mu_assert("x^4 from 0.0 to 1.0", IN_RANGE(poly_maxima(p, 0, 1), 1.0));
+    mu_assert("x^4 from 1.0 to 2.0", IN_RANGE(poly_maxima(p, 1, 2), 16.0));
+    poly_delete(p);
+
+    p = poly_new(4, 1, 1, -3, 4, 3);
+    mu_assert("3x^4 + 4x^3 - 3x^2 + x + 1 from 0.0 to 1.0",
+              IN_RANGE(poly_maxima(p, 0, 1), 6.0));
+    mu_assert("3x^4 + 4x^3 - 3x^2 + x + 1 from 1.0 to 2.0",
+              IN_RANGE(poly_maxima(p, 1, 2), 71.0));
+    poly_delete(p);
+
+    p = poly_new(3, 1, -3, 3, -1);
+    mu_assert("-x^3 + 3x^2 - 3x + 1", IN_RANGE(poly_maxima(p, 0, 1), 1.0));
+    poly_delete(p);
+
+    p = poly_new(3, 0, 1, -2, 1);
+    mu_assert("x^3 - 2x^2 + x", IN_RANGE(poly_maxima(p, 0, 1), 0.148148));
+    poly_delete(p);
+
+    p = poly_new(3, 0, 0, 1, -1);
+    mu_assert("-x^3 + x^2", IN_RANGE(poly_maxima(p, 0, 1), 0.148148));
+    poly_delete(p);
+
+    p = poly_new(3, 0, 0, 0, 1);
+    mu_assert("x^3", IN_RANGE(poly_maxima(p, 0, 1), 1.0));
+    poly_delete(p);
+    return NULL;
+}
+
 char *all_tests() {
     mu_run_test(test_poly3_get_maximum);
     mu_run_test(test_poly3_create);
@@ -186,5 +219,6 @@ char *all_tests() {
     mu_run_test(test_find_break_even);
     mu_run_test(test_poly_new);
     mu_run_test(test_poly_synth_div);
+    mu_run_test(test_poly_maxima);
     return NULL;
 }

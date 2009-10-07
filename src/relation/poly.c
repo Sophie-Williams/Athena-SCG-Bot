@@ -263,6 +263,26 @@ poly_new(int degree, ...) {
     return p;
 }
 
+double
+poly_maxima(poly *p, double left, double right) {
+    double max;
+    double temp;
+
+    assert(p != NULL);
+    assert(left < right);
+
+    max = -INFINITY;
+
+    /* */
+    for (; left < right; left += 0.001) {
+        if ((temp = poly_eval(p, left)) > max)
+            max = temp;
+    }
+
+    /* Check the right-bound */
+    return (temp = poly_eval(p, right)) > max ? temp : max;
+}
+
 int
 poly_synth_div(poly *p, int q) {
     int i;
