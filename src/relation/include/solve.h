@@ -24,7 +24,9 @@
  * variables.
  */
 typedef struct __solution {
+    /** The values corresponding to the variables in a problem. */
     int *values;
+    /** The number of values. */
     int size;
 } solution;
 
@@ -32,8 +34,11 @@ typedef struct __solution {
  * Represents a clause in a CNF.
  */
 typedef struct __clause {
+    /** The relation number of the clause */
     uint32_t rn;
+    /** The rank (the size) of the relation number */
     int rank;
+    /** The variables in the clause. Indirectly references a problem. */
     int *vars;
 } clause;
 
@@ -41,9 +46,13 @@ typedef struct __clause {
  * Represents a MAX-CSP problem.
  */
 typedef struct __problem {
+    /** The list of variables in the problem. */
     char **vars;
+    /** The number of variables in the problem. */
     int num_vars;
+    /** The clauses in the problem */
     clause *clauses;
+    /** The number of clauses in the problem. */
     int num_clauses;
 } problem;
 
@@ -51,6 +60,11 @@ typedef struct __problem {
 
 /**
  * Create a problem.
+ * @param vars The list of variables.
+ * @param num_vars The number of variables.
+ * @param clauses The clauses.
+ * @param num_clauses The number of clauses.
+ * @return The problem instance created from the given.
  */
 problem *
 problem_create(char **vars, int num_vars, clause *clauses, int num_clauses);
@@ -64,6 +78,7 @@ problem_set(problem *problem, char **vars, int num_vars, clause *clauses,
 
 /**
  * Free a problem.
+ * @param problem The problem to delete.
  */
 void
 problem_delete(problem *problem);
@@ -122,12 +137,18 @@ solve(const problem * restrict problem, solution *solution);
 
 /**
  * Return true or false based on the assignment.
+ * @param clause The clause.
+ * @param assignment The assignment for the clause.
+ * @return The result of the assignment, either TRUE or FALSE.
  */
 int
 solve_value(const clause * restrict clause, int assignment);
 
 /**
  * Convert the values into the row number.
+ * @param values The list of values.
+ * @param rank The number of values.
+ * @return The row number corresponding to the assignment.
  */
 int
 to_row_number(int *values, int rank);

@@ -10,6 +10,7 @@
 #include "solve.h"
 #include "_relation.h" /* relation numbers, etc.*/
 #include "relation_consts.h"
+#include "poly.h"
 
 #define RAND2 (rand() % 2)
 
@@ -394,34 +395,55 @@ random_solve(const problem * restrict problem, solution *solution) {
     return solution;
 }
 
+#define OPTIMIZE 1
 solution *
 solve_iterate(const problem * restrict p, solution *s) {
     register uint32_t bit_mask;
-    uint32_t i;
-    uint32_t k;
-    int max;
-    int temp;
+    register uint32_t i;
+    register uint32_t k;
+    register int max;
+    register int temp;
+    solution *max_solution;
+#if OPTIMIZE
     register int num_ones;
     register int num_zeros;
-    solution *max_solution;
+    register int max_ones;
+    register int max_zeros;
+    double max_p;
+#endif
 
     assert(p != NULL);
     assert(s != NULL);
 
+#if OPTIMIZE
+    max_p = find_maximum_point(p->clauses->rn, 3);
+    max_ones = max_p * p->num_vars;
+    max_zeros = p->num_vars - max_ones;
+
+    max_ones += 3;
+    max_zeros += 3;
+#endif
+
     max = 0;
     max_solution = solution_create(p);
 
+
     for (i = 0; i < (1 << p->num_vars); i++) {
-        /* Keep track of the number of ones and zeros. */
-        num_ones = 0;
-        num_zeros = 0;
+#if OPTIMIZE
+    #if __GNUC__
+        num_ones = __builtin_popcountl(i);
+    #else
+        num_ones = ones(i, 5); /* 5 as in 2^5 == 32 */
+    #endif
+        num_zeros = p->num_vars - num_ones;
+        /* Depending on the number of ones and zeros,
+         * skip certain assignments. */
+        if (num_ones > max_ones || num_zeros > max_zeros)
+            continue;
+#endif
         bit_mask = 0x00000001;
         for (k = 0; k < s->size; k++) {
-            /* alpha = (i & j) ? TRUE : FALSE;
-             * alpha ? num_ones++ : num_zeros++; */
-            (*(s->values+k) = i & bit_mask ? TRUE : FALSE)
-                            ? num_ones++
-                            : num_zeros++;
+            *(s->values+k) = i & bit_mask ? TRUE : FALSE;
             bit_mask <<= 1;
         }
 
@@ -432,11 +454,11 @@ solve_iterate(const problem * restrict p, solution *s) {
             memcpy(max_solution->values, s->values, sizeof(int) * s->size);
         }
 
-        if (max == p->num_clauses) {
+        if (max == p->num_clauses)
             break;
-        }
     }
 
+    /* Copy the correct solution. */
     memcpy(s->values, max_solution->values, sizeof(int) * s->size);
     solution_delete(max_solution);
 

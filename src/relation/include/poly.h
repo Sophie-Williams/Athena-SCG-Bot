@@ -119,6 +119,15 @@ poly3 *
 poly3_add(poly3 *a, poly3 *b);
 
 /**
+ * Find the two possible critical points.
+ * @param poly The polynomial of maximum degree 3.
+ * @param answer The pair of possible answers.
+ * @return The answer or NULL if no answer.
+ */
+pair_double *
+poly3_find_critical_points(poly3 *poly, pair_double *answer);
+
+/**
  * Get the maximum value of the polynomial within the range [0,1]
  * @param poly The polynomial to solve.
  * @param answer The address of the answer.
@@ -145,6 +154,9 @@ poly3_eval(poly3 *poly, double x);
  */
 double
 find_break_even(uint32_t rn, int rank);
+
+double
+find_maximum_point(uint32_t rn, int rank);
 
 /* Functions for poly */
 

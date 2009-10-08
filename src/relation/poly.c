@@ -60,9 +60,8 @@ poly3_add(poly3 *a, poly3 *b) {
     return a;
 }
 
-/** Get the two possible maxima/minima. */
 pair_double *
-poly3_get_maximum(poly3 *poly, pair_double *answer) {
+poly3_find_critical_points(poly3 *poly, pair_double *answer) {
     double a;
     double b;
     double c;
@@ -71,27 +70,20 @@ poly3_get_maximum(poly3 *poly, pair_double *answer) {
     assert(answer != NULL);
     assert(poly != NULL);
 
-    answer->first = 0.0;
-    answer->last = 0.0;
-
+    /* Differentiate */
     a = poly->coeff3 * 3;
     b = poly->coeff2 * 2;
     c = poly->coeff1;
 
-    /* If both a and b are 0, we do not have a polynomial. */
-    /* assert(a != 0 || b != 0); */
-    /* Since this is a special function designed to find the break-even
-     * point for class, this needs to be dealt with.
-     * XXX TODO FIXME
-     */
-
+    /* If both a and b are 0, we do not have a polynomial of interest. */
     if (a == 0 && b == 0) {
-        return answer;
+        return NULL;
     }
 
+    /* If z < 0, then there are only complex solutions. */
     z = pow(b, 2) - (4 * a * c);
     if (z < 0) {
-        return answer;
+        return NULL;
     }
 
     /* corner case, if a == 0, this is a polynomial or degree 1 
@@ -101,14 +93,31 @@ poly3_get_maximum(poly3 *poly, pair_double *answer) {
      */
     if (a == 0) {
         answer->first = -(((double)c) / b);
+        answer->last = answer->first;
     }
     else {
         answer->first = (-b + sqrt(z)) / (2 * a);
         answer->last = (-b - sqrt(z)) / (2 * a);
     }
 
-    answer->first = poly3_eval(poly, answer->first);
-    answer->last = poly3_eval(poly, answer->last);
+    return answer;
+}
+
+pair_double *
+poly3_get_maximum(poly3 *poly, pair_double *answer) {
+    pair_double possible_points;
+
+    assert(answer != NULL);
+    assert(poly != NULL);
+
+    answer->first = 0.0;
+    answer->last = 0.0;
+
+    /* Find the critical points and evaluate them. */
+    if ((poly3_find_critical_points(poly, &possible_points)) != NULL) {
+        answer->first = poly3_eval(poly, possible_points.first);
+        answer->last = poly3_eval(poly, possible_points.last);
+    }
     return answer;
 }
 
@@ -136,6 +145,48 @@ static void sort(double *list, int length) {
             }
         }
     }
+}
+
+double
+find_maximum_point(uint32_t rn, int rank) {
+    poly3 poly;
+    pair_double possible_points;
+    double p[4];
+    int i;
+
+    /* Set all to false. */
+    if (rn % 2 == 1) {
+        return 0;
+    }
+    /* Set all to true. */
+    if (rn >= 128) {
+        return 1;
+    }
+    poly3_create(rn, &poly);
+    poly3_find_critical_points(&poly, &possible_points);
+
+    p[0] = poly3_eval(&poly, 0);
+    p[1] = poly3_eval(&poly, 1);
+    p[2] = poly3_eval(&poly, possible_points.first);
+    p[3] = poly3_eval(&poly, possible_points.last);
+
+    sort(p, 4);
+
+    for (i = 0; i < 4; i++) {
+        if (!(p[i] > 1) || !(p[i] < 0)) {
+            if (fabs(p[i] - poly3_eval(&poly, possible_points.first)) < 0.001)
+                return possible_points.first;
+            if (fabs(p[i] - poly3_eval(&poly, possible_points.last)) < 0.001)
+                return possible_points.last;
+            if (fabs(p[i] - poly3_eval(&poly, 0)) < 0.001)
+                return 0;
+            if (fabs(p[i] - poly3_eval(&poly, 1)) < 0.001)
+                return 1;
+            return 0.0;
+        }
+    }
+
+    return 0.0;
 }
 
 double
