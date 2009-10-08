@@ -333,6 +333,7 @@ solve_it(void *p) {
  * The naive solver. Runs random_solve `loopy` times.
  * @param p The problem instance
  * @param s The solution.
+ * @param loopy The number of times to run random_solve.
  * @return The best solution.
  */
 static solution *
@@ -395,10 +396,13 @@ random_solve(const problem * restrict problem, solution *solution) {
 
 solution *
 solve_iterate(const problem * restrict p, solution *s) {
-    int i;
-    int k;
+    register uint32_t bit_mask;
+    uint32_t i;
+    uint32_t k;
     int max;
     int temp;
+    register int num_ones;
+    register int num_zeros;
     solution *max_solution;
 
     assert(p != NULL);
@@ -408,9 +412,20 @@ solve_iterate(const problem * restrict p, solution *s) {
     max_solution = solution_create(p);
 
     for (i = 0; i < (1 << p->num_vars); i++) {
+        /* Keep track of the number of ones and zeros. */
+        num_ones = 0;
+        num_zeros = 0;
+        bit_mask = 0x00000001;
         for (k = 0; k < s->size; k++) {
-            *(s->values+k) = i & (1 << k) ? TRUE : FALSE;
+            /* alpha = (i & j) ? TRUE : FALSE;
+             * alpha ? num_ones++ : num_zeros++; */
+            (*(s->values+k) = i & bit_mask ? TRUE : FALSE)
+                            ? num_ones++
+                            : num_zeros++;
+            bit_mask <<= 1;
         }
+
+        /* Keep track of the maximum. */
         temp = fsat(p, s);
         if (temp > max) {
             max = temp;
