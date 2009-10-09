@@ -13,7 +13,7 @@ import relation.gen
 gflags.DEFINE_enum('solver', 'c', ['proxy', 'python', 'c'],
                    'Problem solver to use')
 gflags.DEFINE_integer('problemdegree', 13, 'Degree of generated problems')
-gflags.DEFINE_float('pricemarkup', 0.19999,
+gflags.DEFINE_float('pricemarkup', 0.01,
                     'What markup to add to our maxsat for offers')
 gflags.DEFINE_string('showproxysolution', False,
                      'Show proxy solution and real solution messages')

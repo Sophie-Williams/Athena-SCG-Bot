@@ -19,6 +19,7 @@ class Game(object):
     self.id = int(self.context.playerid)
 
   def RunTasks(self):
+    starttime = time.time()
     self.replies = []
     logging.info('Starting Balance: $%0.4f' % self.context.balance)
     logging.debug('Their Offered: %s' % str(self.context.their_offered))
@@ -30,6 +31,8 @@ class Game(object):
               self.ProvideTask, self.SolveTask]:
       x()
     logging.info('Ending Balance: $%0.4f' % self.context.endbalance)
+    endtime = time.time()
+    logging.info('Gameplay took %s' % (endtime - starttime))
 
   def AcceptTask(self):
     logging.info('Running AcceptTask')
@@ -81,18 +84,8 @@ class Game(object):
   def SolveTask(self):
     logging.info('Running SolveTask')
     solvestart = time.time()
-    threads = []
     for problem in self.context.provided:
-      t = problem.GetSolveThread()
-      t.start()
-      threads.append((t, problem))
-    
-    while threads:
-      for threadproblem in threads:
-        thread, problem = threadproblem
-        if not thread.isAlive():
-          self.replies.append(problem.Solve())
-          threads.remove(threadproblem)
+      self.replies.append(problem.Solve())
     logging.info('Solves took %s seconds' % (time.time() - solvestart))
 
   def OfferTask(self):
