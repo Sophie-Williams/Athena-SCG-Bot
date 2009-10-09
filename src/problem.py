@@ -2,7 +2,6 @@
 import gflags
 import itertools
 import logging
-import random
 import threading
 
 import csptree
@@ -237,26 +236,11 @@ class Problem(object):
   def Generate(cls, problemnumber, offerid, degree=None):
     if not degree:
       degree = FLAGS.problemdegree
-    p = cls(0, ['v%d' % x for x in range(0, degree)], [], offerid, 0,
+    p = cls(0, ['v%d' % x for x in range(0, degree+50)], [], offerid, 0,
             problemnumber, 0)
     for i, j, k in relation.gen.permute3(degree):
       p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
     return p
- 
-  @classmethod
-  def MarkupOffer(cls, problemnumber):
-    if problemnumber == 1 or problemnumber%2 or problemnumber <= 128:
-      return 1.0
-    p = cls.Generate(problemnumber, -1)
-    #perc, _, _ = p.PySolve()
-    fsat, values = p.RealSolve()
-    numclauses = float(len(p.clauses))
-    perc = float(fsat)/numclauses
-    newprice = float(perc) + FLAGS.pricemarkup
-    if newprice >= 1:
-      return 1.0
-    else:
-      return newprice
 
   @classmethod
   def GetProblemList(cls, parsedlist):

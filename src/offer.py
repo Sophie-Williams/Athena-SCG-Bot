@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 import gflags
 import logging
-import random
 
 import relation
 import problem
@@ -70,6 +69,16 @@ class Offer(object):
     """
     return 'offer[-1 ( %d) %0.8f]' % (self.problemnumber, self.price)
 
+  def SetPrice(self, price=None, markup=0.1):
+    """Set or Generate a price."""
+    if price is None:
+      price = relation.break_even(problemnumber, 3)
+    price += markup
+    if price >1:
+      price = 1
+    self.price = price
+    return price
+
   @classmethod
   def GetOfferList(cls, parsedlist):
     outputlist = []
@@ -88,9 +97,11 @@ class Offer(object):
     elif problemnumber in justoffered:
       return False
     else:
-      logging.debug('Got problem number %d to generate' % problemnumber)
-      price = problem.Problem.MarkupOffer(problemnumber)
-      return cls(-1, -1, problemnumber, price)
+      o = cls(-1, -1, problemnumber, -1)
+      price = o.SetPrice()
+      logging.info('Got problem number %d to generate for %s'
+                   % (problemnumber, price))
+      return o
 
   @classmethod
   def GenerateOffer(cls, ouroffered, theiroffered, justoffered):
