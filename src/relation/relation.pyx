@@ -559,3 +559,4 @@ cdef class Problem:
 
     def __dealloc__(self):
         problem_delete(self.p)
+        self.p = <problem *> 0

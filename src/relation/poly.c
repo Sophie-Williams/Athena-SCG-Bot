@@ -19,34 +19,20 @@ poly3 *
 poly3_create(uint32_t rn, poly3 *poly) {
     assert(poly != NULL);
 
-    POLY3(*poly, 0, 0, 0, 0);
+    POLY3(*poly, 0, 0, 0, 0); /* A blank, if you will. */
 
-    /*
-     * 0 -> 000
-     * 1 -> 001
-     * 2 -> 010
-     * 3 -> 011
-     * 4 -> 100
-     * 5 -> 101
-     * 6 -> 110
-     * 7 -> 111
-     */
-    if (HAVE_NTH(rn, 0)) POLY3_ADD_03(*poly);
-    if (HAVE_NTH(rn, 1)) POLY3_ADD_12(*poly);
-    if (HAVE_NTH(rn, 2)) POLY3_ADD_12(*poly);
-    if (HAVE_NTH(rn, 3)) POLY3_ADD_21(*poly);
-    if (HAVE_NTH(rn, 4)) POLY3_ADD_12(*poly);
-    if (HAVE_NTH(rn, 5)) POLY3_ADD_21(*poly);
-    if (HAVE_NTH(rn, 6)) POLY3_ADD_21(*poly);
-    if (HAVE_NTH(rn, 7)) POLY3_ADD_30(*poly);
+    if (HAVE_NTH(rn, 0)) POLY3_ADD_03(*poly); /* 0 -> 000 */
+    if (HAVE_NTH(rn, 1)) POLY3_ADD_12(*poly); /* 1 -> 001 */
+    if (HAVE_NTH(rn, 2)) POLY3_ADD_12(*poly); /* 2 -> 010 */
+    if (HAVE_NTH(rn, 3)) POLY3_ADD_21(*poly); /* 3 -> 011 */
+    if (HAVE_NTH(rn, 4)) POLY3_ADD_12(*poly); /* 4 -> 100 */
+    if (HAVE_NTH(rn, 5)) POLY3_ADD_21(*poly); /* 5 -> 101 */
+    if (HAVE_NTH(rn, 6)) POLY3_ADD_21(*poly); /* 6 -> 110 */
+    if (HAVE_NTH(rn, 7)) POLY3_ADD_30(*poly); /* 7 -> 111 */
 
     return poly;
 }
 
-/**
- * poly3_add : poly3 *a, poly3 *b
- * Add the values of b into a.
- */
 poly3 *
 poly3_add(poly3 *a, poly3 *b) {
     assert(a != NULL);
@@ -129,30 +115,15 @@ poly3_eval(poly3 *poly, double x) {
             x * poly->coeff1 + poly->coeff0);
 }
 
-/** TODO Not your best sort */
-static void sort(double *list, int length) {
-    int i;
-    int j;
-    double temp;
-
-    for (i = 0; i < length - 1; i++) {
-        for (j = i + 1; j < length; j++) {
-            if (*(list+j) > *(list+i)) {
-                /* SWAP */
-                temp = *(list+j);
-                *(list+j) = *(list+i);
-                *(list+i) = temp;
-            }
-        }
-    }
-}
-
 double
 find_maximum_point(uint32_t rn, int rank) {
     poly3 poly;
     pair_double possible_points;
     double p[4];
     int i;
+    double max;
+    int max_index;
+    double temp;
 
     /* Set all to false. */
     if (rn % 2 == 1) {
@@ -162,39 +133,32 @@ find_maximum_point(uint32_t rn, int rank) {
     if (rn >= 128) {
         return 1;
     }
+
     poly3_create(rn, &poly);
     poly3_find_critical_points(&poly, &possible_points);
 
-    p[0] = poly3_eval(&poly, 0);
-    p[1] = poly3_eval(&poly, 1);
-    p[2] = poly3_eval(&poly, possible_points.first);
-    p[3] = poly3_eval(&poly, possible_points.last);
+    p[0] = 0.0;
+    p[1] = 1.0;
+    p[2] = possible_points.first;
+    p[3] = possible_points.last;
 
-    sort(p, 4);
+    max = poly3_eval(&poly, p[0]);
+    max_index = 0;
 
-    for (i = 0; i < 4; i++) {
-        if (!(p[i] > 1) || !(p[i] < 0)) {
-            if (fabs(p[i] - poly3_eval(&poly, possible_points.first)) < 0.001)
-                return possible_points.first;
-            if (fabs(p[i] - poly3_eval(&poly, possible_points.last)) < 0.001)
-                return possible_points.last;
-            if (fabs(p[i] - poly3_eval(&poly, 0)) < 0.001)
-                return 0;
-            if (fabs(p[i] - poly3_eval(&poly, 1)) < 0.001)
-                return 1;
-            return 0.0;
+    for (i = 1; i < 4; i++) {
+        temp = poly3_eval(&poly, p[i]);
+        if (!(temp > 1) && temp > max) {
+            max = temp;
+            max_index = i;
         }
     }
 
-    return 0.0;
+    return p[max_index];
 }
 
 double
 find_break_even(uint32_t rn, int rank) {
     poly3 poly;
-    pair_double possible;
-    double p[4];
-    int i;
 
     /* If odd, the break even is 1.0
      *
@@ -208,35 +172,13 @@ find_break_even(uint32_t rn, int rank) {
         return 1.0;
     }
 
-    /*
-     * Optimized Prime!
-     */
-    if (rn >= 127) {
+    /* Optimized Prime! All True cases. */
+    if (rn > 127) {
         return 1.0;
     }
 
     poly3_create(rn, &poly);
-
-    poly3_get_maximum(&poly, &possible);
-
-    /* All possible maximum values for [0,1]. It may include points from o */
-    p[0] = poly3_eval(&poly, 0);
-    p[1] = poly3_eval(&poly, 1);
-    p[2] = possible.first;
-    p[3] = possible.last;
-
-    /* The break even is the value of the polynomial at its maximum. */
-
-    sort(p, 4);
-
-    for (i = 0; i < 4; i++) {
-        if (!(p[i] > 1)) {
-            return p[i];
-        }
-    }
-
-    /* Every maximum was out of range, so normalize. */
-    return 1.0;
+    return poly3_eval(&poly, find_maximum_point(rn, rank));
 }
 
 /* Functions for poly */

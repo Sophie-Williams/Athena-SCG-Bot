@@ -395,6 +395,35 @@ random_solve(const problem * restrict problem, solution *solution) {
     return solution;
 }
 
+/** FIXME TEST ME
+ * @param p The problem
+ * @return The occurences of variables.
+ */
+int *
+variable_count(const problem * restrict p) {
+    int *var_count;
+    int i;
+    int j;
+    clause *c;
+
+    assert(p != NULL);
+
+    if ((var_count = malloc(sizeof(int) * p->num_vars)) == NULL)
+        return NULL;
+
+    /* Initialize all to 0. */
+    memset(var_count, 0, sizeof(int) * p->num_vars);
+
+    for (i = 0; i < p->num_clauses; i++) {
+        c = p->clauses + i;
+        for (j = 0; j < c->rank; j++) {
+            *(var_count + *(c->vars+j)) += 1;
+        }
+    }
+
+    return var_count;
+}
+
 #define OPTIMIZE 1
 solution *
 solve_iterate(const problem * restrict p, solution *s) {

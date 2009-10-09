@@ -35,5 +35,8 @@ test: all poly_test solve_test
 	./poly_test
 	./solve_test
 
+test_full: test
+	python solve_test.py
+
 clean:
 	$(RM) relation.c *.o *.so *.pyc poly_test solve_test

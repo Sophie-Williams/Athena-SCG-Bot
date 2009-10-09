@@ -245,22 +245,6 @@ class TestRelation(unittest.TestCase):
         [0, 1, 1, 0, 0],
     ])
 
-    import test_data
-    c_p = relation.Problem(test_data.vars1, test_data.clauses1)
-    fsat, values = c_p.solve()
-    self.assertEquals(fsat, 468)
-
-    c_p = relation.Problem(test_data.vars2, test_data.clauses2)
-    fsat, values = c_p.solve()
-    self.assertEquals(fsat, 468)
-
-    c_p = relation.Problem(test_data.vars3, test_data.clauses3)
-    fsat, values = c_p.solve()
-    self.assertEquals(fsat, 6)
-
-    c_p = relation.Problem(test_data.vars4, test_data.clauses4)
-    fsat, values = c_p.solve()
-    self.assertEquals(fsat, 36)
 
 class TestGen(unittest.TestCase):
 

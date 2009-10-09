@@ -55,6 +55,13 @@ def problem(p_type, degree=100):
     y += '(%d %s %s %s ) ' % (p_type, var(i), var(j), var(k))
   return y
 
+def gen_problem(p_type, degree):
+  vars = map(var, range(0, degree))
+  clauses = []
+  for i, j, k in permute3(degree):
+    clauses += [(p_type, var(i), var(j), var(k))]
+  return vars, clauses
+
 if __name__ == '__main__':
   import time
 
