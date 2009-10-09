@@ -212,6 +212,49 @@ static char *test_poly_maxima() {
     return NULL;
 }
 
+static char *test_pascal() {
+    mu_assert("0,0", pascal(0, 0) == 1);
+    mu_assert("1,0", pascal(1, 0) == 1);
+    mu_assert("2,0", pascal(2, 0) == 1);
+    mu_assert("3,3", pascal(3, 3) == 1);
+    mu_assert("4,2", pascal(4, 2) == 6);
+    mu_assert("5,3", pascal(5, 3) == 10);
+    mu_assert("7,1", pascal(7, 1) == 7);
+    return NULL;
+}
+
+static char *test_poly_from_relation_number() {
+    poly *p;
+
+#define POLY_FROM_MACRO(rn, rank, a0, a1, a2, a3, a4, a5) do { \
+    p = poly_from_relation_number(rn, rank); \
+    mu_assert(#rn " 0 " #a0, p->coeffs[0] == a0); \
+    if (1 <= rank) mu_assert(#rn " 1 " #a1, p->coeffs[1] == a1); \
+    if (2 <= rank) mu_assert(#rn " 2 " #a2, p->coeffs[2] == a2); \
+    if (3 <= rank) mu_assert(#rn " 3 " #a3, p->coeffs[3] == a3); \
+    if (4 <= rank) mu_assert(#rn " 4 " #a4, p->coeffs[4] == a4); \
+    if (5 <= rank) mu_assert(#rn " 5 " #a5, p->coeffs[5] == a5); \
+    poly_delete(p); } while(0)
+#define POLY_FROM_MACRO3(rn, a0, a1, a2, a3) \
+    POLY_FROM_MACRO(rn, 3, a0, a1, a2, a3, 0, 0);
+#define POLY_FROM_MACRO4(rn, a0, a1, a2, a3, a4) \
+    POLY_FROM_MACRO(rn, 4, a0, a1, a2, a3, a4, 0);
+#define POLY_FROM_MACRO5(rn, a0, a1, a2, a3, a4, a5) \
+    POLY_FROM_MACRO(rn, 5, a0, a1, a2, a3, a4, a5);
+
+    POLY_FROM_MACRO3(1,   1, -3,  3, -1);
+    POLY_FROM_MACRO3(2,   0,  1, -2,  1);
+    POLY_FROM_MACRO3(22,  0,  3, -6,  3);
+    POLY_FROM_MACRO3(60,  0,  2, -2,  0);
+    POLY_FROM_MACRO3(16,  0,  1, -2,  1);
+    POLY_FROM_MACRO3(128, 0,  0,  0,  1);
+
+    POLY_FROM_MACRO4(514, 0, 1, -2, 1, 0);
+    POLY_FROM_MACRO4(2222, 0, 2, -4, 4, -2);
+
+    return NULL;
+}
+
 char *all_tests() {
     mu_run_test(test_poly3_get_maximum);
     mu_run_test(test_poly3_create);
@@ -220,5 +263,7 @@ char *all_tests() {
     mu_run_test(test_poly_new);
     mu_run_test(test_poly_synth_div);
     mu_run_test(test_poly_maxima);
+    mu_run_test(test_pascal);
+    mu_run_test(test_poly_from_relation_number);
     return NULL;
 }

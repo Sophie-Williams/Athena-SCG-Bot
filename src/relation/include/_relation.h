@@ -48,7 +48,7 @@ ones(uint32_t rn, int rank);
  * @param rn
  * @param rank
  * @param num_true_vars used to identify a set of rows in the truth table
- * @return counts the number of ones corresponding to truth table rows
+ * @return The number of corresponding rows in the truth table
  *         with the given number of true variables
  */
 int

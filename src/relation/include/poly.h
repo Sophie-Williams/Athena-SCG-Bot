@@ -214,4 +214,23 @@ poly_maxima(poly *p, double left, double right);
 int
 poly_synth_div(poly *p, int q);
 
+/**
+ * @param rn The relation number.
+ * @param rank The rank of the relation number.
+ * @return The polynomial that corresponds to the relation number.
+ */
+poly *
+poly_from_relation_number(uint32_t rn, int rank);
+
+/* OTHER */
+
+/**
+ * Find the binomial coefficient.
+ * @param n
+ * @param r
+ * @return
+ */
+int
+pascal(int n, int r);
+
 #endif

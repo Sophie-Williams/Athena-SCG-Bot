@@ -6,6 +6,8 @@
 #include <stdarg.h>
 #include <math.h>
 
+#include "_relation.h"
+#include "relation_consts.h"
 #include "poly.h"
 
 #define HAVE_NTH(x, nth) (((x >> nth) % 2) == 1)
@@ -256,6 +258,48 @@ poly_new(int degree, ...) {
     return p;
 }
 
+poly *
+poly_from_relation_number(uint32_t rn, int rank) {
+    poly *p;
+    int i;
+    int j;
+    int num_rows;
+
+    assert(VALID_RANK(rank));
+
+    if ((p = malloc(sizeof(poly))) == NULL) {
+        perror("malloc");
+        return NULL;
+    }
+    if ((p->coeffs = malloc(sizeof(int) * (rank + 1))) == NULL) {
+        perror("malloc");
+        free(p);
+        return NULL;
+    }
+
+    p->degree = rank;
+    /* Zero-out the coefficients. */
+    memset(p->coeffs, 0, sizeof(int) * (rank + 1));
+
+    /* For each possible number of true variables [0,rank] (the function
+     * `q` does exactly that), find the number of rows. Add to the polynomial.
+     * Uses the binomial theorem, since the generated polynomials are
+     * of the form p^x * (1-p)^y, where x + y == rank
+     */
+    for (i = 0; i <= rank; i++) {
+        if ((num_rows = q(rn, rank, rank - i)) > 0) {
+            for (j = 0; j <= i; j++) {
+                /* Assigns from the top degree. */
+                *(p->coeffs + rank-j) += pascal(i, j)
+                                       * num_rows
+                                       * (j % 2 == i % 2 ? 1 : -1);
+            }
+        }
+    }
+
+    return p;
+}
+
 double
 poly_maxima(poly *p, double left, double right) {
     double max;
@@ -289,4 +333,27 @@ poly_synth_div(poly *p, int q) {
     }
 
     return r;
+}
+
+/* OTHER */
+
+int
+pascal(int n, int r) {
+    int i;
+    int x;
+
+    assert(n >= 0);
+    assert(r >= 0);
+    assert(n >= r);
+    x = 1;
+
+    for (i = n; i > (n - r); i--) {
+        x *= i;
+    }
+
+    for (; r > 1; r--) {
+        x /= r;
+    }
+
+    return x;
 }
