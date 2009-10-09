@@ -2,6 +2,7 @@
 import gflags
 import logging
 import random
+import time
 
 import offer
 import playercontext
@@ -79,8 +80,20 @@ class Game(object):
 
   def SolveTask(self):
     logging.info('Running SolveTask')
+    solvestart = time.time()
+    threads = []
     for problem in self.context.provided:
-      self.replies.append(problem.Solve())
+      t = problem.GetSolveThread()
+      t.start()
+      threads.append((t, problem))
+    
+    while threads:
+      for threadproblem in threads:
+        thread, problem = threadproblem
+        if not thread.isAlive():
+          self.replies.append(problem.Solve())
+          threads.remove(threadproblem)
+    logging.info('Solves took %s seconds' % (time.time() - solvestart))
 
   def OfferTask(self):
     logging.info('Running OfferTask')

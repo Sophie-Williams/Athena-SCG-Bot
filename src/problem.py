@@ -3,6 +3,7 @@ import gflags
 import itertools
 import logging
 import random
+import threading
 
 import csptree
 import proxysolver
@@ -12,7 +13,7 @@ import relation.gen
 gflags.DEFINE_enum('solver', 'c', ['proxy', 'python', 'c'],
                    'Problem solver to use')
 gflags.DEFINE_integer('problemdegree', 13, 'Degree of generated problems')
-gflags.DEFINE_float('pricemarkup', 0.29999,
+gflags.DEFINE_float('pricemarkup', 0.19999,
                     'What markup to add to our maxsat for offers')
 gflags.DEFINE_string('showproxysolution', False,
                      'Show proxy solution and real solution messages')
@@ -75,6 +76,7 @@ class Problem(object):
     self.seller = int(seller)
     self.problemnumber = int(problemnumber)
     self.price = float(price)
+    self.solution = None
 
   def __str__(self):
     return ('Problem(num=%d, vars=%s, price=%s, seller=%s clauses=%s)'
@@ -127,11 +129,6 @@ class Problem(object):
       c_p = relation.Problem(tuple(self.vars),
                             [x.GetTuple() for x in self.clauses])
       fsat, values = c_p.solve()
-      fsat = 0
-      for x in self.clauses:
-        if self.IsClauseSat(x, values):
-          fsat += 1
-        
     return fsat, values
 
   def GetVariableValue(self, var, solution):
@@ -222,12 +219,19 @@ class Problem(object):
       return self.GetPySolution()
 
   def Solve(self):
-    rs = self.DoSolve()
-    if FLAGS.showproxysolution:
-      logging.debug('Real solution: %s' % rs)
-      ps = proxysolver.ProxySolve(self)
-      logging.debug('Proxy solution: %s' % ps)
-    return rs
+    if self.solution is None:
+      rs = self.DoSolve()
+      if FLAGS.showproxysolution:
+        logging.debug('Real solution: %s' % rs)
+        ps = proxysolver.ProxySolve(self)
+        logging.debug('Proxy solution: %s' % ps)
+      self.solution = rs
+    return self.solution
+
+  def GetSolveThread(self):
+    logging.debug('Creating solve thread for %s' % str(self))
+    t = threading.Thread(group=None, target=self.Solve)
+    return t
 
   @classmethod
   def Generate(cls, problemnumber, offerid, degree=None):
