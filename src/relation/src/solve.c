@@ -8,7 +8,7 @@
 #include <math.h>
 
 #include "solve.h"
-#include "_relation.h" /* relation numbers, etc.*/
+#include "relation.h" /* relation numbers, etc.*/
 #include "relation_consts.h"
 #include "poly.h"
 

@@ -14,6 +14,6 @@ project/Admin/files/players.*
 project/Admin/files/history/*
 scaffold
 build
-src/relation/relation.c
+src/relation/relation_pyx.c
 *_test
 src/relation/doc

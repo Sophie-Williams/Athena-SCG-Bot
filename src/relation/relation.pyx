@@ -58,7 +58,7 @@ cdef extern from "relation_consts.h":
     cdef int C_TARGET "TARGET"
 
 
-cdef extern from "_relation.h":
+cdef extern from "relation.h":
     int c_is_irrelevant "is_irrelevant" (uint32_t rn, int rank, int var_p)
     uint32_t c_get_mask "get_mask" (int rank)
     uint32_t c_get_magic_number "get_magic_number" (int rank, int var_p,

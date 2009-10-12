@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <assert.h>
 #include "relation_consts.h"
-#include "_relation.h"
+#include "relation.h"
 
 
 /* Defined in relation_consts.h

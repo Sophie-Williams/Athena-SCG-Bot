@@ -6,7 +6,7 @@
 #include <stdarg.h>
 #include <math.h>
 
-#include "_relation.h"
+#include "relation.h"
 #include "relation_consts.h"
 #include "poly.h"
 
