@@ -36,13 +36,17 @@ class TestSolve(unittest.TestCase):
     i = 0
 
     for rn in range(2, 128, 2):
-      c_p = relation.Problem(*gen.gen_problem(rn, 18))
+      vars, clauses = gen.gen_problem(rn, 18)
+      c_p = relation.Problem(vars, clauses)
       s = time.time()
       fsat, values = c_p.solve()
       e = time.time()
       self.assertEquals(answers[i], fsat)
       i += 1
-      print rn, fsat, (e - s)
+      print ('%d (%d) / %d = %f vs %f : %f seconds' % (
+        rn, fsat, len(clauses), float(fsat)/len(clauses),
+        relation.break_even(rn, 3), (e - s)))
+#       print (float(fsat) / len(clauses)) - relation.break_even(rn, 3)
 
 if __name__ == '__main__':
   unittest.main()

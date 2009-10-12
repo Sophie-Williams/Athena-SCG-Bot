@@ -29,6 +29,21 @@ solve_naive_threaded(const problem * restrict p, solution *s, int num_threads);
 static solution *
 solve_iterate(const problem * restrict p, solution *s);
 
+static void *
+__solve_helper(void *t_d);
+
+static solution *
+__solve_iterate(const problem * restrict p, solution *s,
+                uint32_t start, uint32_t end);
+
+/* For threaded iterate. */
+typedef struct __thread_data {
+    problem *p;
+    uint32_t start;
+    uint32_t end;
+} thread_data;
+
+
 /* START constructor/destructor */
 
 problem *
@@ -424,9 +439,115 @@ variable_count(const problem * restrict p) {
     return var_count;
 }
 
-#define OPTIMIZE 1
 solution *
 solve_iterate(const problem * restrict p, solution *s) {
+#define NTHREADS 4
+    pthread_t tids[NTHREADS];
+    pthread_attr_t attrs[NTHREADS];
+    solution *x;
+    solution *best;
+    int max;
+    int clauses_satisfied;
+    int i;
+    int rc;
+    uint32_t search_space;
+    thread_data tds[NTHREADS];
+    problem p_copy;
+
+    assert(p != NULL);
+    assert(s != NULL);
+
+    search_space = (1 << p->num_vars);
+
+    /* soft copy */
+    p_copy.num_vars = p->num_vars;
+    p_copy.num_clauses = p->num_clauses;
+    p_copy.vars = p->vars;
+    p_copy.clauses = p->clauses;
+
+    for (i = 0; i < NTHREADS; i++) {
+        pthread_attr_init(attrs+i);
+        pthread_attr_setdetachstate(attrs+i, PTHREAD_CREATE_JOINABLE);
+
+        /* Create thread data. Copy the problem and give out the range. */
+        tds[i].p = &p_copy;
+        tds[i].start = (search_space / NTHREADS) * i;
+        tds[i].end   = (search_space / NTHREADS) * (i + 1);
+
+        if ((rc = pthread_create(tids+i, attrs+i,
+                                 __solve_helper, (void *)(tds+i))) != 0) {
+            printf("ERROR return code from pthread_create() is %d\n", rc);
+            exit(-1);
+        }
+    }
+
+    max = 0;
+    best = NULL;
+
+    for (i = 0; i < NTHREADS; i++) {
+        /* Wait for the threads */
+        if ((rc = pthread_join(tids[i], (void *)&x) != 0)) {
+            printf("ERROR return code from pthread_join() is %d\n", rc);
+            exit(-1);
+        }
+        pthread_attr_destroy(attrs+i);
+
+        /* Keep track of the best one. */
+        if ((clauses_satisfied = fsat(p, x)) > max) {
+            if (best != NULL) {
+                solution_delete(best);
+            }
+            max = clauses_satisfied;
+            best = x;
+        }
+        else {
+            solution_delete(x);
+        }
+    }
+
+    memcpy(s->values, best->values, sizeof(int) * s->size);
+    solution_delete(best);
+
+    return s;
+}
+
+/**
+ * Helper method for solve_iterate. Calls __solve_iterate on the
+ * range provided by the thread_data.
+ * @param t_d The thread data.
+ * @return The solution for the given range.
+ */
+static void *
+__solve_helper(void *t_d) {
+    thread_data *t;
+    solution *s;
+
+    assert(t_d != NULL);
+
+    t = (thread_data *)t_d;
+
+    /* Create space for the solution for this thread. */
+    s = solution_create(t->p);
+    /* The actual work. */
+    __solve_iterate(t->p, s, t->start, t->end);
+
+    pthread_exit((void *) s);
+
+    /* NOT REACHED. */
+    return (void *) s;
+}
+
+/**
+ * @param p The problem.
+ * @param s The solution.
+ * @param start The starting assignment (inclusive).
+ * @param end The ending assignment (not inclusive).
+ * @return The best solution for the given range.
+ */
+#define OPTIMIZE 1
+static solution *
+__solve_iterate(const problem * restrict p, solution *s,
+                 uint32_t start, uint32_t end) {
     register uint32_t bit_mask;
     register uint32_t i;
     register uint32_t k;
@@ -457,7 +578,7 @@ solve_iterate(const problem * restrict p, solution *s) {
     max_solution = solution_create(p);
 
 
-    for (i = 0; i < (1 << p->num_vars); i++) {
+    for (i = start; i < end; i++) {
 #if OPTIMIZE
     #if __GNUC__
         num_ones = __builtin_popcountl(i);
