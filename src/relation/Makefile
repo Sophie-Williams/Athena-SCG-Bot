@@ -33,4 +33,4 @@ test_full: test
 	python solve_test.py
 
 clean:
-	$(RM) relation.c *.o *.so *.pyc poly_test solve_test
+	$(RM) relation_pyx.c *.o *.so *.pyc poly_test solve_test
