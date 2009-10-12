@@ -8,7 +8,7 @@ import test_data
 
 class TestSolve(unittest.TestCase):
 
-  def test_solve(self):
+  def test_solve_from_other(self):
     c_p = relation.Problem(test_data.vars1, test_data.clauses1)
     fsat, values = c_p.solve()
     self.assertEquals(fsat, 468)
@@ -25,6 +25,7 @@ class TestSolve(unittest.TestCase):
     fsat, values = c_p.solve()
     self.assertEquals(fsat, 36)
 
+  def test_solve_from_us(self):
     answers = [
       792, 792, 1584, 792, 1296, 1296, 2002, 792, 1584, 1584, 2376, 1296,
       2002, 2002, 2772, 792, 1296, 1296, 2002, 1584, 2002, 2002, 2592,

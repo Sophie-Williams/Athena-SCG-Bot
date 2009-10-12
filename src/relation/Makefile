@@ -12,21 +12,15 @@ all: relation.so
 relation.so: $(OBJECTS)
 	$(CC) $(CFLAGS) -shared $(OBJECTS) -o $@
 
-poly_test: poly.o _relation.o tests/poly_test.c
-	$(CC) $(CFLAGS) -lm -I. -o $@ _relation.o poly.o tests/poly_test.c
+relation.o: relation.c
+	$(CC) $(CFLAGS) -fPIC -I/usr/include/python2.6 -c -o $@ relation.c
 
-poly.o: poly.c
-	$(CC) $(CFLAGS) -lm -fPIC -I. -c -o $@ poly.c
+%_test: %.o _relation.o poly.o tests/%_test.c
+	$(CC) $(CFLAGS) -lm $? -o $@
 
-solve_test: solve.o _relation.o poly.o tests/solve_test.c
-	$(CC) $(CFLAGS) -lm solve.o _relation.o poly.o tests/solve_test.c -o solve_test
+%.o: src/%.c
+	$(CC) $(CFLAGS) -c -o $@ $<
 
-solve.o: solve.c
-	$(CC) $(CFLAGS) -c -o solve.o solve.c
-
-%.o: %.c
-	$(CC) $(CFLAGS) -fPIC -I. -I/usr/include/python2.6 -c -o $@ $<
-	
 %.c: %.pyx
 	pyrexc $< -o $@
 
