@@ -17,6 +17,7 @@ import util
 
 gflags.DEFINE_string('ip', '0.0.0.0', 'IP to listen on')
 gflags.DEFINE_integer('port', 8080, 'Port number to listen on')
+gflags.DEFINE_boolean('enablediehandler', False, 'Enable /diediedie to quit')
 FLAGS = gflags.FLAGS
 
 urls = (
@@ -29,8 +30,13 @@ urls = (
 
 class DieHandler(object):
   def GET(self):
-    logging.info('Killed by DieHandler')
-    os.abort()
+    if FLAGS.enablediehandler:
+      logging.warning('Killed by DieHandler')
+      os.abort()
+    else:
+      logging.warning('Failed kill attempt by DieHandler')
+      web.ctx.status = '403 Access Denied'
+      return 'Client die request ignored by flags configuration'
 
 class RegisterHandler(object):
   def GET(self):
