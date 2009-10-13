@@ -72,7 +72,7 @@ class Offer(object):
   def SetPrice(self, price=None, markup=0.1):
     """Set or Generate a price."""
     if price is None:
-      price = relation.break_even(problemnumber, 3)
+      price = relation.break_even(self.problemnumber, 3)
     price += markup
     if price >1:
       price = 1
