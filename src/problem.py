@@ -76,6 +76,7 @@ class Problem(object):
     self.problemnumber = int(problemnumber)
     self.price = float(price)
     self.solution = None
+    self.profit = 0
 
   def __str__(self):
     return ('Problem(num=%d, vars=%s, price=%s, seller=%s clauses=%s)'
@@ -116,7 +117,11 @@ class Problem(object):
 
   def RealSolve(self):
     """Solve this Problem instance using the C solver."""
-    if self.problemnumber%2:
+    if self.problemnumber == 0:
+      logging.info('Special Case Solve: Relation 0!')
+      values = [0]*len(self.vars)
+      fsat = len(self.clauses)
+    elif self.problemnumber%2:
       logging.info('Special Case Solve: All False!')
       values = [0]*len(self.vars)
       fsat = len(self.clauses)
@@ -179,28 +184,27 @@ class Problem(object):
 
     return best
 
+  def SetProfit(self, satisfied):
+    numclauses = float(len(self.clauses))
+    solperc = float(satisfied)/numclauses
+    self.profit = solperc-self.price
+    logging.info('Solved %d out of %d | %0.3f - %0.3f = %0.3f profit'
+                  % (satisfied, numclauses, solperc, self.price, self.profit))
+    if self.profit < 0:
+      logging.error('Lost money on %s' % str(self))
+    return self.profit
+
   def GetPySolution(self):
     perc, sat, solution = self.PySolve()
-    profit = perc-self.price
-    logging.info('Solved %d %0.3f%% (%0.3f - %0.3f = %0.3f profit)'
-                  % (sat, perc*100, perc, self.price, profit))
-    logging.info('Using solution: %s' % str(solution))
-    if profit < 0:
-      logging.error('Lost money on %s' % str(self))
+    self.SetProfit(sat)
+    logging.debug('Values are: %s' % str(solution))
     s = csptree.CSPTree.CreateSolution(self.vars, solution)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
   def GetCSolution(self):
     fsat, values = self.RealSolve()
-    numclauses = float(len(self.clauses))
-    solperc = float(fsat)/numclauses
-    profit = solperc-self.price
-    logging.info('Solved %d out of %d | %0.3f - %0.3f = %0.3f profit'
-                  % (fsat, numclauses, solperc, self.price, profit))
-    if profit < 0:
-      logging.error('Lost money on %s' % str(self))
+    self.SetProfit(fsat)
     logging.debug('Values are: %s' % str(values))
-
     s = csptree.CSPTree.CreateSolution(self.vars, values)
     return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
 
@@ -238,7 +242,7 @@ class Problem(object):
       degree = FLAGS.problemdegree
     p = cls(0, ['v%d' % x for x in range(0, degree+50)], [], offerid, 0,
             problemnumber, 0)
-    for i, j, k in relation.gen.permute3(degree):
+    for i, j, k in itertools.permutations(range(degree), 3):
       p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
     return p
 

@@ -35,12 +35,12 @@ class Offer(object):
     return abs(self.bep-self.price)
 
   def IsGoodBuy(self):
+    if self.problemnumber <= 0:
+      return False
     if self.problemnumber % 2 or self.problemnumber >= 128:
       return True
     elif self.bep == 1:
       return True
-    elif not self.bep:
-      return False
     else:
       return self.bep+FLAGS.bepbump >= self.price
 
@@ -77,6 +77,8 @@ class Offer(object):
     if price >1:
       price = 1
     self.price = price
+    logging.debug('Got problem number %d to generate price @ %s'
+                  % (self.problemnumber, self.price))
     return price
 
   @classmethod
@@ -99,8 +101,6 @@ class Offer(object):
     else:
       o = cls(-1, -1, problemnumber, -1)
       price = o.SetPrice()
-      logging.info('Got problem number %d to generate for %s'
-                   % (problemnumber, price))
       return o
 
   @classmethod

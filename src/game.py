@@ -11,6 +11,8 @@ import relation
 
 gflags.DEFINE_boolean('allowreoffer', True,
                       'Don\'t force buys to allow reoffer')
+gflags.DEFINE_integer('maxaccept', 15,
+                      'Maximum number of offers to buy')
 FLAGS = gflags.FLAGS
 
 class Game(object):
@@ -42,11 +44,17 @@ class Game(object):
     #  logging.warning('End of game, not buying')
     #  return
 
+    acceptedcount = 0
     otheroffers = list(self.context.their_offered)
     for offer in self.context.their_offered:
+      if acceptedcount >= FLAGS.maxaccept:
+        logging.info('Maximum accepted reached (%d/%d)'
+                     % (acceptedcount, FLAGS.maxaccept))
+        break
       if offer.price > self.context.endbalance:
         logging.info('%s is out of budget' % str(offer))
       elif offer.IsGoodBuy():
+        acceptedcount +=1
         logging.info('%s is good buy' % str(offer))
         self.replies.append(offer.GetAccept())
         self.context.endbalance -= offer.price
@@ -86,6 +94,7 @@ class Game(object):
     solvestart = time.time()
     for problem in self.context.provided:
       self.replies.append(problem.Solve())
+      self.context.endbalance += problem.profit
     logging.info('Solves took %s seconds' % (time.time() - solvestart))
 
   def OfferTask(self):
