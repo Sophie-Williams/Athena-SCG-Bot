@@ -44,9 +44,9 @@ class TestSolve(unittest.TestCase):
       e = time.time()
       self.assertEquals(answers[i], fsat)
       i += 1
-      print ('%d (%d) / %d = %f vs %f : %f seconds' % (
-        rn, fsat, len(clauses), float(fsat)/len(clauses),
-        relation.break_even(rn, 3), (e - s)))
+#       print ('%d (%d) / %d = %f vs %f : %f seconds' % (
+#         rn, fsat, len(clauses), float(fsat)/len(clauses),
+#         relation.break_even(rn, 3), (e - s)))
 #       print (float(fsat) / len(clauses)) - relation.break_even(rn, 3)
 
 if __name__ == '__main__':
