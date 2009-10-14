@@ -12,8 +12,6 @@
 #include "relation_consts.h"
 #include "poly.h"
 
-#define RAND2 (rand() % 2)
-
 static solution *
 solve_iterate(const problem * restrict p, solution *s);
 
@@ -31,144 +29,13 @@ typedef struct __thread_data {
     uint32_t end;
 } thread_data;
 
-
-/* START constructor/destructor */
-
-problem *
-problem_create(char **vars, int num_vars, clause *clauses, int num_clauses) {
-    problem *p;
-    int i;
-
-    assert(num_vars > 0);
-    assert(num_clauses > 0);
-    assert(vars != NULL);
-    assert(clauses != NULL);
-
-    if((p = malloc(sizeof(problem))) == NULL) {
-        perror("malloc");
-        return NULL;
-    }
-
-    p->vars = malloc(num_vars);
-
-    for (i = 0; i < num_vars; i++) {
-        *(p->vars+i) = malloc(strlen(*(vars+i)) + 1);
-        strcpy(*(p->vars+i), *(vars+i));
-    }
-
-    p->clauses = malloc(sizeof(clause) * num_clauses);
-    memcpy(p->clauses, clauses, sizeof(clause) * num_clauses);
-
-    return p;
-}
-
-/* Set values for a problem. */
-void
-problem_set(problem *problem, char **vars, int num_vars, clause *clauses,
-            int num_clauses) {
-    assert(problem != NULL);
-    problem->vars = vars;
-    problem->num_vars = num_vars;
-    problem->clauses = clauses;
-    problem->num_clauses = num_clauses;
-}
-
-void
-problem_delete(problem *p) {
-    int i;
-
-    for (i = 0; i < p->num_vars; i++) {
-        free(*(p->vars+i));
-    }
-
-    free(p->vars);
-    free(p->clauses);
-    free(p);
-}
-
-solution *
-solution_create(const problem * restrict problem) {
-    solution *s;
-
-    assert(problem != NULL);
-
-    s = malloc(sizeof(solution));
-    if (s == NULL) {
-        perror("malloc");
-        return NULL;
-    }
-
-    s->values = malloc(sizeof(int) * problem->num_vars);
-    s->size = problem->num_vars;
-
-    if (s->values == NULL) {
-        perror("malloc");
-        free(s);
-        return NULL;
-    }
-
-    memset(s->values, '\0', sizeof(int) * problem->num_vars);
-
-    return s;
-}
-
-void
-solution_delete(solution *s) {
-    free(s->values);
-    free(s);
-}
-
-clause *
-clause_create(uint32_t rn, int rank, int *vars) {
-    clause *c;
-    register size_t size;
-
-    assert(vars != NULL);
-
-    size = sizeof(int) * rank;
-
-    c = malloc(sizeof(clause));
-    c->rn = rn;
-    c->rank = rank;
-    c->vars = malloc(size);
-    memcpy(c->vars, vars, size);
-
-    return c;
-}
-
-void
-clause_set(clause *clause, uint32_t rn, int rank, int *vars) {
-    register size_t size;
-    assert(clause != NULL);
-
-    size = sizeof(int) * rank;
-
-    clause->rn = rn;
-    clause->rank = rank;
-
-    /* Short-circuit if vars is not going to change. */
-    if (vars == NULL)
-        return;
-
-    if ((clause->vars = malloc(size)) == NULL) {
-        perror("malloc");
-        return;
-    }
-    memcpy(clause->vars, vars, size);
-}
-
-void
-clause_delete(clause *clause) {
-    assert(clause != NULL);
-    free(clause->vars);
-    free(clause);
-}
-
-/* END constructor/destructor */
+/* Code related to the "object" layer is in a different file.
+ * It is not linked for performance reasons. */
+#include "solve_objects.c"
 
 /* Returns the number of satisfied clauses. */
 int
-fsat(const problem * restrict problem, solution *solution) {
+fsat(const problem * restrict problem, const solution * restrict solution) {
     int i;
     int count = 0;
 
@@ -233,15 +100,9 @@ clause_is_satisfied_v0(const clause * restrict c, const solution * restrict s) {
 
 solution *
 solve(const problem * restrict p, solution *s) {
-    /*
-    return solve_naive(p, s, 5000000);
-     * Proof of concept threaded solver thing. Slower than the above.
-    return solve_naive_threaded(p, s, 2);
-     */
     /* FIXME filter unused variables */
     return solve_iterate(p, s);
 }
-
 
 
 /** FIXME TEST ME
@@ -315,7 +176,7 @@ solve_iterate(const problem * restrict p, solution *s) {
         }
     }
 
-    max = 0;
+    max = -1;
     best = NULL;
 
     for (i = 0; i < NTHREADS; i++) {
@@ -408,7 +269,7 @@ __solve_iterate(const problem * restrict p, solution *s,
     max_zeros += 3;
 #endif
 
-    max = 0;
+    max = -1;
     max_solution = solution_create(p);
 
 
@@ -470,10 +331,10 @@ solve_value(const clause * restrict clause, int assignment) {
     return (clause->rn & (1 << assignment)) != 0;
 }
 
-int
-to_row_number(int *values, int rank) {
-    int i;
-    int ret = 0;
+inline int
+to_row_number(const int * restrict values, int rank) {
+    register int i;
+    register int ret = 0;
 
     assert(values != NULL);
 

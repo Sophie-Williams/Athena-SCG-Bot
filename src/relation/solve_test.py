@@ -26,7 +26,7 @@ class TestSolve(unittest.TestCase):
     self.assertEquals(fsat, 36)
 
   def test_solve_from_us(self):
-    answers = [
+    answers = [ 0,
       792, 792, 1584, 792, 1296, 1296, 2002, 792, 1584, 1584, 2376, 1296,
       2002, 2002, 2772, 792, 1296, 1296, 2002, 1584, 2002, 2002, 2592,
       1296, 2002, 2002, 2772, 2002, 2592, 2592, 3280, 792, 1296, 1296,
@@ -36,7 +36,7 @@ class TestSolve(unittest.TestCase):
     ]
     i = 0
 
-    for rn in range(2, 128, 2):
+    for rn in range(0, 128, 2):
       vars, clauses = gen.gen_problem(rn, 18)
       c_p = relation.Problem(vars, clauses)
       s = time.time()

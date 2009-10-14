@@ -120,7 +120,7 @@ clause_delete(clause *clause);
  * Calculate the number of satisfied clauses.
  */
 int
-fsat(const problem * restrict problem, solution *solution);
+fsat(const problem * restrict problem, const solution * restrict solution);
 
 /**
  * @return true if the clause is satisfied by the clause.
@@ -151,6 +151,6 @@ solve_value(const clause * restrict clause, int assignment);
  * @return The row number corresponding to the assignment.
  */
 int
-to_row_number(int *values, int rank);
+to_row_number(const int * restrict values, int rank);
 
 #endif
