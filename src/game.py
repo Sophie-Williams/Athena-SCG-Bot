@@ -11,7 +11,7 @@ import relation
 
 gflags.DEFINE_boolean('allowreoffer', True,
                       'Don\'t force buys to allow reoffer')
-gflags.DEFINE_integer('maxaccept', 15,
+gflags.DEFINE_integer('maxaccept', 10,
                       'Maximum number of offers to buy')
 FLAGS = gflags.FLAGS
 
@@ -45,7 +45,9 @@ class Game(object):
     #  return
 
     acceptedcount = 0
-    otheroffers = list(self.context.their_offered)
+    # The sort and reverse should give us most profitable items first
+    self.context.their_offered.sort()
+    self.context.their_offered.reverse()
     for offer in self.context.their_offered:
       if acceptedcount >= FLAGS.maxaccept:
         logging.info('Maximum accepted reached (%d/%d)'

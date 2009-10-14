@@ -32,7 +32,7 @@ class Offer(object):
     return cmp(self.BEPDiff(), other.BEPDiff())
 
   def BEPDiff(self):
-    return abs(self.bep-self.price)
+    return self.bep-self.price
 
   def IsGoodBuy(self):
     if self.problemnumber <= 0:
