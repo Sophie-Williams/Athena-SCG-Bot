@@ -70,7 +70,12 @@ class TestRelation(unittest.TestCase):
 
   def test_swap(self):
     # XXX needs more tests
-    self.assertEqual(relation.swap(123123, 4, 1, 2), 51407)
+    self.assertEqual(relation.swap(123123, 5, 1, 2), 116943)
+    self.assertEqual(relation.swap(116943, 5, 1, 2), 123123)
+    self.assertEqual(relation.swap(123123, 5, 0, 3), 127441)
+    self.assertEqual(relation.swap(127441, 5, 0, 3), 123123)
+    self.assertEqual(relation.swap(61905, 5, 0, 3), 57587)
+    self.assertEqual(relation.swap(57587, 5, 0, 3), 61905)
 
   def test_renme(self):
     # XXX what the fuck?

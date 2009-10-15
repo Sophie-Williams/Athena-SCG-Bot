@@ -261,7 +261,7 @@ static char *test_poly_eval() {
     p = poly_new(7, 1, 0, 0, 1, 0, 0, 0, 1);
     mu_assert("x^7 + x^3 + 1, x = 0", IN_RANGE(poly_eval(p, 0), 1));
     mu_assert("x^7 + x^3 + 1, x = 1", IN_RANGE(poly_eval(p, 1), 3));
-    mu_assert("x^7 + x^3 + 1, x = 2", IN_RANGE(poly_eval(p, 2), 128 + 8 + 3));
+    mu_assert("x^7 + x^3 + 1, x = 2", IN_RANGE(poly_eval(p, 2), 128 + 8 + 1));
     poly_delete(p);
     return NULL;
 }
@@ -276,5 +276,6 @@ char *all_tests() {
     mu_run_test(test_poly_maxima);
     mu_run_test(test_pascal);
     mu_run_test(test_poly_from_relation_number);
+    mu_run_test(test_poly_eval);
     return NULL;
 }
