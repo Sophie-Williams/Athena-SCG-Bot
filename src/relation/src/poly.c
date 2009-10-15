@@ -219,9 +219,10 @@ poly_eval(poly *p, double value) {
     assert(p != NULL);
     assert(p->coeffs != NULL);
 
-    ret = 0.0;
-    for (i = 0; i <= p->degree; i++) {
-        ret += pow(value, i) * p->coeffs[i];
+    /* Horner's rule */
+    ret = p->coeffs[p->degree];
+    for (i = p->degree - 1; i >= 0; i--) {
+        ret = ret * value + p->coeffs[i];
     }
     
     return ret;
