@@ -103,9 +103,16 @@ class Problem(object):
 
   def GetProvide(self):
     """Get a 'provide' blob to send to the administrator for this problem."""
-    return ('provide[%s %s %d]'
+    if False:
+      self.Solve()
+      solution = ' %s' % self.solution
+    else:
+      solution = ''
+
+    return ('provide[%s %s%s %d]'
             % (' '.join(self.vars),
                ' '.join([x.GetProvideBlob() for x in self.clauses]),
+               solution,
                self.challengeid))
 
   def GetProvided(self):
@@ -199,14 +206,14 @@ class Problem(object):
     self.SetProfit(sat)
     logging.debug('Values are: %s' % str(solution))
     s = csptree.CSPTree.CreateSolution(self.vars, solution)
-    return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
+    return str(s)
 
   def GetCSolution(self):
     fsat, values = self.RealSolve()
     self.SetProfit(fsat)
     logging.debug('Values are: %s' % str(values))
     s = csptree.CSPTree.CreateSolution(self.vars, values)
-    return 'solve[[ %s ] %d]' % (str(s), self.challengeid)
+    return str(s)
 
   def GetProxySolution(self):
     return proxysolver.ProxySolve(self)
@@ -214,12 +221,14 @@ class Problem(object):
   def DoSolve(self):
     logging.debug('Solving offer %d relation %d cost %0.3f'
                  % (self.challengeid, self.problemnumber, self.price))
+    s = ''
     if FLAGS.solver == 'c':
-      return self.GetCSolution()
+      s = self.GetCSolution()
     elif FLAGS.solver == 'proxy':
-      return self.GetProxySolution()
+      s = self.GetProxySolution()
     else:
-      return self.GetPySolution()
+      s = self.GetPySolution()
+    return s
 
   def Solve(self):
     if self.solution is None:
@@ -229,7 +238,7 @@ class Problem(object):
         ps = proxysolver.ProxySolve(self)
         logging.debug('Proxy solution: %s' % ps)
       self.solution = rs
-    return self.solution
+    return 'solve[[ %s ] %d]' % (str(self.solution), self.challengeid)
 
   def GetSolveThread(self):
     logging.debug('Creating solve thread for %s' % str(self))

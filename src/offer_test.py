@@ -5,12 +5,12 @@ import offer
 class OfferTestCase(unittest.TestCase):
 
   def setUp(self):
-    self.o1 = offer.Offer(501, 101, 3, 1.0)
-    self.o2 = offer.Offer(501, 101, 3, 0.555)
-    self.o3 = offer.Offer(501, 101, 0, 0.1)
-    self.o4 = offer.Offer(501, 101, 247, 1.0)
-    self.o5 = offer.Offer(501, 101, 128, 1.0)
-    self.o6 = offer.Offer(501, 101, 22, 1.0)
+    self.o1 = offer.Offer(501, 101, 3, 1.0, 'all')
+    self.o2 = offer.Offer(501, 101, 3, 0.555, 'all')
+    self.o3 = offer.Offer(501, 101, 0, 0.1, 'all')
+    self.o4 = offer.Offer(501, 101, 247, 1.0, 'all')
+    self.o5 = offer.Offer(501, 101, 128, 1.0, 'all')
+    self.o6 = offer.Offer(501, 101, 22, 1.0, 'all')
 
   def tearDown(self):
     del self.o1

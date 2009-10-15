@@ -11,9 +11,9 @@ class PlayerContextTestCase(unittest.TestCase):
     self.assertEqual(pc.playerid, 100)
     self.assertEqual(pc.currentround, 13)
     self.assertEqual(len(pc.our_offered), 0)
-    self.assertEqual(len(pc.their_offered), 6)
+    self.assertEqual(len(pc.their_offered), 1)
     self.assertEqual(len(pc.accepted), 0)
-    self.assertEqual(len(pc.provided), 5)
+    self.assertEqual(len(pc.provided), 0)
 
 if __name__ == '__main__':
   unittest.main()

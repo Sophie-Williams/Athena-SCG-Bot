@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import gflags
 import logging
+import random
 
 import relation
 import problem
@@ -11,7 +12,7 @@ gflags.DEFINE_float('avoidreofferdiff', 0.3,
 FLAGS = gflags.FLAGS
 
 class Offer(object):
-  def __init__(self, offerid, playerid, problemnumber, price):
+  def __init__(self, offerid, playerid, problemnumber, price, kind):
     self.offerid = int(offerid)
     self.playerid = int(playerid)
     self.problemnumber = int(problemnumber)
@@ -19,6 +20,7 @@ class Offer(object):
     self.actedon = False
     self.bep = relation.break_even(self.problemnumber, 3)
     self.potential = 0
+    self.kind = kind
   
   def __str__(self):
     return 'Offer(id=%s, from=%s, problem=%s, price=%s)' % (self.offerid,
@@ -67,7 +69,8 @@ class Offer(object):
     """Generate an OfferTrans from this offer.
     Note: -1 is a fake constant, it gets replaced by the Admin.
     """
-    return 'offer[-1 ( %d) %0.8f]' % (self.problemnumber, self.price)
+    return ('offer[-1 %s ( %d) %0.8f]'
+            % (self.kind, self.problemnumber, self.price))
 
   def SetPrice(self, price=None, markup=0.1):
     """Set or Generate a price."""
@@ -85,8 +88,9 @@ class Offer(object):
   def GetOfferList(cls, parsedlist):
     outputlist = []
     while parsedlist:
-      outputlist.append(cls(*parsedlist[:4]))
-      parsedlist = parsedlist[4:]
+      logging.info(parsedlist[:5])
+      outputlist.append(cls(*parsedlist[:5]))
+      parsedlist = parsedlist[5:]
     return outputlist
 
   @classmethod
@@ -99,7 +103,7 @@ class Offer(object):
     elif problemnumber in justoffered:
       return False
     else:
-      o = cls(-1, -1, problemnumber, -1)
+      o = cls(-1, -1, problemnumber, -1, 'all')
       price = o.SetPrice()
       return o
 
@@ -107,6 +111,7 @@ class Offer(object):
   def GenerateOffer(cls, ouroffered, theiroffered, justoffered):
     goodones = filter(lambda x: not x%2, range(128))
     badones = filter(lambda x: x%2, range(128)) + range(128,256)
+    random.shuffle(goodones)
     for problemnumber in goodones:
       x = cls.GetGenerateOffer(ouroffered, theiroffered, justoffered,
                                problemnumber)
@@ -119,12 +124,13 @@ class Offer(object):
         return x
 
 class AcceptedChallenge(object):
-  def __init__(self, acceptor, offerid, provider, problemnumber, price):
+  def __init__(self, acceptor, offerid, provider, problemnumber, price, kind):
     self.acceptor = int(acceptor)
     self.offerid = int(offerid)
     self.provider = int(provider)
     self.problemnumber = int(problemnumber)
     self.price = float(price)
+    self.kind = kind
 
   def __str__(self):
     return ('AcceptedChallenge(acceptor=%s, offerid=%s, provider=%s,'
@@ -138,7 +144,8 @@ class AcceptedChallenge(object):
   def GetAcceptedChallengeList(cls, parsedlist):
     outputlist = []
     while parsedlist:
-      outputlist.append(cls(*parsedlist[:5]))
-      parsedlist = parsedlist[5:]
+      logging.info(parsedlist)
+      outputlist.append(cls(*parsedlist[:6]))
+      parsedlist = parsedlist[6:]
     return outputlist
 

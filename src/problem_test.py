@@ -85,9 +85,9 @@ class ProblemTestCase(unittest.TestCase):
   def test_GenerateSolution(self):
     for clause in self.clauses:
       self.pblm.AddClause(clause)
-    sol = ('solve[[ (node black (v1 -> false) (node black (v0 -> false)'
+    sol = ('(node black (v1 -> false) (node black (v0 -> false)'
            '  ) (node black (v3 -> false) (node red (v2 -> false)  )'
-           ' (node red (v4 -> false)  ))) ] 501]')
+           ' (node red (v4 -> false)  )))')
     self.assertEqual(self.pblm.GetPySolution(), sol)
 
   def testCandPySolve(self):

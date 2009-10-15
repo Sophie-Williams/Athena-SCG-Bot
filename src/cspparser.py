@@ -66,10 +66,12 @@ Clause = Group(wrap(Integer("relation_number") + List(Var), "(", ")"))
 
 Problem = Group(Group(List(Var)) + Group(List(Clause)))
 ProblemType = wrap(List(Integer("pt")), "(", ")")
+ProblemKind = Or([Literal('all'), Literal('secret')])
 
 
 ChallengeCommon = ( Integer("key") + PlayerID("challenger") +
-                    ProblemType("pred") + Double("price") )
+                    ProblemType("pred") + Double("price") +
+                    ProblemKind('kind'))
 
 OfferedChallenge = sup_lit("offered") + wrap(ChallengeCommon)
 AcceptedChallenge = sup_lit("accepted") + wrap(PlayerID("challengee")
@@ -93,8 +95,12 @@ TreeNode = Forward()
 TreeNode << wrap(sup_lit("node") + TreeColor +
                   Group(wrap(Var + sup_lit('->') + TrueFalse, '(',')'))
                  + ZeroOrMore(TreeNode) + ZeroOrMore(TreeNode), '(', ')')
+
 # Describes the five transactions
-OfferTrans = Suppress("offer") + wrap(Integer("challengeid") + ProblemType("pred") + Double("price"))
+OfferTrans = (Suppress("offer")
+              + wrap(Integer("challengeid")
+                     + ProblemKind('kind') + ProblemType("pred")
+                     + Double("price")))
 AcceptTrans = Suppress("accept") + wrap(Integer("challengeid"))
 ProvideTrans = Suppress("provide") + wrap(Integer("challengeid"))
 SolveTrans = Suppress("solve") + wrap(Integer("challengeid"))
