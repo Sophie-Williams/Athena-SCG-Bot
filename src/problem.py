@@ -2,6 +2,7 @@
 import gflags
 import itertools
 import logging
+import random
 import threading
 
 import csptree
@@ -12,8 +13,6 @@ import relation.gen
 gflags.DEFINE_enum('solver', 'c', ['proxy', 'python', 'c'],
                    'Problem solver to use')
 gflags.DEFINE_integer('problemdegree', 13, 'Degree of generated problems')
-gflags.DEFINE_float('pricemarkup', 0.01,
-                    'What markup to add to our maxsat for offers')
 gflags.DEFINE_string('showproxysolution', False,
                      'Show proxy solution and real solution messages')
 
@@ -79,9 +78,9 @@ class Problem(object):
     self.profit = 0
 
   def __str__(self):
-    return ('Problem(num=%d, vars=%s, price=%s, seller=%s clauses=%s)'
+    return ('Problem(num=%d, vars=%s, price=%s, seller=%s clauses=%d)'
             % (self.problemnumber, str(self.vars), self.price, self.seller,
-               str(self.clauses)))
+               len(self.clauses)))
 
   def __repr__(self):
     return str(self)
@@ -108,7 +107,7 @@ class Problem(object):
       solution = ' %s' % self.solution
     else:
       solution = ''
-
+    random.shuffle(self.clauses)
     return ('provide[%s %s%s %d]'
             % (' '.join(self.vars),
                ' '.join([x.GetProvideBlob() for x in self.clauses]),
@@ -137,10 +136,38 @@ class Problem(object):
       values = [1]*len(self.vars)
       fsat = len(self.clauses)
     else:
-      c_p = relation.Problem(tuple(self.vars),
+      filtered, vars = self.FilterSolve()
+      c_p = relation.Problem(tuple(vars),
                             [x.GetTuple() for x in self.clauses])
       fsat, values = c_p.solve()
+      if filtered:
+        values = self.TransposeValues(vars, values)
     return fsat, values
+
+  def TransposeValues(self, vars, values):
+    output = [0]*len(self.vars)
+    self.vars.sort()
+    for x in self.vars:
+      if x in vars:
+        i = vars.index(x)
+        output[i] = values[i]
+    return output
+
+  def FilterSolve(self):
+    vars = list(self.vars)
+    vars.sort()
+    usedvars = []
+    for x in self.clauses:
+      for var in x.vars:
+        if var not in usedvars:
+          usedvars.append(var)
+    usedvars.sort()
+    if vars == usedvars:
+      return False, vars
+    else:
+      logging.info('Rewrote solve to %d vars not %d' % (len(usedvars),
+                                                        len(self.vars)))
+      return True, usedvars
 
   def GetVariableValue(self, var, solution):
     """Get the value of a variable for a given solution.
@@ -249,9 +276,13 @@ class Problem(object):
   def Generate(cls, problemnumber, offerid, degree=None):
     if not degree:
       degree = FLAGS.problemdegree
-    p = cls(0, ['v%d' % x for x in range(0, degree+50)], [], offerid, 0,
+    vars = []
+    for x in range(65):
+      if not x%5:
+        vars.append(x)
+    p = cls(0, ['v%d' % x for x in range(130)], [], offerid, 0,
             problemnumber, 0)
-    for i, j, k in itertools.permutations(range(degree), 3):
+    for i, j, k in itertools.permutations(vars, 3):
       p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
     return p
 

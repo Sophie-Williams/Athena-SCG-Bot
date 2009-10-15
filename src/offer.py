@@ -72,7 +72,7 @@ class Offer(object):
     return ('offer[-1 %s ( %d) %0.8f]'
             % (self.kind, self.problemnumber, self.price))
 
-  def SetPrice(self, price=None, markup=0.1):
+  def SetPrice(self, price=None, markup=0.09):
     """Set or Generate a price."""
     if price is None:
       price = relation.break_even(self.problemnumber, 3)
