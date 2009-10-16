@@ -5,6 +5,7 @@ import random
 
 import relation
 import problem
+import constants
 
 gflags.DEFINE_float('bepbump', 0.03, 'Buy offers where `price <= bep+this`')
 gflags.DEFINE_float('avoidreofferdiff', 0.3,
@@ -44,7 +45,12 @@ class Offer(object):
     elif self.bep == 1:
       return True
     else:
-      return self.bep+FLAGS.bepbump >= self.price
+      try:
+        if self.price < constants.PRICES[13][self.problemnumber]:
+          return True
+        return False
+      except KeyError:
+        return self.bep+FLAGS.bepbump >= self.price
 
   def AvoidReoffer(self, mindecrement=0.1):
     return ((self.price - mindecrement) < 0
@@ -104,7 +110,10 @@ class Offer(object):
       return False
     else:
       o = cls(-1, -1, problemnumber, -1, 'all')
-      price = o.SetPrice()
+      try:
+        o.price = constants.PRICES[13][problemnumber] + 0.5 * 0.01 # FIXME 
+      except KeyError:
+        price = o.SetPrice()
       return o
 
   @classmethod
