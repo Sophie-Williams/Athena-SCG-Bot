@@ -12,15 +12,8 @@
 #include "relation_consts.h"
 #include "poly.h"
 
-static solution *
-solve_iterate(const problem * restrict p, solution *s);
-
 static void *
 __solve_helper(void *t_d);
-
-static solution *
-__solve_iterate(const problem * restrict p, solution *s,
-                uint32_t start, uint32_t end);
 
 /* For threaded iterate. */
 typedef struct __thread_data {
@@ -275,7 +268,7 @@ __solve_helper(void *t_d) {
  * @return The best solution for the given range.
  */
 #define OPTIMIZE 1
-static solution *
+solution *
 __solve_iterate(const problem * restrict p, solution *s,
                  uint32_t start, uint32_t end) {
     register uint32_t bit_mask;

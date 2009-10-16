@@ -106,6 +106,9 @@ cdef extern from "solve.h":
     void clause_set(void *c, uint32_t rn, int rank, int *vars)
     void clause_delete(clause *clause)
     int fsat(problem *p, solution *s)
+    solution *solve_iterate(problem *p, solution *s)
+    solution *__solve_iterate(problem *p, solution *s,
+                              uint32_t start, uint32_t end)
 
 
 # for the module
@@ -377,6 +380,20 @@ cdef class Problem:
             ret.append((s[0].values)[i])
 
         # Record the number of satisified clauses.
+        f = fsat(self.p, s)
+        solution_delete(s)
+
+        return (f, ret)
+
+    def solve_iterate_range(self, start, end):
+        cdef solution *s
+        s = solution_create(self.p)
+        __solve_iterate(self.p, s, start, end)
+
+        ret = []
+        for 0 <= i < s[0].size:
+            ret.append((s[0].values)[i])
+
         f = fsat(self.p, s)
         solution_delete(s)
 

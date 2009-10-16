@@ -144,6 +144,25 @@ solution *
 solve(const problem * restrict problem, solution *solution);
 
 /**
+ * @param p The problem.
+ * @param s The solution.
+ * @return The solution. Warning may take a lifetime.
+ */
+solution *
+solve_iterate(const problem * restrict p, solution *s);
+
+/**
+ * @param p The problem.
+ * @param s The solution.
+ * @param start The starting assignment (inclusive).
+ * @param end The ending assignment (not inclusive).
+ * @return The best solution for the given range.
+ */
+solution *
+__solve_iterate(const problem * restrict p, solution *s,
+                uint32_t start, uint32_t end);
+
+/**
  * Return true or false based on the assignment.
  * @param clause The clause.
  * @param assignment The assignment for the clause.
