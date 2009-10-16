@@ -343,9 +343,9 @@ pascal(int n, int r) {
     int i;
     int x;
 
-    assert(n >= 0);
-    assert(r >= 0);
-    assert(n >= r);
+    if (n < 0 || r < 0 || r > n) {
+        return 1;
+    }
     x = 1;
 
     for (i = n; i > (n - r); i--) {

@@ -70,6 +70,14 @@ problem *
 problem_create(char **vars, int num_vars, clause *clauses, int num_clauses);
 
 /**
+ * Create a shallow copy. Does not copy the vars
+ * @param from The problem to copy.
+ * @return A shallow copy of the problem.
+ */
+problem *
+problem_shallow_copy(const problem * restrict from);
+
+/**
  * Set values in a problem.
  */
 void

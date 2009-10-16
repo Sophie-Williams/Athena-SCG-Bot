@@ -28,6 +28,35 @@ problem_create(char **vars, int num_vars, clause *clauses, int num_clauses) {
     return p;
 }
 
+problem *
+problem_shallow_copy(const problem * restrict from) {
+    problem *to;
+    register size_t size;
+
+    assert(from != NULL);
+
+    if ((to = malloc(sizeof(problem))) == NULL) {
+        perror("malloc");
+        return NULL;
+    }
+
+    to->vars = NULL;
+    to->num_vars = from->num_vars;
+    to->num_clauses = from->num_clauses;
+
+    size = sizeof(clause) * from->num_clauses;
+
+    if ((to->clauses = malloc(size)) == NULL) {
+        perror("malloc");
+        free(to);
+        return NULL;
+    }
+
+    memcpy(to->clauses, from->clauses, size);
+
+    return to;
+}
+
 /* Set values for a problem. */
 void
 problem_set(problem *problem, char **vars, int num_vars, clause *clauses,

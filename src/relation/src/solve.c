@@ -52,6 +52,41 @@ fsat(const problem * restrict problem, const solution * restrict solution) {
     return count;
 }
 
+/* assignment is the row number 0-indexed == binary value.
+ * e.g. rank 3
+ * 000 -> 0, 001 -> 1, 010 -> 2, ..., 111 -> 7
+ */
+int
+solve_value(const clause * restrict clause, int assignment) {
+    assert(clause != NULL);
+    assert(assignment >= 0);
+    assert(assignment < (1 << clause->rank));
+    /* The assignment is represented as a binary number whose length is the
+     * rank. So, the assignment number represents a row contained by the
+     * relation numbers. Thus, to check if the relation number is satisfied
+     * is the same as checking if the row is represented in the relation
+     * number.
+     *
+     * A binary (or logical) AND of the number that represents the row and the
+     * relation number should not be 0 if the clause is satisfied.
+     */
+    return (clause->rn & (1 << assignment)) != 0;
+}
+
+inline int
+to_row_number(const int * restrict values, int rank) {
+    register int i;
+    register int ret = 0;
+
+    assert(values != NULL);
+
+    for(i = 0; i < rank; i++) {
+        ret += (1 << i) * (*(values+i) ? TRUE : FALSE);
+    }
+
+    return ret;
+}
+
 int
 clause_is_satisfied(const clause * restrict c, const solution * restrict s) {
     int i;
@@ -136,7 +171,7 @@ variable_count(const problem * restrict p) {
 
 solution *
 solve_iterate(const problem * restrict p, solution *s) {
-#define NTHREADS 4
+#define NTHREADS 16
     pthread_t tids[NTHREADS];
     pthread_attr_t attrs[NTHREADS];
     solution *x;
@@ -308,39 +343,4 @@ __solve_iterate(const problem * restrict p, solution *s,
     solution_delete(max_solution);
 
     return s;
-}
-
-/* assignment is the row number 0-indexed == binary value.
- * e.g. rank 3
- * 000 -> 0, 001 -> 1, 010 -> 2, ..., 111 -> 7
- */
-int
-solve_value(const clause * restrict clause, int assignment) {
-    assert(clause != NULL);
-    assert(assignment >= 0);
-    assert(assignment < (1 << clause->rank));
-    /* The assignment is represented as a binary number whose length is the
-     * rank. So, the assignment number represents a row contained by the
-     * relation numbers. Thus, to check if the relation number is satisfied
-     * is the same as checking if the row is represented in the relation
-     * number.
-     *
-     * A binary (or logical) AND of the number that represents the row and the
-     * relation number should not be 0 if the clause is satisfied.
-     */
-    return (clause->rn & (1 << assignment)) != 0;
-}
-
-inline int
-to_row_number(const int * restrict values, int rank) {
-    register int i;
-    register int ret = 0;
-
-    assert(values != NULL);
-
-    for(i = 0; i < rank; i++) {
-        ret += (1 << i) * (*(values+i) ? TRUE : FALSE);
-    }
-
-    return ret;
 }
