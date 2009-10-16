@@ -45,16 +45,10 @@ class Offer(object):
     elif self.bep == 1:
       return True
     else:
-      try:
-        if self.price < constants.PRICES[13][self.problemnumber]:
-          return True
-        return False
-      except KeyError:
-        return self.bep+FLAGS.bepbump >= self.price
+      return self.bep+FLAGS.bepbump >= self.price
 
-  def AvoidReoffer(self, mindecrement=0.1):
-    return ((self.price - mindecrement) < 0
-            or (abs(self.bep-self.price) <= FLAGS.avoidreofferdiff))
+  def AvoidReoffer(self, mindecrement=0.01):
+    return (self.price - mindecrement) < 0
 
   def GetReoffer(self, decrement=0.1):
     """Generate a ReofferTrans from this offer.
@@ -110,10 +104,7 @@ class Offer(object):
       return False
     else:
       o = cls(-1, -1, problemnumber, -1, 'all')
-      try:
-        o.price = constants.PRICES[13][problemnumber] + 0.5 * 0.01 # FIXME 
-      except KeyError:
-        price = o.SetPrice()
+      price = o.SetPrice()
       return o
 
   @classmethod
