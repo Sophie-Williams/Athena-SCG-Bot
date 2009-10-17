@@ -29,9 +29,8 @@ class Game(object):
     logging.debug('Accepted: %s' % str(self.context.accepted))
     logging.debug('Provided: %s' % str(self.context.provided))
     logging.info('Running all tasks...')
-    for x in [self.OfferTask, self.AcceptTask, self.ReofferTask,
-              self.ProvideTask, self.SolveTask]:
-      x()
+    map(lambda x: x(), [self.OfferTask, self.AcceptTask, self.ReofferTask,
+                        self.ProvideTask, self.SolveTask])
     logging.info('Ending Balance: $%0.4f' % self.context.endbalance)
     endtime = time.time()
     logging.info('Gameplay took %s' % (endtime - starttime))
@@ -56,7 +55,7 @@ class Game(object):
       if offer.price > self.context.endbalance:
         logging.info('%s is out of budget' % str(offer))
       elif offer.IsGoodBuy():
-        acceptedcount +=1
+        acceptedcount += 1
         logging.info('%s is good buy' % str(offer))
         self.replies.append(offer.GetAccept())
         self.context.endbalance -= offer.price

@@ -10,6 +10,8 @@ import constants
 gflags.DEFINE_float('bepbump', 0.03, 'Buy offers where `price <= bep+this`')
 gflags.DEFINE_float('avoidreofferdiff', 0.3,
                     'Avoid reoffer if abs(bep-price) <= this')
+gflags.DEFINE_float('mindecrement', 0.01,
+                    'The minimum decrement for reoffers')
 FLAGS = gflags.FLAGS
 
 class Offer(object):
@@ -42,21 +44,40 @@ class Offer(object):
       return False
     if self.problemnumber % 2 or self.problemnumber >= 128:
       return True
-    elif self.bep == 1:
+    if self.bep == 1:
       return True
-    else:
-      return self.bep+FLAGS.bepbump >= self.price
+    
+    try:
+      if self.price <= constants.PRICES[13][self.problemnumber]:
+        return True
+    except KeyError:
+      pass
+    return (self.bep + FLAGS.bepbump) >= self.price
 
   def AvoidReoffer(self, mindecrement=0.01):
-    return (self.price - mindecrement) < 0
+    new_price = self.price - mindecrement
 
-  def GetReoffer(self, decrement=0.1):
+    probably_solvable = False
+    try:
+      probably_solvable = new_price < constants.PRICES[13][self.problemnumber]
+    except KeyError:
+      pass
+    return (self.price - mindecrement) < 0 or probably_solvable
+
+  def GetReoffer(self, decrement=0.01):
     """Generate a ReofferTrans from this offer.
     
     Args:
        decrement: (float) Reoffer at the current price minus this number
     """
-    return 'reoffer[%d %0.18f]' % (self.offerid, self.price - decrement)
+    try:
+      new_price = (constants.PRICES[13][self.problemnumber]
+                   + 0.5 * decrement)
+      if new_price > (self.price - decrement):
+        raise
+    except:
+      new_price = self.price - decrement
+    return 'reoffer[%d %0.18f]' % (self.offerid, new_price)
 
   def GetAccept(self):
     """Generate an AcceptTrans from this offer.
@@ -74,10 +95,17 @@ class Offer(object):
 
   def SetPrice(self, price=None, markup=0.09):
     """Set or Generate a price."""
+    apply_markup = True
     if price is None:
-      price = relation.break_even(self.problemnumber, 3)
-    price += markup
-    if price >1:
+      try:
+        price = (constants.PRICES[13][self.problemnumber]
+               + 0.5 * FLAGS.mindecrement)
+        apply_markup = False
+      except KeyError:
+        price = relation.break_even(self.problemnumber, 3)
+    if apply_markup:
+      price += markup
+    if price > 1:
       price = 1
     self.price = price
     logging.debug('Got problem number %d to generate price @ %s'
