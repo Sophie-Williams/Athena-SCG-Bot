@@ -65,7 +65,7 @@ class Clause(object):
 class Problem(object):
   """Describes a problem instance."""
   def __init__(self, buyer, list_of_vars, clauselist, challengeid, seller,
-               problemnumber, price):
+               problemnumber, price, kind='all'):
     self.buyer = int(buyer)
     self.vars = list(list_of_vars)
     self.clauses = []
@@ -76,6 +76,7 @@ class Problem(object):
     self.price = float(price)
     self.solution = None
     self.profit = 0
+    self.kind = kind
 
   def __str__(self):
     return ('Problem(num=%d, vars=%s, price=%s, seller=%s clauses=%d)'
@@ -102,7 +103,7 @@ class Problem(object):
 
   def GetProvide(self):
     """Get a 'provide' blob to send to the administrator for this problem."""
-    if False:
+    if self.kind == 'secret':
       self.Solve()
       solution = ' %s' % self.solution
     else:
@@ -273,16 +274,19 @@ class Problem(object):
     return t
 
   @classmethod
-  def Generate(cls, problemnumber, offerid, degree=None):
+  def GenerateFromAccepted(cls, acceptedproblem):
+    return cls.Generate(acceptedproblem.problemnumber,
+                        acceptedproblem.offerid,
+                        acceptedproblem.kind)
+
+
+  @classmethod
+  def Generate(cls, problemnumber, offerid, kind, degree=None):
     if not degree:
       degree = FLAGS.problemdegree
-    vars = []
-    for x in range(65):
-      if not x%5:
-        vars.append(x)
-    p = cls(0, ['v%d' % x for x in range(130)], [], offerid, 0,
-            problemnumber, 0)
-    for i, j, k in itertools.permutations(vars, 3):
+    p = cls(0, ['v%d' % x for x in range(13)], [], offerid, 0,
+            problemnumber, 0, kind)
+    for i, j, k in itertools.permutations(range(13), 3):
       p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
     return p
 

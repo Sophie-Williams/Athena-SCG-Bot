@@ -87,7 +87,7 @@ class Game(object):
         continue
       logging.info('Providing number %d for offer %d'
                    % (accepted.problemnumber, accepted.offerid))
-      p = problem.Problem.Generate(accepted.problemnumber, accepted.offerid)
+      p = problem.Problem.GenerateFromAccepted(accepted)
       self.replies.append(p.GetProvide())
 
   def SolveTask(self):
