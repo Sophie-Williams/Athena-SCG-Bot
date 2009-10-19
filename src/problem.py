@@ -127,7 +127,7 @@ class Problem(object):
       logging.info('Special Case Solve: Relation 0!')
       values = [0]*len(self.vars)
       fsat = len(self.clauses)
-    elif self.problemnumber%2:
+    elif self.problemnumber % 2:
       logging.info('Special Case Solve: All False!')
       values = [0]*len(self.vars)
       fsat = len(self.clauses)

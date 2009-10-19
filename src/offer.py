@@ -40,6 +40,16 @@ class Offer(object):
     return self.bep-self.price
 
   def IsGoodBuy(self):
+    if self.kind == 'secret':
+      return self.IsGoodBuySecret()
+    else:
+      return self.IsGoodBuyAll()
+
+  def IsGoodBuySecret(self):
+    # This is really ballsy, as they say.
+    return True
+
+  def IsGoodBuyAll(self):
     if self.problemnumber <= 0:
       return False
     if self.problemnumber % 2 or self.problemnumber >= 128:
