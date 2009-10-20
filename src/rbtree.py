@@ -1,3 +1,13 @@
+#!/usr/bin/python
+"""Red Black Tree implementation
+
+Taken from http://code.activestate.com/recipes/576817/
+"""
+
+__author__ = 'John Reid'
+__version__ = '1'
+
+
 class rbnode(object):
     """
     A node in a red black tree. See Cormen, Leiserson, Rivest, Stein 2nd edition pg 273.

@@ -1,8 +1,10 @@
 #!/usr/bin/env python
+import glob
 import unittest
 
 import constants
 import util
+
 
 class UtilTestCase(unittest.TestCase):
 
@@ -19,6 +21,10 @@ class UtilTestCase(unittest.TestCase):
     self.assertEqual(util.GetRegistrationURL('n0r.org', 'baddpass'),
                      ('http://n0r.org:%d/register?password=baddpass'
                       % (constants.GAMEREG_PORT)))
+
+  def testsetuplogging(self):
+    #TODO(wan): Make this better
+    util.setuplogging()
 
 if __name__ == '__main__':
   unittest.main()
