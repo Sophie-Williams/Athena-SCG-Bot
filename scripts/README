@@ -1,7 +1,13 @@
 To run,
 
-python ./athena.py [port]
-./athena.py [port]
+    ./athena.py
+
+should run Athena on port 8080.
+
+For help,
+
+    ./athena.py --help
+
 
 Dependencies are:
     webpy (http://webpy.org/)
