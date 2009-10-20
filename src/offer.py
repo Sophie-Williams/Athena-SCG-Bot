@@ -15,7 +15,7 @@ gflags.DEFINE_float('mindecrement', 0.01,
 FLAGS = gflags.FLAGS
 
 class Offer(object):
-  def __init__(self, offerid, playerid, problemnumber, price, kind):
+  def __init__(self, offerid, playerid, problemnumber, price, kind='all'):
     self.offerid = int(offerid)
     self.playerid = int(playerid)
     self.problemnumber = int(problemnumber)
@@ -140,7 +140,7 @@ class Offer(object):
     elif problemnumber in justoffered:
       return False
     else:
-      o = cls(-1, -1, problemnumber, -1, 'all')
+      o = cls(-1, -1, problemnumber, -1)
       price = o.SetPrice()
       return o
 

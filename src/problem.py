@@ -105,7 +105,7 @@ class Problem(object):
     """Get a 'provide' blob to send to the administrator for this problem."""
     if self.kind == 'secret':
       self.Solve()
-      solution = ' %s' % self.solution
+      solution = ' [ %s ]' % self.solution
     else:
       solution = ''
     random.shuffle(self.clauses)
