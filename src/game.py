@@ -11,7 +11,7 @@ import relation
 
 gflags.DEFINE_boolean('allowreoffer', True,
                       'Don\'t force buys to allow reoffer')
-gflags.DEFINE_integer('maxaccept', 10,
+gflags.DEFINE_integer('maxaccept', 3,
                       'Maximum number of offers to buy')
 FLAGS = gflags.FLAGS
 
