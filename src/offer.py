@@ -126,7 +126,6 @@ class Offer(object):
   def GetOfferList(cls, parsedlist):
     outputlist = []
     while parsedlist:
-      logging.info(parsedlist[:5])
       outputlist.append(cls(*parsedlist[:5]))
       parsedlist = parsedlist[5:]
     return outputlist
@@ -182,7 +181,6 @@ class AcceptedChallenge(object):
   def GetAcceptedChallengeList(cls, parsedlist):
     outputlist = []
     while parsedlist:
-      logging.info(parsedlist)
       outputlist.append(cls(*parsedlist[:6]))
       parsedlist = parsedlist[6:]
     return outputlist
