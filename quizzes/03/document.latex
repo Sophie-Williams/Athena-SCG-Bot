@@ -20,21 +20,22 @@ reputation-confidence based market impacts our agent -- Athena.
 \section{The academic metaphor}
 
 \subsection{Problems do not come from the students.}
-Students do not ask the professor to solve a problem. Students do not
-ask other students to solve a problem. The way, as it has been
-for centuries, is that the professor asks, and the students try to
-answer -- especially during an examination. How can we evaluate a student
-based on a problem another student asks?
+Students do not ask the professor to solve a problem. Students do not ask
+other students to solve a problem. The way, as it has been for centuries,
+is that the professor asks, and the students try to answer -- especially
+during an examination. How can we evaluate a student based on a problem
+another student asks?
 
 When the competition is linked to our grades, it is in our collective
 interest to tie. However, it seems that the Nash equilibrium has won for
-now (where the stronger teams prevented the weakers ones from receiving an
-A). There is no barrier preventing the students to form a pact; our agents
-will always re-offer, making the game uninteresting while we collectively
-receive A's.
+now (where the stronger teams prevented the weakers ones from receiving
+an A). There is no barrier preventing the students to form a pact;
+our agents will always re-offer, making the game uninteresting while we
+collectively receive A's.
 
-For the game to make sense, the requirement that the agents produce problems
-has to be removed (or that they interact with each other).
+For the game to make sense, the requirement that the agents produce
+problems has to be removed (or that they interact with each other). After
+all, the ability to generate problems is not in question.
 
 \subsubsection{The world without a market.}
 
@@ -50,37 +51,33 @@ The solution to such problem is the assignment of variables where the
 maximum number of clauses are satisfied. The benchmark to {\tt MAX-CSP}
 is how fast you can arrive at the solution.
 
-The sixty second limit per turn should be changed. The time limit
-should linearly correspond to the number of questions one has to solve
-and the number of questions one has to generate.
+The sixty second limit per turn should be changed. The time limit should
+linearly correspond to the number of questions one has to solve and the
+number of questions one has to generate.
 
 The user may want to know which agent (algorithm) is the fastest.
-Currently, the administrator and the protocol both do not have the
-faculty to provide such information (since all transactions are globbed
-together).
+Currently, the administrator and the protocol both do not have the faculty
+to provide such information (since all transactions are globbed together).
 
 \subsubsection{Bringing back the classroom.}
 
-Let us define ``reputation''. It is the collective opinion of an individual
-entity. This suggests that the reputations depend on a human construct
-contingent on cognition -- our opinion. Using such logic will harm the
-process in discovering the best agent, since our opinions will be inherently
-human.
+Let us define ``reputation''. A reputation is the collective opinion
+of an individual entity. This suggests that the reputations depend on a
+human construct contingent on cognition -- our opinion. Using such logic
+will harm the process in discovering the best agent, since our opinions
+will be inherently human.
 
-Suppose that we keep the old system in place where ``reputations'' are being
-transacted. The administrator governs why and where these ``reputations'' go.
-The metaphor would not make any sense. It is wrong to assign numeric value
-to reputation.
-
+Suppose that we keep the old system in place where ``reputations''
+are being transacted. The administrator governs why and where these
+``reputations'' go.  The metaphor would not make any sense. It is wrong
+to assign numeric value to reputation.
 
 \section{The impact on Athena}
 
-There is no doubt that when the administrator changes, all agents based on
-the ``Baby Agent'' get a free upgrade that they really should not get.
-Athena has a comparative disadvantage when the specification changes, but
-there is enough discrepency in speed (C versus Java \texttrademark) to make
-up for those changes. 
-
-
+There is no doubt that when the administrator changes, all agents based
+on the ``Baby Agent'' get a free upgrade that they really should not get.
+Athena has a comparative disadvantage when the specification changes,
+but there is enough discrepency in speed (C versus Java \texttrademark)
+to make up for those changes.
 
 \end{document}
