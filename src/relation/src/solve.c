@@ -162,6 +162,49 @@ variable_count(const problem * restrict p) {
     return var_count;
 }
 
+/**
+ * @param p The original problem
+ * @param var The variable in question.
+ * @param value The value to set the variable.
+ * @return The reduced problem (itself).
+ */
+problem *
+problem_reduce_all(problem *p, int var, int value) {
+    int i;
+    int j;
+    register clause *c;
+    register int var_p;
+
+    assert(p != NULL);
+    assert(var >= 0);
+    assert(var < p->num_vars);
+
+
+    for (i = 0; i < p->num_clauses; i++) {
+        c = p->clauses + i;
+        /* If the clause is either satisfied or unsatisfied, skip. */
+        if (c->rn == get_mask(c->rank) || c->rn == 0) {
+            continue;
+        }
+
+        /* Find the position of the variable in the clause. */
+        var_p = -1;
+        for(j = 0; j < c->rank; j++) {
+            if (*(c->vars + j) == var) {
+                var_p = j;
+                break;
+            }
+        }
+
+        /* if the variable is in the clause, reduce it. */
+        if (var_p >= 0) {
+            c->rn = reduce(c->rn, c->rank, var_p, value);
+        }
+    }
+
+    return p;
+}
+
 solution *
 solve_iterate(const problem * restrict p, solution *s) {
 #define NTHREADS 16

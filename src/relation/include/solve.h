@@ -137,6 +137,16 @@ int
 clause_is_satisfied(const clause * restrict c, const solution * restrict s);
 
 /**
+ * Reduce a problem by assigning a value to a variable.
+ * @param p The original problem
+ * @param var The variable in question.
+ * @param value The value to set the variable.
+ * @return The reduced problem (itself).
+ */
+problem *
+problem_reduce_all(problem *p, int var, int value);
+
+/**
  * Tries to solve the problem and puts the answer in solution. Which should
  * have been created by solution_create.
  */

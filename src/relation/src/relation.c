@@ -57,7 +57,7 @@ ones(uint32_t rn, int rank) {
         if ((rn & (1 << i)) != 0)
             c++;
     }
-    return c
+    return c;
 #endif
 }
 
