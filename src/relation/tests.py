@@ -5,6 +5,12 @@ import test_data
 
 class TestRelation(unittest.TestCase):
 
+  def test_pascal(self):
+    self.assertEqual(relation.pascal(0, 0), 1)
+    self.assertEqual(relation.pascal(25, 0), 1)
+    self.assertEqual(relation.pascal(25, 25), 1)
+    self.assertEqual(relation.pascal(7, 3), 35)
+
   def test_get_magic_number(self):
     self.assertEqual(relation.get_magic_number(4, 3, 1), 65280)
 
@@ -237,6 +243,8 @@ class TestRelation(unittest.TestCase):
   def test_evergreen(self):
     c_p = relation.Problem(test_data.vars1, test_data.clauses1)
     print c_p.evergreen(), len(test_data.clauses1)
+    c_p = relation.Problem(test_data.vars5, test_data.clauses5)
+    print c_p.evergreen(), len(test_data.clauses5)
 
   def test_solve(self):
     clauses = [

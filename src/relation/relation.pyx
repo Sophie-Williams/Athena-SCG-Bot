@@ -351,20 +351,20 @@ cdef rn_counts(problem *p):
 
 
 cdef mean(problem *p, int num_vars, int num_vars_true):
-    sum = 0
+    sum = 0.0
     # FIXME variable rank.
     rank = 3
     for rn, count in rn_counts(p).items():
         sum += count * sat(p, rn, rank, num_vars, num_vars_true)
-    return float(sum) / p[0].num_vars
+    return sum / p[0].num_vars
 
 
 cdef sat(problem *p, uint32_t rn, int rank, int n, int k):
-    sum = 0
+    sum = 0.0
     for j in range(0, rank + 1):
-        sum += c_q(rn, rank, j) / pascal(rank, j) * pascal(k, j) * pascal(n - k, rank - j)
+        sum += float(c_q(rn, rank, j)) / pascal(rank, j) * pascal(k, j) * pascal(n - k, rank - j)
 
-    return float(sum) / pascal(n, rank)
+    return sum / pascal(n, rank)
 
 
 def pascal(n, k):
