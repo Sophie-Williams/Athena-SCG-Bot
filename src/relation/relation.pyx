@@ -98,6 +98,7 @@ cdef extern from "solve.h":
     problem *problem_create(char **vars, int num_vars, clause *clauses,
                             int num_clauses)
     problem *problem_shallow_copy(problem *p)
+    void problem_shallow_delete(problem *p)
     void problem_set(problem *problem, char **vars, int num_vars,
                      clause *clauses, int num_clauses)
     void problem_delete(problem *problem)
@@ -355,14 +356,15 @@ cdef mean(problem *p, int num_vars, int num_vars_true):
     # FIXME variable rank.
     rank = 3
     for rn, count in rn_counts(p).items():
-        sum += count * sat(p, rn, rank, num_vars, num_vars_true)
+        sum = sum + sat(p, rn, rank, num_vars, num_vars_true) * count
     return sum / p[0].num_vars
 
 
 cdef sat(problem *p, uint32_t rn, int rank, int n, int k):
     sum = 0.0
     for j in range(0, rank + 1):
-        sum += float(c_q(rn, rank, j)) / pascal(rank, j) * pascal(k, j) * pascal(n - k, rank - j)
+        sum = sum + ((float(c_q(rn, rank, j)) / pascal(rank, j))
+                    * pascal(k, j) * pascal(n - k, rank - j))
 
     return sum / pascal(n, rank)
 
@@ -437,6 +439,7 @@ cdef class Problem:
         cdef problem *tmp
         cdef solution *s
         cdef int var
+        cdef int i
 
         n = self.p[0].num_vars
         max_num_true = 0
@@ -466,27 +469,30 @@ cdef class Problem:
                 j.append(1)
                 k = k - 1
                 f = f_true
-                free(f_false[0].clauses)
-                free(f_false)
+                problem_shallow_delete(f_false)
             else:
                 j.append(0)
                 f = f_false
-                free(f_true[0].clauses)
-                free(f_true)
-            
+                problem_shallow_delete(f_true)
+
             # free the old `f`
-            free(tmp[0].clauses)
-            free(tmp)
+            problem_shallow_delete(tmp)
+
+        # free the last `f` we don't need it.
+        problem_shallow_delete(f)
 
         s = <solution *> malloc(sizeof(solution))
         s[0].values = <int *> malloc(sizeof(int) * len(j))
         s[0].size = len(j)
 
-        satisfied = fsat(f, s)
+        # copy the solution into C
+        for 0 <= i < len(j):
+            s[0].values[i] = j[i]
+
+        # find the number of clauses satisfied
+        satisfied = fsat(self.p, s)
 
         solution_delete(s)
-        free(f[0].clauses)
-        free(f)
 
         return (satisfied, j)
 

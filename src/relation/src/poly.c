@@ -160,6 +160,14 @@ find_maximum_point(uint32_t rn, int rank) {
 
 double
 find_break_even(uint32_t rn, int rank) {
+    poly *p;
+    double maxima;
+    p = poly_from_relation_number(rn, rank);
+    maxima = poly_maxima(p, 0.0, 1.0);
+    poly_delete(p);
+    return maxima;
+    
+#if 0
     poly3 poly;
 
     /* If odd, the break even is 1.0
@@ -181,6 +189,7 @@ find_break_even(uint32_t rn, int rank) {
 
     poly3_create(rn, &poly);
     return poly3_eval(&poly, find_maximum_point(rn, rank));
+#endif
 }
 
 /* Functions for poly */
@@ -312,7 +321,7 @@ poly_maxima(poly *p, double left, double right) {
     max = -INFINITY;
 
     /* */
-    for (; left < right; left += 0.001) {
+    for (; left < right; left += 0.0001) {
         if ((temp = poly_eval(p, left)) > max)
             max = temp;
     }

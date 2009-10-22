@@ -77,6 +77,11 @@ problem_delete(problem *p) {
     }
 
     free(p->vars);
+    problem_shallow_delete(p);
+}
+
+void
+problem_shallow_delete(problem *p) {
     free(p->clauses);
     free(p);
 }

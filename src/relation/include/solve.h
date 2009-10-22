@@ -78,6 +78,14 @@ problem *
 problem_shallow_copy(const problem * restrict from);
 
 /**
+ * Delete a shallow copy. Does not free the variables (as they were not
+ * allocated).
+ * @param p The problem to free.
+ */
+void
+problem_shallow_delete(problem *p);
+
+/**
  * Set values in a problem.
  */
 void
