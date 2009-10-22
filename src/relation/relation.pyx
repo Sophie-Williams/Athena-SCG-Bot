@@ -90,13 +90,14 @@ cdef extern from "solve.h":
     struct __problem:
         char **vars
         int num_vars
-        clause **clauses
+        clause *clauses
         int num_clauses
     ctypedef __problem problem
 
     solution *solve(problem *problem, solution *solution)
     problem *problem_create(char **vars, int num_vars, clause *clauses,
                             int num_clauses)
+    problem *problem_shallow_copy(problem *p)
     void problem_set(problem *problem, char **vars, int num_vars,
                      clause *clauses, int num_clauses)
     void problem_delete(problem *problem)
@@ -106,6 +107,7 @@ cdef extern from "solve.h":
     void clause_set(void *c, uint32_t rn, int rank, int *vars)
     void clause_delete(clause *clause)
     int fsat(problem *p, solution *s)
+    problem *problem_reduce_all(problem *p, int var, int value)
     solution *solve_iterate(problem *p, solution *s)
     solution *__solve_iterate(problem *p, solution *s,
                               uint32_t start, uint32_t end)
@@ -327,19 +329,28 @@ def x_true_vars(int rank, int num_true_vars):
     """
     return TRUE_VARS[rank][num_true_vars]
 
+
 # rank should be 3 for now.
 def break_even(uint32_t rn, int rank):
     return find_break_even(rn, rank)
 
 cdef class Problem:
     cdef problem *p
+    cdef int __shallow
 
-    def __cinit__(self, vars, clauses):
+    def __cinit__(self, vars, clauses, shallow=False):
         cdef clause *tmp
         cdef int i
         cdef int j
         cdef int var_tmp[5]
         cdef char **c_vars
+       
+        # support for shallow copying.
+        if shallow:
+            self.__shallow = 1
+            self.p = problem_shallow_copy(<problem *> shallow.p)
+            return
+        self.__shallow = 0
 
         tmp = <clause *> malloc(sizeof(clause) * len(clauses))
 
@@ -366,6 +377,78 @@ cdef class Problem:
 
         self.p = <problem *> malloc(sizeof(problem))
         problem_set(self.p, c_vars, j, tmp, i)
+
+    def shallow_copy(self):
+        """A shallow copy of the problem. Should only be internal."""
+        return self.__class__(None, None, shallow=self)
+
+    def mean(self, num_vars_true):
+        sum = 0
+        # FIXME variable rank.
+        rank = 3
+        for rn, count in self.rn_counts.items():
+            sum += count * self.sat(rn, rank, n, k)
+        return float(sum) / self.p[0].num_vars
+
+    def sat(self, rn, rank, n, k):
+        sum = 0
+        for j in range(0, rank + 1):
+            sum += c_q(rn, rank, j) / pascal(r, j) * pascal(k, j) * pascal(n - k, r - j)
+
+        return float(sum) / pascal(n, rank)
+
+    def rn_counts(self):
+        cdef int i
+        
+        counts = {}
+
+        for 0 <= i < self.p[0].num_clauses:
+            rn = (self.p[0].clauses + i)[0].rn
+            if counts.has_key(rn):
+                counts[rn] += 1
+            else:
+                counts[rn] = 1
+
+        return counts
+
+    def evergreen(self):
+        max_num_true = 0
+        max_mean = self.mean(n, 0)
+
+        for t in range(1, self.p[0].num_vars):
+            x = self.mean(t)
+            if x > max_mean:
+                max_mean = x
+                max_num_true = t
+
+        f = self.shallow_copy()
+
+        k = max_num_true
+        j = []
+        for 0 <= i < self.p[0].num_vars:
+            f_true  = f.reduce_all(var, True)
+            f_false = f.reduce_all(var, False)
+            
+            mean_true  = f_true.mean(n - 1, k - 1)
+            mean_false = f_false.mean(n - 1, k)
+
+            if mean_true > mean_false:
+                j.append(True)
+                k = k - 1
+                f = f_true
+            else:
+                j.append(False)
+                f = f_false
+
+        return j
+
+    def reduce_all(self, var, value):
+        """
+        Create a shallow copy of this problem instance then reduce.
+        """
+        q = self.shallow_copy()
+        problem_reduce_all(<problem *> q.p, var, value)
+        return q
 
     def solve(self):
         cdef solution *s
@@ -400,4 +483,8 @@ cdef class Problem:
         return (f, ret)
 
     def __dealloc__(self):
-        problem_delete(self.p)
+        if not self.__shallow:
+            problem_delete(self.p)
+        else:
+            free(self.p[0].clauses)
+            free(self.p)

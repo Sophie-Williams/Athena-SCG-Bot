@@ -207,6 +207,32 @@ class TestRelation(unittest.TestCase):
     self.assertAlmostEqual(f(126, 3), 0.750000000000)
     # XXX More than rank 3?
 
+  def test_rn_counts(self):
+    clauses = [
+      (3, 'v1', 'v2', 'v3'),
+      (22, 'v2', 'v3', 'v4'),
+      (3, 'v3', 'v4', 'v5'),
+      (22, 'v1', 'v2', 'v3'),
+      (22, 'v1', 'v2', 'v3'),
+      (22, 'v1', 'v2', 'v3'),
+      (21, 'v1', 'v2', 'v3'),
+      (22, 'v2', 'v3', 'v4'),
+      (22, 'v3', 'v4', 'v5'),
+      (21, 'v2', 'v3', 'v4'),
+      (22, 'v3', 'v4', 'v5'),
+      (21, 'v2', 'v3', 'v4'),
+      (22, 'v3', 'v4', 'v5'),
+      (21, 'v2', 'v3', 'v4'),
+      (22, 'v3', 'v4', 'v5'),
+    ]
+    vars = ('v1', 'v2', 'v3', 'v4', 'v5')
+    c_p = relation.Problem(vars, clauses)
+    counts = c_p.rn_counts()
+    self.assertEquals(counts[3], 2)
+    self.assertEquals(counts[21], 4)
+    self.assertEquals(counts[22], 9)
+    self.assertEquals(len(counts.keys()), 3)
+
   def test_solve(self):
     clauses = [
       (22, 'v1', 'v2', 'v3'),
