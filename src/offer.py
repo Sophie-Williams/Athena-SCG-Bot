@@ -5,7 +5,6 @@ import random
 
 import relation
 import problem
-import constants
 
 gflags.DEFINE_float('bepbump', 0.03, 'Buy offers where `price <= bep+this`')
 gflags.DEFINE_float('avoidreofferdiff', 0.3,
@@ -56,22 +55,20 @@ class Offer(object):
       return True
     if self.bep == 1:
       return True
-    
-    try:
-      if self.price <= constants.PRICES[13][self.problemnumber]:
-        return True
-    except KeyError:
-      pass
-    return (self.bep + FLAGS.bepbump) >= self.price
+   
+    ptv = problem.Problem.GetBestPriceAndType(self.problemnumber)
+    if ptv:
+      return self.price <= ptv[0]
+    else:
+      return (self.bep + FLAGS.bepbump) >= self.price
 
   def AvoidReoffer(self, mindecrement=0.01):
     new_price = self.price - mindecrement
 
     probably_solvable = False
-    try:
-      probably_solvable = new_price < constants.PRICES[13][self.problemnumber]
-    except KeyError:
-      pass
+    ptv = problem.Problem.GetBestPriceAndType(self.problemnumber)
+    if ptv:
+      probably_solvable = new_price < ptv[0]
     return (self.price - mindecrement) < 0 or probably_solvable
 
   def GetReoffer(self, decrement=0.01):
@@ -80,13 +77,12 @@ class Offer(object):
     Args:
        decrement: (float) Reoffer at the current price minus this number
     """
-    try:
-      new_price = (constants.PRICES[13][self.problemnumber]
-                   + 0.5 * decrement)
-      if new_price > (self.price - decrement):
-        raise
-    except:
-      new_price = self.price - decrement
+    ptv = problem.Problem.GetBestPriceAndType(self.problemnumber)
+    new_price = self.price - decrement
+    if ptv:
+      gen_price = ptv[0] + 0.5 * decrement
+      if gen_price < new_price:
+        new_price = gen_price
     return 'reoffer[%d %0.18f]' % (self.offerid, new_price)
 
   def GetAccept(self):
@@ -107,11 +103,11 @@ class Offer(object):
     """Set or Generate a price."""
     apply_markup = True
     if price is None:
-      try:
-        price = (constants.PRICES[13][self.problemnumber]
-               + 0.5 * FLAGS.mindecrement)
+      ptv = problem.Problem.GetBestPriceAndType(self.problemnumber)
+      if ptv:
+        price = ptv[0] + 0.5 * FLAGS.mindecrement
         apply_markup = False
-      except KeyError:
+      else:
         price = relation.break_even(self.problemnumber, 3)
     if apply_markup:
       price += markup

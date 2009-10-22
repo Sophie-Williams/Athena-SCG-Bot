@@ -5,6 +5,7 @@ import logging
 import random
 import threading
 
+import constants
 import csptree
 import proxysolver
 import relation
@@ -286,7 +287,19 @@ class Problem(object):
       degree = FLAGS.problemdegree
     p = cls(0, ['v%d' % x for x in range(13)], [], offerid, 0,
             problemnumber, 0, kind)
-    for i, j, k in itertools.permutations(range(13), 3):
+
+    ptv = Problem.GetBestPriceAndType(problemnumber)
+    if ptv:
+      numvars = ptv[2]
+      if ptv[1] == 'permutations':
+        generator = itertools.permutations
+      else:
+        generator = itertools.combinations
+    else:
+      generator = itertools.combinations
+      numvars = 23
+
+    for i, j, k in generator(range(numvars), 3):
       p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
     return p
 
@@ -301,3 +314,22 @@ class Problem(object):
       outputlist.append(newp)
     return outputlist
 
+  @staticmethod
+  def GetPriceAndType(problemnumber):
+    output = []
+    for x in constants.PRICES:
+      if problemnumber in constants.PRICES[x]:
+        output.append((constants.PRICES[x][problemnumber],
+                       'permutations', x))
+    for x in constants.PRICES_COMB:
+      if problemnumber in constants.PRICES_COMB[x]:
+        output.append((constants.PRICES_COMB[x][problemnumber],
+                       'combinations', x))
+    output.sort()
+    return output
+
+  @staticmethod
+  def GetBestPriceAndType(problemnumber):
+    l = Problem.GetPriceAndType(problemnumber)
+    if l:
+      return l[0]
