@@ -1,6 +1,7 @@
 import relation
 import gen
 import unittest
+import test_data
 
 class TestRelation(unittest.TestCase):
 
@@ -232,6 +233,10 @@ class TestRelation(unittest.TestCase):
     self.assertEquals(counts[21], 4)
     self.assertEquals(counts[22], 9)
     self.assertEquals(len(counts.keys()), 3)
+
+  def test_evergreen(self):
+    c_p = relation.Problem(test_data.vars1, test_data.clauses1)
+    print c_p.evergreen(), len(test_data.clauses1)
 
   def test_solve(self):
     clauses = [

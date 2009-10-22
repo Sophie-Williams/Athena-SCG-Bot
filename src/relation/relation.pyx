@@ -334,23 +334,61 @@ def x_true_vars(int rank, int num_true_vars):
 def break_even(uint32_t rn, int rank):
     return find_break_even(rn, rank)
 
+
+cdef rn_counts(problem *p):
+    cdef int i
+
+    counts = {}
+
+    for 0 <= i < p[0].num_clauses:
+        rn = (p[0].clauses + i)[0].rn
+        if counts.has_key(rn):
+            counts[rn] += 1
+        else:
+            counts[rn] = 1
+
+    return counts
+
+
+cdef mean(problem *p, int num_vars, int num_vars_true):
+    sum = 0
+    # FIXME variable rank.
+    rank = 3
+    for rn, count in rn_counts(p).items():
+        sum += count * sat(p, rn, rank, num_vars, num_vars_true)
+    return float(sum) / p[0].num_vars
+
+
+cdef sat(problem *p, uint32_t rn, int rank, int n, int k):
+    sum = 0
+    for j in range(0, rank + 1):
+        sum += c_q(rn, rank, j) / pascal(rank, j) * pascal(k, j) * pascal(n - k, rank - j)
+
+    return float(sum) / pascal(n, rank)
+
+
+def pascal(n, k):
+    if (n <= 0 or k <= 0 or n == k):
+        return 1
+
+    result = 1
+    for x in range(n - k + 1, n + 1):
+        result *= x
+    for y in range(2, k + 1):
+        result /= y
+
+    return result
+
+
 cdef class Problem:
     cdef problem *p
-    cdef int __shallow
 
-    def __cinit__(self, vars, clauses, shallow=False):
+    def __cinit__(self, vars, clauses):
         cdef clause *tmp
         cdef int i
         cdef int j
         cdef int var_tmp[5]
         cdef char **c_vars
-       
-        # support for shallow copying.
-        if shallow:
-            self.__shallow = 1
-            self.p = problem_shallow_copy(<problem *> shallow.p)
-            return
-        self.__shallow = 0
 
         tmp = <clause *> malloc(sizeof(clause) * len(clauses))
 
@@ -378,25 +416,6 @@ cdef class Problem:
         self.p = <problem *> malloc(sizeof(problem))
         problem_set(self.p, c_vars, j, tmp, i)
 
-    def shallow_copy(self):
-        """A shallow copy of the problem. Should only be internal."""
-        return self.__class__(None, None, shallow=self)
-
-    def mean(self, num_vars_true):
-        sum = 0
-        # FIXME variable rank.
-        rank = 3
-        for rn, count in self.rn_counts.items():
-            sum += count * self.sat(rn, rank, n, k)
-        return float(sum) / self.p[0].num_vars
-
-    def sat(self, rn, rank, n, k):
-        sum = 0
-        for j in range(0, rank + 1):
-            sum += c_q(rn, rank, j) / pascal(r, j) * pascal(k, j) * pascal(n - k, r - j)
-
-        return float(sum) / pascal(n, rank)
-
     def rn_counts(self):
         cdef int i
         
@@ -412,43 +431,64 @@ cdef class Problem:
         return counts
 
     def evergreen(self):
+        cdef problem *f_true
+        cdef problem *f_false
+        cdef problem *f
+        cdef problem *tmp
+        cdef solution *s
+        cdef int var
+
+        n = self.p[0].num_vars
         max_num_true = 0
-        max_mean = self.mean(n, 0)
+        max_mean = mean(self.p, n, 0)
 
         for t in range(1, self.p[0].num_vars):
-            x = self.mean(t)
+            x = mean(self.p, n, t)
             if x > max_mean:
                 max_mean = x
                 max_num_true = t
 
-        f = self.shallow_copy()
+        f = problem_shallow_copy(self.p)
 
         k = max_num_true
         j = []
-        for 0 <= i < self.p[0].num_vars:
-            f_true  = f.reduce_all(var, True)
-            f_false = f.reduce_all(var, False)
-            
-            mean_true  = f_true.mean(n - 1, k - 1)
-            mean_false = f_false.mean(n - 1, k)
+        for 0 <= var < self.p[0].num_vars:
+            f_true  = problem_shallow_copy(f)
+            f_false = problem_shallow_copy(f)
+            problem_reduce_all(f_true,  var, 1)
+            problem_reduce_all(f_false, var, 0)
+
+            mean_true  = mean(f_true, n - 1, k - 1)
+            mean_false = mean(f_false, n - 1, k)
+            tmp = f
 
             if mean_true > mean_false:
-                j.append(True)
+                j.append(1)
                 k = k - 1
                 f = f_true
+                free(f_false[0].clauses)
+                free(f_false)
             else:
-                j.append(False)
+                j.append(0)
                 f = f_false
+                free(f_true[0].clauses)
+                free(f_true)
+            
+            # free the old `f`
+            free(tmp[0].clauses)
+            free(tmp)
 
-        return j
+        s = <solution *> malloc(sizeof(solution))
+        s[0].values = <int *> malloc(sizeof(int) * len(j))
+        s[0].size = len(j)
 
-    def reduce_all(self, var, value):
-        """
-        Create a shallow copy of this problem instance then reduce.
-        """
-        q = self.shallow_copy()
-        problem_reduce_all(<problem *> q.p, var, value)
-        return q
+        satisfied = fsat(f, s)
+
+        solution_delete(s)
+        free(f[0].clauses)
+        free(f)
+
+        return (satisfied, j)
 
     def solve(self):
         cdef solution *s
@@ -483,8 +523,4 @@ cdef class Problem:
         return (f, ret)
 
     def __dealloc__(self):
-        if not self.__shallow:
-            problem_delete(self.p)
-        else:
-            free(self.p[0].clauses)
-            free(self.p)
+        problem_delete(self.p)
