@@ -344,7 +344,7 @@ cdef rn_counts(problem *p):
     for 0 <= i < p[0].num_clauses:
         rn = (p[0].clauses + i)[0].rn
         if counts.has_key(rn):
-            counts[rn] += 1
+            counts[rn] = counts[rn] + 1
         else:
             counts[rn] = 1
 
@@ -375,9 +375,9 @@ def pascal(n, k):
 
     result = 1
     for x in range(n - k + 1, n + 1):
-        result *= x
+        result = result * x
     for y in range(2, k + 1):
-        result /= y
+        result = result / y
 
     return result
 
@@ -426,7 +426,7 @@ cdef class Problem:
         for 0 <= i < self.p[0].num_clauses:
             rn = (self.p[0].clauses + i)[0].rn
             if counts.has_key(rn):
-                counts[rn] += 1
+                counts[rn] = counts[rn] + 1
             else:
                 counts[rn] = 1
 

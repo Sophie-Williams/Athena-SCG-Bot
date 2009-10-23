@@ -283,11 +283,6 @@ class Problem(object):
 
   @classmethod
   def Generate(cls, problemnumber, offerid, kind, degree=None):
-    if not degree:
-      degree = FLAGS.problemdegree
-    p = cls(0, ['v%d' % x for x in range(13)], [], offerid, 0,
-            problemnumber, 0, kind)
-
     ptv = Problem.GetBestPriceAndType(problemnumber)
     if ptv:
       numvars = ptv[2]
@@ -299,6 +294,8 @@ class Problem(object):
       generator = itertools.combinations
       numvars = 23
 
+    p = cls(0, ['v%d' % x for x in range(numvars)], [], offerid, 0,
+            problemnumber, 0, kind)
     for i, j, k in generator(range(numvars), 3):
       p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
     return p
