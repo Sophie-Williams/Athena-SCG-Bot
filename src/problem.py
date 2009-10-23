@@ -308,7 +308,9 @@ class Problem(object):
       generator = itertools.combinations
       numvars = 23
 
-    p = cls(0, ['v%d' % x for x in range(numvars)], [], offerid, 0,
+    #XXX: This is a hack to always generate the appearance of 23 vars, even
+    #     when we only use 13.
+    p = cls(0, ['v%d' % x for x in range(23)], [], offerid, 0,
             problemnumber, 0, kind)
     for i, j, k in generator(range(numvars), 3):
       p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
