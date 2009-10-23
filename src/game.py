@@ -23,7 +23,8 @@ class Game(object):
   def RunTasks(self):
     starttime = time.time()
     self.replies = []
-    logging.info('Starting Balance: $%0.4f' % self.context.balance)
+    logging.info('Round %d Starting Balance: $%0.4f'
+                 % (self.context.currentround, self.context.balance))
     logging.debug('Their Offered: %s' % str(self.context.their_offered))
     logging.debug('Our Offered: %s' % str(self.context.our_offered))
     logging.debug('Accepted: %s' % str(self.context.accepted))

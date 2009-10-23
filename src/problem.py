@@ -233,8 +233,9 @@ class Problem(object):
     numclauses = float(len(self.clauses))
     solperc = float(satisfied)/numclauses
     self.profit = solperc-self.price
-    logging.info('Solved %d out of %d | %0.3f - %0.3f = %0.3f profit'
-                  % (satisfied, numclauses, solperc, self.price, self.profit))
+    logging.info('Solved %d out of %d (%d vars) | %0.3f - %0.3f = %0.3f profit'
+                  % (satisfied, numclauses, len(self.vars), solperc,
+                     self.price, self.profit))
     if self.profit < 0:
       logging.error('Lost money on %s' % str(self))
     return self.profit
