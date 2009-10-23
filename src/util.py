@@ -29,6 +29,7 @@ def DoRegistration(server, ourport, ourteam, ourpass):
   try:
     resp = urllib2.urlopen(req).read()
     if str(resp) == str(ourteam):
+      logging.info('Registered to %s as %s' % (server, ourteam))
       return '%s registration success!' % ourteam
     else:
       return '"%s" != "%s"' % (str(resp), str(ourteam))

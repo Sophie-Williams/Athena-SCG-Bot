@@ -167,11 +167,10 @@ class Problem(object):
   def FilterSolve(self):
     vars = list(self.vars)
     vars.sort()
-    usedvars = []
+    usedvars = set()
     for x in self.clauses:
-      for var in x.vars:
-        if var not in usedvars:
-          usedvars.append(var)
+      usedvars.update(list(x.vars))
+    usedvars = list(usedvars)
     usedvars.sort()
     if vars == usedvars:
       return False, vars
