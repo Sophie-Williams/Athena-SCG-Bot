@@ -141,7 +141,12 @@ class Problem(object):
       filtered, vars = self.FilterSolve()
       c_p = relation.Problem(tuple(vars),
                             [x.GetTuple() for x in self.clauses])
-      fsat, values = c_p.solve()
+      if len(vars) <= 22:
+        logging.debug('Using Iterative Solve')
+        fsat, values = c_p.solve()
+      else:
+        logging.debug('Using Contracted Relative Solve')
+        fsat, values = c_p.evergreen() # w00t
       if filtered:
         values = self.TransposeValues(vars, values)
     return fsat, values
