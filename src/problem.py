@@ -14,8 +14,6 @@ import relation.gen
 gflags.DEFINE_enum('solver', 'c', ['proxy', 'python', 'c'],
                    'Problem solver to use')
 gflags.DEFINE_integer('problemdegree', 13, 'Degree of generated problems')
-gflags.DEFINE_string('showproxysolution', False,
-                     'Show proxy solution and real solution messages')
 # gflags.DEFINE_integer('iterlimit', 22,
 #                       'The maximum degree to solve with iteration.')
 # XXX Ideally, we would have the flag, but we want to hide this information.
@@ -146,7 +144,7 @@ class Problem(object):
                   % (self.problemnumber, self.challengeid))
     return fsat, values
 
-  def RealSolve(self):
+  def CSolve(self):
     """Solve this Problem instance using the C solver."""
     filtered, vars = self.FilterSolve()
     c_p = relation.Problem(tuple(vars),
@@ -228,10 +226,8 @@ class Problem(object):
       # if we satisfy everything, don't keep looping
       if sat == tot:
         return (perc, sat, solution)
-
       elif best is None:
         best = (perc, sat, solution)
-
       elif perc > best[0]: 
         best = (perc, sat, solution)
 
@@ -248,26 +244,29 @@ class Problem(object):
       logging.error('Lost money on %s' % str(self))
     return self.profit
 
+  def CreateSolution(self, values, variables=None):
+    if not variables:
+      variables = self.vars
+    logging.debug('Solution values are: %s' % str(values))
+    s = csptree.CSPTree.CreateSolution(variables, values)
+    return str(s)
+
   def GetTrivialSolution(self):
     if not self.TrivialSolve():
       return
-    sat, solution = self.TrivialSolve()
-    s = csptree.CSPTree.CreateSolution(self.vars, solution)
-    return str(s)
+    fsat, values = self.TrivialSolve()
+    self.SetProfit(fsat)
+    return self.CreateSolution(values)
 
   def GetPySolution(self):
-    perc, sat, solution = self.PySolve()
-    self.SetProfit(sat)
-    logging.debug('Values are: %s' % str(solution))
-    s = csptree.CSPTree.CreateSolution(self.vars, solution)
-    return str(s)
+    _, fsat, values = self.PySolve()
+    self.SetProfit(fsat)
+    return self.CreateSolution(values)
 
   def GetCSolution(self):
-    fsat, values = self.RealSolve()
+    fsat, values = self.CSolve()
     self.SetProfit(fsat)
-    logging.debug('Values are: %s' % str(values))
-    s = csptree.CSPTree.CreateSolution(self.vars, values)
-    return str(s)
+    return self.CreateSolution(values)
 
   def GetProxySolution(self):
     return proxysolver.ProxySolve(self)
@@ -289,10 +288,6 @@ class Problem(object):
   def Solve(self):
     if self.solution is None:
       rs = self.DoSolve()
-      if FLAGS.showproxysolution:
-        logging.debug('Real solution: %s' % rs)
-        ps = proxysolver.ProxySolve(self)
-        logging.debug('Proxy solution: %s' % ps)
       self.solution = rs
     return 'solve[[ %s ] %d]' % (str(self.solution), self.challengeid)
 
@@ -304,7 +299,7 @@ class Problem(object):
 
 
   @classmethod
-  def Generate(cls, problemnumber, offerid, kind, degree=None):
+  def GetVarsGenerator(cls, problemnumber, perceived_vars=23):
     ptv = Problem.GetBestPriceAndType(problemnumber)
     if ptv:
       numvars = ptv[2]
@@ -315,12 +310,15 @@ class Problem(object):
     else:
       generator = itertools.combinations
       numvars = 23
-
     #XXX: This is a hack to always generate the appearance of 23 vars, even
     #     when we only use 13.
-    p = cls(0, ['v%d' % x for x in range(23)], [], offerid, 0,
-            problemnumber, 0, kind)
-    for i, j, k in generator(range(numvars), 3):
+    return (numvars, generator, ['v%d' % x for x in range(perceived_vars)])
+
+  @classmethod
+  def Generate(cls, problemnumber, offerid, kind, degree=None):
+    numvars, clausegenerator, varslist = cls.GetVarsGenerator(problemnumber)
+    p = cls(0, varslist, [], offerid, 0, problemnumber, 0, kind)
+    for i, j, k in clausegenerator(range(numvars), 3):
       p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
     return p
 
