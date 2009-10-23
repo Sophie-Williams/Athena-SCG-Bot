@@ -123,32 +123,36 @@ class Problem(object):
                ' '.join([x.GetProvideBlob() for x in self.clauses]),
                self.challengeid, self.seller, self.problemnumber, self.price))
 
+  def TrivialSolve(self):
+    fsat = len(self.clauses)
+    if self.problemnumber == 0:
+      logging.debug('Special Case Solve: Relation 0!')
+      values = [0]*len(self.vars)
+    elif self.problemnumber % 2:
+      logging.debug('Special Case Solve: All False!')
+      values = [0]*len(self.vars)
+    elif self.problemnumber >= 128:
+      logging.debug('Special Case Solve: All True!')
+      values = [1]*len(self.vars)
+    else:
+      return False
+    logging.debug('Trivially Solved # %d challenge %d'
+                  % (self.problemnumber, self.challengeid))
+    return fsat, values
+
   def RealSolve(self):
     """Solve this Problem instance using the C solver."""
-    if self.problemnumber == 0:
-      logging.info('Special Case Solve: Relation 0!')
-      values = [0]*len(self.vars)
-      fsat = len(self.clauses)
-    elif self.problemnumber % 2:
-      logging.info('Special Case Solve: All False!')
-      values = [0]*len(self.vars)
-      fsat = len(self.clauses)
-    elif self.problemnumber >= 128:
-      logging.info('Special Case Solve: All True!')
-      values = [1]*len(self.vars)
-      fsat = len(self.clauses)
+    filtered, vars = self.FilterSolve()
+    c_p = relation.Problem(tuple(vars),
+                          [x.GetTuple() for x in self.clauses])
+    if len(vars) <= 22:
+      logging.debug('Using Iterative Solve')
+      fsat, values = c_p.solve()
     else:
-      filtered, vars = self.FilterSolve()
-      c_p = relation.Problem(tuple(vars),
-                            [x.GetTuple() for x in self.clauses])
-      if len(vars) <= 22:
-        logging.debug('Using Iterative Solve')
-        fsat, values = c_p.solve()
-      else:
-        logging.debug('Using Contracted Relative Solve')
-        fsat, values = c_p.evergreen() # w00t
-      if filtered:
-        values = self.TransposeValues(vars, values)
+      logging.debug('Using Contracted Relative Solve')
+      fsat, values = c_p.evergreen() # w00t
+    if filtered:
+      values = self.TransposeValues(vars, values)
     return fsat, values
 
   def TransposeValues(self, vars, values):
@@ -235,6 +239,13 @@ class Problem(object):
       logging.error('Lost money on %s' % str(self))
     return self.profit
 
+  def GetTrivialSolution(self):
+    if not self.TrivialSolve():
+      return
+    sat, solution = self.TrivialSolve()
+    s = csptree.CSPTree.CreateSolution(self.vars, solution)
+    return str(s)
+
   def GetPySolution(self):
     perc, sat, solution = self.PySolve()
     self.SetProfit(sat)
@@ -256,7 +267,9 @@ class Problem(object):
     logging.debug('Solving offer %d relation %d cost %0.3f'
                  % (self.challengeid, self.problemnumber, self.price))
     s = ''
-    if FLAGS.solver == 'c':
+    if self.TrivialSolve():
+      s = self.GetTrivialSolution()
+    elif FLAGS.solver == 'c':
       s = self.GetCSolution()
     elif FLAGS.solver == 'proxy':
       s = self.GetProxySolution()
@@ -273,11 +286,6 @@ class Problem(object):
         logging.debug('Proxy solution: %s' % ps)
       self.solution = rs
     return 'solve[[ %s ] %d]' % (str(self.solution), self.challengeid)
-
-  def GetSolveThread(self):
-    logging.debug('Creating solve thread for %s' % str(self))
-    t = threading.Thread(group=None, target=self.Solve)
-    return t
 
   @classmethod
   def GenerateFromAccepted(cls, acceptedproblem):
