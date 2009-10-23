@@ -55,7 +55,10 @@ class Game(object):
         break
       if offer.price > self.context.endbalance:
         logging.info('%s is out of budget' % str(offer))
-      elif offer.IsGoodBuy():
+        # Quit window shopping when you are out of money.
+        break
+
+      if offer.IsGoodBuy():
         acceptedcount += 1
         logging.info('%s is good buy' % str(offer))
         self.replies.append(offer.GetAccept())
@@ -63,22 +66,19 @@ class Game(object):
       else:
         logging.info('%s is bad buy' % str(offer))
 
-    
-    a = [x.actedon for x in self.context.their_offered]
-    if True not in a and self.context.their_offered:
-      if FLAGS.allowreoffer:
-        noreoffer = []
-        for offer in self.context.their_offered:
-          if offer.AvoidReoffer():
-            logging.info('%s shouldn\'t reoffer' % str(offer))
-            noreoffer.append(offer)
-        if noreoffer:
-          noreoffer.sort()
-          self.replies.append(noreoffer[0].GetAccept())
-      else:
-        l = list(self.context.their_offered)
-        l.sort()
-        self.replies.append(l[0].GetAccept())
+    if FLAGS.allowreoffer and acceptedcount == 0:
+      noreoffer = []
+      for offer in self.context.their_offered:
+        if offer.AvoidReoffer():
+          logging.info('%s shouldn\'t reoffer' % str(offer))
+          noreoffer.append(offer)
+      if noreoffer:
+        noreoffer.sort()
+        self.replies.append(noreoffer[0].GetAccept())
+    else:
+      # Re-sort to find the cheapest one.
+      offers = sorted(self.context.their_offered)
+      self.replies.append(offers[0].GetAccept())
 
   def ProvideTask(self):
     logging.info('Running ProvideTask')
@@ -101,7 +101,7 @@ class Game(object):
 
   def OfferTask(self):
     logging.info('Running OfferTask')
-    ouroffer  = [x.problemnumber for x in self.context.our_offered]
+    ouroffer    = [x.problemnumber for x in self.context.our_offered]
     theiroffer  = [x.problemnumber for x in self.context.their_offered]
     justoffered = []
     for x in range(1):

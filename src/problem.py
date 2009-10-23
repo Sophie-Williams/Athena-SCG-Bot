@@ -16,6 +16,11 @@ gflags.DEFINE_enum('solver', 'c', ['proxy', 'python', 'c'],
 gflags.DEFINE_integer('problemdegree', 13, 'Degree of generated problems')
 gflags.DEFINE_string('showproxysolution', False,
                      'Show proxy solution and real solution messages')
+# gflags.DEFINE_integer('iterlimit', 22,
+#                       'The maximum degree to solve with iteration.')
+# XXX Ideally, we would have the flag, but we want to hide this information.
+#     Also, this really depends on hardware...
+ITERLIMIT = 22
 
 FLAGS = gflags.FLAGS
 
@@ -73,6 +78,7 @@ class Problem(object):
     self.AddClauses(clauselist)
     self.challengeid = int(challengeid)
     self.seller = int(seller)
+    # XXX for later games we will need to change this to be a list.
     self.problemnumber = int(problemnumber)
     self.price = float(price)
     self.solution = None
@@ -145,7 +151,7 @@ class Problem(object):
     filtered, vars = self.FilterSolve()
     c_p = relation.Problem(tuple(vars),
                           [x.GetTuple() for x in self.clauses])
-    if len(vars) <= 22:
+    if len(vars) <= ITERLIMIT: # XXX see at the top.
       logging.debug('Using Iterative Solve')
       fsat, values = c_p.solve()
     else:
@@ -166,13 +172,15 @@ class Problem(object):
     return [mapping[v] for v in self.vars]
 
   def FilterSolve(self):
-    vars = list(self.vars)
-    vars.sort()
+    # Accumulate all variables used in clauses onto usedvars.
     usedvars = set()
     for x in self.clauses:
       usedvars.update(list(x.vars))
-    usedvars = list(usedvars)
-    usedvars.sort()
+
+    # Sort usedvars to compare it with vars.
+    # XXX Should we use sets instead (like set.issubset)?
+    vars = sorted(self.vars)
+    usedvars = sorted(usedvars)
     if vars == usedvars:
       return False, vars
     else:
@@ -320,8 +328,8 @@ class Problem(object):
   def GetProblemList(cls, parsedlist):
     outputlist = []
     for problem in parsedlist:
-      #buyer, list_of_vars, clauselist, challengeid, seller,
-      # problemnumner, price
+      # buyer, list_of_vars, clauselist, challengeid,
+      # seller, problemnumner, price
       newp = cls(problem[0], problem[1][0], problem[1][1], problem[2],
                  problem[3], problem[4], problem[5])
       outputlist.append(newp)
