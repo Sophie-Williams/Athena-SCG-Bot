@@ -116,6 +116,19 @@ class ProblemTestCase(unittest.TestCase):
     for x in clauses:
       self.assert_(pblm.IsClauseSat(x, solution))
 
+  def testTransposeValues(self):
+    p = self.pblm
+    p.vars = range(0, 25)
+    usedvars = [0, 5, 10, 15]
+    values   = [1, 2, 3, 4]
+
+    all_values = p.TransposeValues(usedvars, values)
+    self.assertEquals(len(all_values), 25)
+    self.assertEquals(all_values[0], 1)
+    self.assertEquals(all_values[5], 2)
+    self.assertEquals(all_values[10], 3)
+    self.assertEquals(all_values[15], 4)
+
 
 if __name__ == '__main__':
   unittest.main()

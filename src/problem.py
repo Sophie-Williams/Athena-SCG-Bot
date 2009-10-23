@@ -155,14 +155,15 @@ class Problem(object):
       values = self.TransposeValues(vars, values)
     return fsat, values
 
-  def TransposeValues(self, vars, values):
-    output = [0]*len(self.vars)
+  def TransposeValues(self, usedvars, values):
     self.vars.sort()
-    for x in self.vars:
-      if x in vars:
-        i = vars.index(x)
-        output[i] = values[i]
-    return output
+    # Create the default mapping.
+    mapping = dict([(v, 0) for v in self.vars])
+    # Write over with the used variables.
+    for k, v in zip(usedvars, values):
+      mapping[k] = v
+
+    return [mapping[v] for v in self.vars]
 
   def FilterSolve(self):
     vars = list(self.vars)
