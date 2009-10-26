@@ -106,7 +106,9 @@ cdef extern from "solve.h":
     solution *solution_create(problem *problem)
     void solution_delete(solution *solution)
     clause *clause_create(uint32_t rn, int rank, int *vars)
-    void clause_set(void *c, uint32_t rn, int rank, int *vars)
+    void clause_set(clause *c, uint32_t rn, int rank, int *vars)
+    void clause_set_weighted(clause *c, uint32_t rn, int rank, int *vars,
+                             int weight)
     void clause_delete(clause *clause)
     int fsat(problem *p, solution *s)
     problem *problem_reduce_all(problem *p, int var, int value)
@@ -392,7 +394,7 @@ def pascal(n, k):
 cdef class Problem:
     cdef problem *p
 
-    def __cinit__(self, vars, clauses):
+    def __cinit__(self, vars, clauses, weights=None):
         cdef clause *tmp
         cdef int i
         cdef int j
@@ -410,7 +412,10 @@ cdef class Problem:
             for v in c[1:]:
                 var_tmp[j] = vars.index(v)
                 j = j + 1
-            clause_set(tmp+i, c[0], j, var_tmp)
+            if weights:
+                clause_set_weighted(tmp+i, c[0], j, var_tmp, weights[i])
+            else:
+                clause_set(tmp+i, c[0], j, var_tmp)
             i = i + 1
 
         # Allocate spaces for the pointers to the variable names.
