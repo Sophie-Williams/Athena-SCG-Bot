@@ -34,7 +34,7 @@ so, 10010110 => 2^1 + 2^2 + 2^4 + 2^7
 The rank of a number is the number of variables a clause can have.
 
 """
-
+import copy
 
 cdef extern from "stdlib.h":
     ctypedef unsigned long int size_t
@@ -362,6 +362,18 @@ cdef sat(problem *p, uint32_t rn, int rank, int n, int k):
 
     return sum / pascal(n, rank)
 
+cdef appmean(problem *p, double x):
+    sum = 0.0
+    # t(R_i, p) * appsat(R_i, x)
+    return sum
+
+cdef appsat(uint32_t rn, int rank, double x):
+    cdef int j
+    sum = 0.0
+    # x
+    for 0 <= j <= rank:
+        sum += float(q(rn, rank, j)) * (x ** j) * (1 - x) ** (rank - j)
+    return sum
 
 def pascal(n, k):
     if (n <= 0 or k <= 0 or n == k):
@@ -412,6 +424,23 @@ cdef class Problem:
         self.p = <problem *> malloc(sizeof(problem))
         problem_set(self.p, c_vars, j, tmp, i)
 
+    def sat(self, assignment):
+        cdef solution *s
+
+        s = <solution *> malloc(sizeof(solution))
+        s[0].values = <int *> malloc(sizeof(int) * len(assignment))
+        s[0].size = len(assignment)
+
+        # copy the solution into C
+        for 0 <= i < len(assignment):
+            s[0].values[i] = assignment[i]
+
+        # find the number of clauses satisfied
+        satisfied = fsat(self.p, s)
+
+        solution_delete(s)
+        return satisfied
+
     def rn_counts(self):
         cdef int i
         
@@ -425,6 +454,47 @@ cdef class Problem:
                 counts[rn] = 1
 
         return counts
+
+    def lap(self, assignment, prob):
+        # TODO
+        # appmean(n_map(H, N), x)
+        # H = self, N = assignment, x = prob
+        pass
+
+    def maximal(self, assignment):
+        # TODO
+        # lap(H, N, mb) <= fsat(H, N)
+        # XXX mb = maximum bias?
+        return self.lap(assignment, 0.0)
+        pass
+
+    def n_map_all(self, assignment):
+        cdef int i
+        cdef int j
+        cdef int var_p
+        cdef clause *c
+
+        for 0 <= i < self.p[0].num_clauses:
+            # n_map only if the assignment is true
+            if assignment[i]:
+                c = self.p[0].clauses + i
+                # search the clause for the variable.
+                var_p = -1
+                for 0 <= j < c[0].rank:
+                    if c[0].vars[j] == i:
+                        var_p = j
+                        break
+
+                if var_p >= 0:
+                    c[0].rn = c_n_map(c[0].rn, c[0].rank, var_p)
+
+
+    def n_map_inverse(self, assignment, original):
+        """n-map-inverse(M, F, H) as a function that maps the assignment M
+        of formula F to a corresponding assignment of formula H
+        H = self, M = assignment, F = self
+        """
+        pass
 
     def evergreen(self):
         cdef problem *f_true
@@ -492,19 +562,21 @@ cdef class Problem:
 
     # aggressive-player(F)
     def evergreen_aggressive(self):
-        f0 = self
+        f0 = copy.copy(self)
         # M <- evergreen-player(F)
         m0 = self.evergreen()
-        # F' <- n-map(F, M )
-        f1 = self.n_map(m0)
+        # F' <- n-map(F, M)
+        f1 = copy.copy(self)
+        f1.n_map(m0)
         # M' <- evergreen-player(F')
         m1 = f1.evergreen()
         # M <- n-map-inverse(M', F', F)
         m0 = self.n_map_inverse(m1, f1)
         # while !maximal(M, F)
-        while not maximal(m0, f0):
+        while not maximal(f0, m0):
             # F'' <- n-map(F', M')
-            f2 = f1.n_map(m1)
+            f2 = copy.copy(f2)
+            f2.n_map(m1)
             # M'' <- evergreen-player(F'')
             m2 = f2.evergreen()
             # M <- n-map-inverse(M'', F'', F)
@@ -514,7 +586,7 @@ cdef class Problem:
             # F' <- F''
             f1 = f2
         # return M
-        return m
+        return m0
 
     def solve(self):
         cdef solution *s
@@ -549,4 +621,7 @@ cdef class Problem:
         return (f, ret)
 
     def __dealloc__(self):
-        problem_delete(self.p)
+        if self.p[0].vars:
+            problem_delete(self.p)
+        else:
+            problem_shallow_delete(self.p)
