@@ -69,6 +69,7 @@ cdef extern from "relation.h":
     uint32_t c_swap "swap" (uint32_t rn, int rank, int var_p1, int var_p2)
     int c_q "q" (uint32_t rn, int rank, int num_true_vars)
     uint32_t c_reduce "reduce" (uint32_t rn, int rank, int var_p, int value)
+    uint32_t c_n_map "n_map" (uint32_t rn, int rank, int var_p)
 
 
 cdef extern from "poly.h":
@@ -195,14 +196,7 @@ def n_map(uint32_t rn, int rank, int var_p):
     @return The number of the given relation with the specified variable
             nmapped.
     """
-    cdef uint32_t m0
-    cdef uint32_t m1
-    cdef uint32_t s
-
-    m0 = get_magic_number(rank, var_p, 0)
-    m1 = get_magic_number(rank, var_p, 1)
-    s = (1 << var_p)
-    return ((rn & m0) << s) | ((rn & m1) >> s)
+    return c_n_map(rn, rank, var_p)
 
 def reduce(uint32_t rn, int rank, int var_p, int value):
     """

@@ -210,3 +210,13 @@ renme(uint32_t rn, int rank, int perm_semantics, int *permutation) {
     return rn;
 }
 
+uint32_t
+n_map(uint32_t rn, int rank, int var_p) {
+    uint32_t m0;
+    uint32_t m1;
+    uint32_t s;
+    m0 = get_magic_number(rank, var_p, 0);
+    m1 = get_magic_number(rank, var_p, 1);
+    s = (1 << var_p);
+    return ((rn & m0) << s) | ((rn & m1) >> s);
+}

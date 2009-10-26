@@ -128,4 +128,16 @@ swap(uint32_t rn, int rank, int var_p1, int var_p2);
 uint32_t
 renme(uint32_t rn, int rank, int perm_semantics, int *permutation);
 
+/**
+ * Replaces the relation by its complement.
+ * For example, n_mapping x in Or(x,y,z) results in Or(!x,y,z).
+ * @param rn The relation number. 
+ * @param rank The rank of the given relation.
+ * @param var_p The position of the variable to be nmapped.
+ * @return The number of the given relation with the specified variable
+ *         nmapped.
+ */
+uint32_t
+n_map(uint32_t rn, int rank, int var_p);
+
 #endif
