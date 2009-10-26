@@ -163,6 +163,19 @@ variable_count(const problem * restrict p) {
     return var_count;
 }
 
+int
+problem_weight(const problem * restrict p) {
+    int i;
+    int weight;
+
+    weight = 0;
+    for (i = 0; i < p->num_clauses; i++) {
+        weight += (p->clauses + i)->weight;
+    }
+
+    return weight;
+}
+
 /**
  * @param p The original problem
  * @param var The variable in question.

@@ -111,6 +111,7 @@ cdef extern from "solve.h":
                              int weight)
     void clause_delete(clause *clause)
     int fsat(problem *p, solution *s)
+    int problem_weight(problem *p)
     problem *problem_reduce_all(problem *p, int var, int value)
     solution *solve_iterate(problem *p, solution *s)
     solution *__solve_iterate(problem *p, solution *s,
@@ -364,20 +365,6 @@ cdef sat(problem *p, uint32_t rn, int rank, int n, int k):
 
     return sum / pascal(n, rank)
 
-cdef appmean(problem *p, double x):
-    # TODO
-    sum = 0.0
-    # t(R_i, p) * appsat(R_i, x)
-    return sum
-
-cdef appsat(uint32_t rn, int rank, double x):
-    cdef int j
-    sum = 0.0
-    # x
-    for 0 <= j <= rank:
-        sum += float(q(rn, rank, j)) * (x ** j) * (1 - x) ** (rank - j)
-    return sum
-
 def pascal(n, k):
     if (n <= 0 or k <= 0 or n == k):
         return 1
@@ -430,6 +417,29 @@ cdef class Problem:
         self.p = <problem *> malloc(sizeof(problem))
         problem_set(self.p, c_vars, j, tmp, i)
 
+    def get_all(self):
+        cdef int i
+        cdef int j
+        cdef clause *c
+        vars = []
+        clauses = []
+
+        for 0 <= i < self.p[0].num_vars:
+            vars.append(self.p[0].vars[i])
+
+        for 0 <= i < self.p[0].num_clauses:
+            c = self.p[0].clauses + i
+            tmp = [c[0].rn]
+            for 0 <= j < c[0].rank:
+                tmp.append(vars[c[0].vars[j]])
+            clauses.append(tmp)
+
+        return vars, clauses
+
+    def copy(self):
+        vars, clauses = self.get_all()
+        return Problem(vars, clauses)
+
     def sat(self, assignment):
         """Return the number of satisfied clauses."""
         cdef solution *s
@@ -448,6 +458,9 @@ cdef class Problem:
         solution_delete(s)
         return satisfied
 
+    def fsat(self, assignment):
+        return float(self.sat(assignment)) / problem_weight(self.p)
+
     def rn_counts(self):
         cdef int i
         
@@ -462,44 +475,26 @@ cdef class Problem:
 
         return counts
 
-    def lap(self, assignment, prob):
-        # TODO
-        # appmean(n_map(H, N), x)
-        # H = self, N = assignment, x = prob
-        pass
-
-    def maximal(self, assignment):
-        # TODO
-        # lap(H, N, mb) <= fsat(H, N)
-        # XXX mb = maximum bias?
-        return self.lap(assignment, 0.0)
-
     def n_map_all(self, assignment):
         cdef int i
         cdef int j
+        cdef int k
         cdef int var_p
         cdef clause *c
 
-        for 0 <= i < self.p[0].num_clauses:
+        for 0 <= i < self.p[0].num_vars:
             # n_map only if the assignment is true
             if assignment[i]:
-                c = self.p[0].clauses + i
-                # search the clause for the variable.
-                var_p = -1
-                for 0 <= j < c[0].rank:
-                    if c[0].vars[j] == i:
-                        var_p = j
-                        break
-
-                if var_p >= 0:
-                    c[0].rn = c_n_map(c[0].rn, c[0].rank, var_p)
-
-    def n_map_inverse(self, assignment, original):
-        """n-map-inverse(M, F, H) as a function that maps the assignment M
-        of formula F to a corresponding assignment of formula H
-        H = self, M = assignment, F = self
-        """
-        pass
+                for 0 <= j < self.p[0].num_clauses:
+                    c = self.p[0].clauses + j
+                    # search the clause for the variable.
+                    var_p = -1
+                    for 0 <= k < c[0].rank:
+                        if c[0].vars[k] == i:
+                            var_p = k
+                            break
+                    if var_p >= 0:
+                        c[0].rn = c_n_map(c[0].rn, c[0].rank, var_p)
 
     def evergreen(self):
         cdef problem *f_true
@@ -552,33 +547,20 @@ cdef class Problem:
 
         return (self.sat(j), j)
 
-    # aggressive-player(F)
     def evergreen_aggressive(self):
-        f0 = copy.copy(self)
-        # M <- evergreen-player(F)
-        _, m0 = self.evergreen()
-        # F' <- n-map(F, M)
-        f1 = copy.copy(self)
-        f1.n_map(m0)
-        # M' <- evergreen-player(F')
-        _, m1 = f1.evergreen()
-        # M <- n-map-inverse(M', F', F)
-        m0 = self.n_map_inverse(m1, f1)
-        # while !maximal(M, F)
-        while not maximal(f0, m0):
-            # F'' <- n-map(F', M')
-            f2 = copy.copy(f2)
-            f2.n_map(m1)
-            # M'' <- evergreen-player(F'')
-            _, m2 = f2.evergreen()
-            # M <- n-map-inverse(M'', F'', F)
-            m0 = self.n_map_inverse(m2, f2)
-            # M' <- M''
-            m1 = m2
-            # F' <- F''
-            f1 = f2
-        # return M
-        return m0
+        import operator
+        f = self.copy()
+        A = [0] * (self.p[0].num_vars)
+        oldratio = -1
+        newratio = f.sat(A)
+        while oldratio != newratio:
+            oldratio = newratio
+            newratio, m = f.evergreen()
+            if newratio <= oldratio:
+                break
+            f.n_map_all(m)
+            A = map(operator.xor, A, m)
+        return self.sat(A), A
 
     def solve(self):
         cdef solution *s

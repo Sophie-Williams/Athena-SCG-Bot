@@ -158,6 +158,13 @@ int
 clause_is_satisfied(const clause * restrict c, const solution * restrict s);
 
 /**
+ * @param p The problem.
+ * @return The weight of the problem.
+ */
+int
+problem_weight(const problem * restrict p);
+
+/**
  * Reduce a problem by assigning a value to a variable.
  * @param p The original problem
  * @param var The variable in question.
