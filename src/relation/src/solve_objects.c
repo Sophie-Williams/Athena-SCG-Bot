@@ -1,3 +1,4 @@
+
 /* START constructor/destructor */
 
 problem *
@@ -119,7 +120,7 @@ solution_delete(solution *s) {
 }
 
 clause *
-clause_create(uint32_t rn, int rank, int *vars) {
+clause_create_real(uint32_t rn, int rank, int *vars, uint32_t weight) {
     clause *c;
     register size_t size;
 
@@ -137,7 +138,8 @@ clause_create(uint32_t rn, int rank, int *vars) {
 }
 
 void
-clause_set(clause *clause, uint32_t rn, int rank, int *vars) {
+clause_set_real(clause *clause, uint32_t rn, int rank, int *vars,
+                uint32_t weight) {
     register size_t size;
     assert(clause != NULL);
 
@@ -145,6 +147,7 @@ clause_set(clause *clause, uint32_t rn, int rank, int *vars) {
 
     clause->rn = rn;
     clause->rank = rank;
+    clause->weight = weight;
 
     /* Short-circuit if vars is not going to change. */
     if (vars == NULL)

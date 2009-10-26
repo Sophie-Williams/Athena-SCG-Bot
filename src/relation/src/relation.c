@@ -49,15 +49,14 @@ ones(uint32_t rn, int rank) {
     return __builtin_popcountl(rn & get_mask(rank));
 #else
     /* The slower version */
-    int c;
-    int i;
+    int count;
 
-    c = 0;
-    for (i = 0; i < (1 << rank); i++) {
-        if ((rn & (1 << i)) != 0)
-            c++;
+    while (rn) {
+        rn &= (rn - 1);
+        count++;
     }
-    return c;
+
+    return count;
 #endif
 }
 

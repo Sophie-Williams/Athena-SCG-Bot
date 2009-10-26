@@ -40,6 +40,8 @@ typedef struct __clause {
     int rank;
     /** The variables in the clause. Indirectly references a problem. */
     int *vars;
+    /** The weight of this clause. */
+    uint32_t weight;
 } clause;
 
 /**
@@ -115,14 +117,25 @@ solution_delete(solution *solution);
  * Create a clause.
  */
 clause *
-clause_create(uint32_t rn, int rank, int *vars);
+clause_create_real(uint32_t rn, int rank, int *vars, uint32_t weight);
+
+#define clause_create(rn, rank, vars) \
+        clause_create_real(rn, rank, vars, 1)
+#define clause_create_weighted(rn, rank, vars, weight) \
+        clause_create_real(rn, rank, vars, weight)
 
 /**
  * Set the values of a clause already in memory (or stack).
  * If vars == NULL, vars is not changed.
  */
 void
-clause_set(clause *clause, uint32_t rn, int rank, int *vars);
+clause_set_real(clause *clause, uint32_t rn, int rank, int *vars,
+                uint32_t weight);
+
+#define clause_set(clause, rn, rank, vars) \
+        clause_set_real(clause, rn, rank, vars, 1)
+#define clause_set_weighted(clause, rn, rank, vars, weight) \
+        clause_set_real(clause, rn, rank, vars, weight)
 
 /**
  * Delete a clause.
