@@ -553,14 +553,22 @@ cdef class Problem:
         A = [0] * (self.p[0].num_vars)
         oldratio = -1
         newratio = f.sat(A)
+        max = [-1, None]
+        count = 0
         while oldratio != newratio:
             oldratio = newratio
             newratio, m = f.evergreen()
+            # Keep track of the maximum
+            if max[0] < newratio:
+                max = [newratio, m]
+            # Search deeper
             if newratio <= oldratio:
-                break
+                count += 1
+                if count > 3:
+                    break
             f.n_map_all(m)
             A = map(operator.xor, A, m)
-        return self.sat(A), A
+        return max[0], max[1]
 
     def solve(self):
         cdef solution *s
