@@ -363,6 +363,7 @@ cdef sat(problem *p, uint32_t rn, int rank, int n, int k):
     return sum / pascal(n, rank)
 
 cdef appmean(problem *p, double x):
+    # TODO
     sum = 0.0
     # t(R_i, p) * appsat(R_i, x)
     return sum
@@ -425,6 +426,7 @@ cdef class Problem:
         problem_set(self.p, c_vars, j, tmp, i)
 
     def sat(self, assignment):
+        """Return the number of satisfied clauses."""
         cdef solution *s
 
         s = <solution *> malloc(sizeof(solution))
@@ -466,7 +468,6 @@ cdef class Problem:
         # lap(H, N, mb) <= fsat(H, N)
         # XXX mb = maximum bias?
         return self.lap(assignment, 0.0)
-        pass
 
     def n_map_all(self, assignment):
         cdef int i
@@ -487,7 +488,6 @@ cdef class Problem:
 
                 if var_p >= 0:
                     c[0].rn = c_n_map(c[0].rn, c[0].rank, var_p)
-
 
     def n_map_inverse(self, assignment, original):
         """n-map-inverse(M, F, H) as a function that maps the assignment M
@@ -545,31 +545,18 @@ cdef class Problem:
         # free the last `f` we don't need it.
         problem_shallow_delete(f)
 
-        s = <solution *> malloc(sizeof(solution))
-        s[0].values = <int *> malloc(sizeof(int) * len(j))
-        s[0].size = len(j)
-
-        # copy the solution into C
-        for 0 <= i < len(j):
-            s[0].values[i] = j[i]
-
-        # find the number of clauses satisfied
-        satisfied = fsat(self.p, s)
-
-        solution_delete(s)
-
-        return (satisfied, j)
+        return (self.sat(j), j)
 
     # aggressive-player(F)
     def evergreen_aggressive(self):
         f0 = copy.copy(self)
         # M <- evergreen-player(F)
-        m0 = self.evergreen()
+        _, m0 = self.evergreen()
         # F' <- n-map(F, M)
         f1 = copy.copy(self)
         f1.n_map(m0)
         # M' <- evergreen-player(F')
-        m1 = f1.evergreen()
+        _, m1 = f1.evergreen()
         # M <- n-map-inverse(M', F', F)
         m0 = self.n_map_inverse(m1, f1)
         # while !maximal(M, F)
@@ -578,7 +565,7 @@ cdef class Problem:
             f2 = copy.copy(f2)
             f2.n_map(m1)
             # M'' <- evergreen-player(F'')
-            m2 = f2.evergreen()
+            _, m2 = f2.evergreen()
             # M <- n-map-inverse(M'', F'', F)
             m0 = self.n_map_inverse(m2, f2)
             # M' <- M''

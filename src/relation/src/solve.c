@@ -31,15 +31,16 @@ int
 fsat(const problem * restrict problem, const solution * restrict solution) {
     int i;
     int count = 0;
+    clause *c;
 
     assert(problem != NULL);
     assert(solution != NULL);
 
     /* for c in clauses */
     for (i = 0; i < problem->num_clauses; i++) {
-        /* copy the values from the clause */
-        if (clause_is_satisfied(problem->clauses+i, solution)) {
-            count++;
+        c = problem->clauses + i;
+        if (clause_is_satisfied(c, solution)) {
+            count += c->weight;
         }
     }
     return count;
