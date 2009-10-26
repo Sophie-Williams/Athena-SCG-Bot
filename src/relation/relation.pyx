@@ -496,6 +496,32 @@ cdef class Problem:
 
         return (satisfied, j)
 
+    # aggressive-player(F)
+    def evergreen_aggressive(self):
+        f0 = self
+        # M <- evergreen-player(F)
+        m0 = self.evergreen()
+        # F' <- n-map(F, M )
+        f1 = self.n_map(m0)
+        # M' <- evergreen-player(F')
+        m1 = f1.evergreen()
+        # M <- n-map-inverse(M', F', F)
+        m0 = self.n_map_inverse(m1, f1)
+        # while !maximal(M, F)
+        while not maximal(m0, f0):
+            # F'' <- n-map(F', M')
+            f2 = f1.n_map(m1)
+            # M'' <- evergreen-player(F'')
+            m2 = f2.evergreen()
+            # M <- n-map-inverse(M'', F'', F)
+            m0 = self.n_map_inverse(m2, f2)
+            # M' <- M''
+            m1 = m2
+            # F' <- F''
+            f1 = f2
+        # return M
+        return m
+
     def solve(self):
         cdef solution *s
         cdef int i
