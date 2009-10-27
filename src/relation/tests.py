@@ -141,6 +141,23 @@ class TestRelation(unittest.TestCase):
     self.assertEqual(f(5, 4), 0b01101000100000001000000000000000)
     self.assertEqual(f(5, 5), 0b10000000000000000000000000000000)
 
+  def test_reduce_rns(self):
+    f = relation.reduce_rns
+    self.assertEqual(f([2, 22]), 2)
+    self.assertEqual(f([22, 2]), 2)
+    self.assertEqual(f([4, 22]), 4)
+    self.assertEqual(f([22, 4]), 4)
+    self.assertEqual(f([6, 22]), 6)
+    self.assertEqual(f([22, 6]), 6)
+    self.assertEqual(f([16, 22]), 16)
+    self.assertEqual(f([22, 16]), 16)
+    self.assertEqual(f([18, 22]), 18)
+    self.assertEqual(f([22, 18]), 18)
+    self.assertEqual(f([20, 22]), 20)
+    self.assertEqual(f([22, 20]), 20)
+    self.assertEqual(f([22, 22]), 22)
+    self.assertEqual(f([22, 6, 2]), 2)
+
   def test_break_even(self):
     f = relation.break_even
     for rn in range(1, 256, 2):

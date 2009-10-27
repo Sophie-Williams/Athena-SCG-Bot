@@ -34,7 +34,7 @@ so, 10010110 => 2^1 + 2^2 + 2^4 + 2^7
 The rank of a number is the number of variables a clause can have.
 
 """
-import copy
+import itertools
 
 cdef extern from "stdlib.h":
     ctypedef unsigned long int size_t
@@ -70,6 +70,7 @@ cdef extern from "relation.h":
     int c_q "q" (uint32_t rn, int rank, int num_true_vars)
     uint32_t c_reduce "reduce" (uint32_t rn, int rank, int var_p, int value)
     uint32_t c_n_map "n_map" (uint32_t rn, int rank, int var_p)
+    int c_implies "implies" (uint32_t a, uint32_t b)
 
 
 cdef extern from "poly.h":
@@ -328,6 +329,18 @@ def x_true_vars(int rank, int num_true_vars):
     """
     return TRUE_VARS[rank][num_true_vars]
 
+def implies(uint32_t a, uint32_t b):
+    return c_implies(a, b)
+
+def reduce_rns(rns):
+    """Reduce the relation numbers in the given list"""
+    for rn in rns:
+        for x in rns:
+            if not implies(rn, x):
+                break
+        else:
+            return rn
+    return None
 
 # rank should be 3 for now.
 def break_even(uint32_t rn, int rank):
