@@ -163,7 +163,8 @@ class Game(object):
     for problem in self.context.provided:
       self.AddReply('solve', problem.Solve())
       self.context.endbalance += problem.profit
-    logging.info('Solves took %s seconds' % (time.time() - solvestart))
+    if self.CountReplyType(['solve']):
+      logging.info('Solves took %s seconds' % (time.time() - solvestart))
 
   def GenerateReply(self):
     """Generate a string reply packet for the administrator."""
