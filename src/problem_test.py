@@ -5,10 +5,10 @@ import problem
 
 class ClauseTestCase(unittest.TestCase):
   def setUp(self):
-    self.c = problem.Clause(109, ['v1', 'v2', 'v3'])
-    self.d = problem.Clause(109, ['v1', 'v2', 'v3'])
-    self.e = problem.Clause(110, ['v1', 'v2', 'v3'])
-    self.f = problem.Clause(109, ['v0', 'v2', 'v3'])
+    self.c = problem.Clause(109, 1, ['v1', 'v2', 'v3'])
+    self.d = problem.Clause(109, 1, ['v1', 'v2', 'v3'])
+    self.e = problem.Clause(110, 1, ['v1', 'v2', 'v3'])
+    self.f = problem.Clause(109, 1, ['v0', 'v2', 'v3'])
 
   def tearDown(self):
     del self.c
@@ -44,16 +44,16 @@ class ClauseTestCase(unittest.TestCase):
     self.assertEqual(str(self.f), repr(self.f))
 
   def testGetTuple(self):
-    self.assertEqual(self.c.GetTuple(), (109, 'v1', 'v2', 'v3'))
-    self.assertEqual(self.d.GetTuple(), (109, 'v1', 'v2', 'v3'))
-    self.assertEqual(self.e.GetTuple(), (110, 'v1', 'v2', 'v3'))
-    self.assertEqual(self.f.GetTuple(), (109, 'v0', 'v2', 'v3'))
+    self.assertEqual(self.c.GetTuple(), (109, 1, 'v1', 'v2', 'v3'))
+    self.assertEqual(self.d.GetTuple(), (109, 1, 'v1', 'v2', 'v3'))
+    self.assertEqual(self.e.GetTuple(), (110, 1, 'v1', 'v2', 'v3'))
+    self.assertEqual(self.f.GetTuple(), (109, 1, 'v0', 'v2', 'v3'))
 
   def testGetProvideBlob(self):
-    self.assertEqual(self.c.GetProvideBlob(), '(109 v1 v2 v3 )')
-    self.assertEqual(self.d.GetProvideBlob(), '(109 v1 v2 v3 )')
-    self.assertEqual(self.e.GetProvideBlob(), '(110 v1 v2 v3 )')
-    self.assertEqual(self.f.GetProvideBlob(), '(109 v0 v2 v3 )')
+    self.assertEqual(self.c.GetProvideBlob(), '(109 {1} v1 v2 v3 )')
+    self.assertEqual(self.d.GetProvideBlob(), '(109 {1} v1 v2 v3 )')
+    self.assertEqual(self.e.GetProvideBlob(), '(110 {1} v1 v2 v3 )')
+    self.assertEqual(self.f.GetProvideBlob(), '(109 {1} v0 v2 v3 )')
 
 
 class ProblemTestCase(unittest.TestCase):
@@ -64,16 +64,16 @@ class ProblemTestCase(unittest.TestCase):
     #         (109 v3 v4 v0 ) (109 v1 v2 v3 ) (109 v0 v1 v2 ) (109 v4 v0 v1 )
     #         501 102 (109 ) 1.0]
     clauses = []
-    clauses.append(problem.Clause(109, ['v4', 'v0', 'v1']))
-    clauses.append(problem.Clause(109, ['v1', 'v2', 'v3']))
-    clauses.append(problem.Clause(109, ['v4', 'v0', 'v1']))
-    clauses.append(problem.Clause(109, ['v2', 'v3', 'v4']))
-    clauses.append(problem.Clause(109, ['v2', 'v3', 'v4']))
-    clauses.append(problem.Clause(109, ['v1', 'v2', 'v3']))
-    clauses.append(problem.Clause(109, ['v3', 'v4', 'v0']))
-    clauses.append(problem.Clause(109, ['v1', 'v2', 'v3']))
-    clauses.append(problem.Clause(109, ['v0', 'v1', 'v2']))
-    clauses.append(problem.Clause(109, ['v4', 'v0', 'v1']))
+    clauses.append(problem.Clause(109, list_of_vars=['v4', 'v0', 'v1']))
+    clauses.append(problem.Clause(109, list_of_vars=['v1', 'v2', 'v3']))
+    clauses.append(problem.Clause(109, list_of_vars=['v4', 'v0', 'v1']))
+    clauses.append(problem.Clause(109, list_of_vars=['v2', 'v3', 'v4']))
+    clauses.append(problem.Clause(109, list_of_vars=['v2', 'v3', 'v4']))
+    clauses.append(problem.Clause(109, list_of_vars=['v1', 'v2', 'v3']))
+    clauses.append(problem.Clause(109, list_of_vars=['v3', 'v4', 'v0']))
+    clauses.append(problem.Clause(109, list_of_vars=['v1', 'v2', 'v3']))
+    clauses.append(problem.Clause(109, list_of_vars=['v0', 'v1', 'v2']))
+    clauses.append(problem.Clause(109, list_of_vars=['v4', 'v0', 'v1']))
     self.clauses = clauses
     self.pblm = problem.Problem(100, ['v0', 'v1', 'v2', 'v3', 'v4'], [], 501,
                                 102, 109, 1.0)
@@ -97,16 +97,16 @@ class ProblemTestCase(unittest.TestCase):
 
   def test_IsClauseSat(self):
     clauses = []
-    clauses.append(problem.Clause(214, ['v0', 'v1', 'v2']))
-    clauses.append(problem.Clause(214, ['v1', 'v2', 'v3']))
-    clauses.append(problem.Clause(214, ['v4', 'v0', 'v1']))
-    clauses.append(problem.Clause(214, ['v1', 'v2', 'v3']))
-    clauses.append(problem.Clause(214, ['v3', 'v4', 'v0']))
-    clauses.append(problem.Clause(214, ['v2', 'v2', 'v4']))
-    clauses.append(problem.Clause(214, ['v1', 'v2', 'v3']))
-    clauses.append(problem.Clause(214, ['v0', 'v1', 'v2']))
-    clauses.append(problem.Clause(214, ['v2', 'v3', 'v4']))
-    clauses.append(problem.Clause(214, ['v3', 'v4', 'v0']))
+    clauses.append(problem.Clause(214, 1, ['v0', 'v1', 'v2']))
+    clauses.append(problem.Clause(214, 1, ['v1', 'v2', 'v3']))
+    clauses.append(problem.Clause(214, 1, ['v4', 'v0', 'v1']))
+    clauses.append(problem.Clause(214, 1, ['v1', 'v2', 'v3']))
+    clauses.append(problem.Clause(214, 1, ['v3', 'v4', 'v0']))
+    clauses.append(problem.Clause(214, 1, ['v2', 'v2', 'v4']))
+    clauses.append(problem.Clause(214, 1, ['v1', 'v2', 'v3']))
+    clauses.append(problem.Clause(214, 1, ['v0', 'v1', 'v2']))
+    clauses.append(problem.Clause(214, 1, ['v2', 'v3', 'v4']))
+    clauses.append(problem.Clause(214, 1, ['v3', 'v4', 'v0']))
     pblm = problem.Problem(100, ['v0', 'v1', 'v2', 'v3', 'v4'], [], 501,
                            102, 214, 1.0)
     for clause in clauses:

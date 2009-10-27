@@ -62,7 +62,10 @@ List = ZeroOrMore
 PlayerID = Integer
 Var = Combine('v'+Integer)
 
-Clause = Group(wrap(Integer("relation_number") + List(Var), "(", ")"))
+Clause = Group(wrap(Integer("relation_number") +
+                    wrap(Integer('weight'), '{', '}') + List(Var), "(", ")"))
+
+GameType = Or([Literal('SlowPitch')])
 
 Problem = Group(Group(List(Var)) + Group(List(Clause)))
 ProblemType = wrap(List(Integer("pt")), "(", ")")
@@ -86,7 +89,7 @@ Challenge = ( Or([OfferedChallenge, AcceptedChallenge, ProvidedChallenge,
                   SolvedChallenge]) )
 
 Objective = Literal("[]")
-Predicate = wrap(Integer("maxClauses"))
+Predicate = GameType + wrap(Integer("maxClauses"))
 ChallengeList = wrap(List(Challenge), "(", ")")
 
 TrueFalse = Or([Literal('true'), Literal('false')])
@@ -120,12 +123,16 @@ Config = (sup_lit("config") + wrap(L
           + KeyAndValue("turnduration", Integer) + L
           + KeyAndValue("mindecrement", Double) + L
           + KeyAndValue("initacc", Double) + L
-          + KeyAndValue("maxOffers", Integer) + L
+          + KeyAndValue("maxProposals", Integer) + L
+          + KeyAndValue("minProposals", Integer) + L
+          + KeyAndValue("minPropositions", Integer) + L
           + KeyAndValue("objective", Objective) + L
           + KeyAndValue("predicate", Predicate) + L
           + KeyAndValue("numrounds", Integer) + L
           + KeyAndValue("profitfactor", Double) + L
-          + KeyAndValue("otrounds", Integer)
+          + KeyAndValue("otrounds", Integer) + L
+          + KeyAndValue("hasSecrets", TrueFalse) + L
+          + KeyAndValue("secretRatio", Double) + L
          ))
 
 # Describes the player context syntax (sent by the admin)

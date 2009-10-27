@@ -38,6 +38,7 @@ class TestSolve(unittest.TestCase):
 
     for rn in range(0, 128, 2):
       vars, clauses = gen.gen_problem(rn, 18)
+      print clauses
       c_p = relation.Problem(vars, clauses)
       s = time.time()
       fsat, values = c_p.solve()

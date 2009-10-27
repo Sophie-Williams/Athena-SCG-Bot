@@ -6,21 +6,29 @@ import problem
 class Config(object):
 
   def __init__(self, gamekind=None, turnduration=None, mindecrement=None,
-               initacc=None, maxOffers=None, objective=None, predicate=None,
+               initacc=None, maxProposals=0, minProposals=0,
+               minPropositions=0, objective=None, predicate=None,
                numrounds=None, profitfactor=None, otrounds=None,
-               maxClauses=None):
+               maxClauses=0, hasSecrets=False, secretRatio=0):
     """A Config object with type enforcement."""
     self.gamekind = gamekind
     self.turnduration = int(turnduration)
     self.mindecrement = float(mindecrement)
     self.initacc = float(initacc)
-    self.maxoffers = int(maxOffers)
+    self.maxoffers = self.maxproposals = int(maxProposals)
+    self.minproposals = int(minProposals)
+    self.minpropositions = int(minPropositions)
     self.maxclauses = int(maxClauses)
     self.objective = objective
     self.predicate = predicate
     self.numrounds = int(numrounds)
     self.profitfactor = float(profitfactor)
     self.otrounds = int(otrounds)
+    if hasSecrets == 'true':
+      self.hassecrets = True
+    else:
+      self.hassecrets = False
+    self.secretratio = float(secretRatio)
 
   @classmethod
   def FromString(cls, input):

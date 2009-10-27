@@ -1,0 +1,16 @@
+config[ 
+        gamekind: "CSP"
+        turnduration: 60
+        mindecrement: 0.01
+        initacc: 100.0
+        maxProposals: 5
+        minProposals: 1
+        minPropositions: 1
+        objective: []
+        predicate: SlowPitch [2000]
+        numrounds: 30
+        profitfactor: 2.0
+        otrounds: 2
+        hasSecrets: true
+        secretRatio: 0.2
+      ]

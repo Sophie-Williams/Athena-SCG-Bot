@@ -391,12 +391,12 @@ cdef class Problem:
         tmp = <clause *> malloc(sizeof(clause) * len(clauses))
 
         # For all clauses, which is a list of the form
-        # [ <relation_number>, <var>, ... ]
+        # [ <relation_number>, weight, <var>, ... ]
         # set it at the index `i'
         i = 0
         for c in clauses:
             j = 0
-            for v in c[1:]:
+            for v in c[2:]:
                 var_tmp[j] = vars.index(v)
                 j = j + 1
             if weights:

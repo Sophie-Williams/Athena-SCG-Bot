@@ -4,12 +4,16 @@ context[
     turnduration: 60
     mindecrement: 0.01
     initacc: 100.0
-    maxOffers: 5
+    maxProposals: 5
+    minProposals: 1
+    minPropositions: 1
     objective: []
-    predicate: [2000]
+    predicate: SlowPitch[2000]
     numrounds: 20
     profitfactor: 1.0
     otrounds: 2
+    hasSecrets: true
+    secretRatio: 0.3
 ]
     100
     95.03029999999998

@@ -9,7 +9,6 @@ import constants
 import csptree
 import proxysolver
 import relation
-import relation.gen
 
 gflags.DEFINE_enum('solver', 'c', ['proxy', 'python', 'c'],
                    'Problem solver to use')
@@ -25,16 +24,21 @@ FLAGS = gflags.FLAGS
 class Clause(object):
   """Represents a CSP problem clause."""
 
-  def __init__(self, number, list_of_vars):
+  def __init__(self, number, weight=1, list_of_vars=None):
     """Initialize a clause.
 
     :param number: (int) problem (relation) number
     :param list_of_vars: (list) list of clause variables like v1, v2, v3
     """
     self.problemnumber = int(number)
-    self.vars = list_of_vars
+    self.weight = weight
+    if not list_of_vars:
+      self.vars = []
+    else:
+      self.vars = list_of_vars
 
   def __eq__(self, other):
+    """Is this equal to other?."""
     try:
       return (self.vars == other.vars
               and self.problemnumber == other.problemnumber)
@@ -55,7 +59,7 @@ class Clause(object):
     Returns:
       A tuple in the form (problemnumber, var1, var2, var3, ...)
     """
-    return tuple([self.problemnumber]+self.vars)
+    return tuple([self.problemnumber, self.weight]+self.vars)
 
   def GetProvideBlob(self):
     """Get a provide[] blob representing this clause.
@@ -64,7 +68,8 @@ class Clause(object):
     Returns:
       A string in the form "(problemnumber var1 var2 var3 ...)"
     """
-    return '(%d %s )' % (self.problemnumber, ' '.join(self.vars))
+    return '(%d {%d} %s )' % (self.problemnumber, self.weight,
+                              ' '.join(self.vars))
 
 class Problem(object):
   """Describes a problem instance."""
@@ -150,11 +155,11 @@ class Problem(object):
     c_p = relation.Problem(tuple(vars),
                           [x.GetTuple() for x in self.clauses])
     if len(vars) <= ITERLIMIT: # XXX see at the top.
-      logging.debug('Using Iterative Solve')
+      logging.debug('Using Iowa Lime Sparrow Solver')
       fsat, values = c_p.solve()
     else:
-      logging.debug('Using Contracted Relative Solve')
-      fsat, values = c_p.evergreen() # w00t
+      logging.debug('Using Alabama Blue Turtle Solver')
+      fsat, values = c_p.evergreen_aggressive()
     if filtered:
       values = self.TransposeValues(vars, values)
     return fsat, values
@@ -319,7 +324,8 @@ class Problem(object):
     numvars, clausegenerator, varslist = cls.GetVarsGenerator(problemnumber)
     p = cls(0, varslist, [], offerid, 0, problemnumber, 0, kind)
     for i, j, k in clausegenerator(range(numvars), 3):
-      p.AddClause(Clause(problemnumber, ['v%d' % x for x in [i, j, k]]))
+      p.AddClause(Clause(problemnumber,
+                         list_of_vars=['v%d' % x for x in [i, j, k]]))
     return p
 
   @classmethod
