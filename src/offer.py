@@ -128,7 +128,7 @@ class Offer(object):
 
   @classmethod
   def GetGenerateOffer(cls, ouroffered, theiroffered, justoffered, 
-                       problemnumber):
+                       problemnumber, kind='all'):
     if problemnumber in ouroffered:
       return False
     elif problemnumber in theiroffered:
@@ -136,23 +136,23 @@ class Offer(object):
     elif problemnumber in justoffered:
       return False
     else:
-      o = cls(-1, -1, problemnumber, -1)
+      o = cls(-1, -1, problemnumber, -1, kind=kind)
       price = o.SetPrice()
       return o
 
   @classmethod
-  def GenerateOffer(cls, ouroffered, theiroffered, justoffered):
+  def GenerateOffer(cls, ouroffered, theiroffered, justoffered, kind='all'):
     goodones = filter(lambda x: not x%2, range(128))
     badones = filter(lambda x: x%2, range(128)) + range(128,256)
     random.shuffle(goodones)
     for problemnumber in goodones:
       x = cls.GetGenerateOffer(ouroffered, theiroffered, justoffered,
-                               problemnumber)
+                               problemnumber, kind=kind)
       if x:
         return x
     for problemnumber in badones:
       x = cls.GetGenerateOffer(ouroffered, theiroffered, justoffered,
-                               problemnumber)
+                               problemnumber, kind=kind)
       if x:
         return x
 

@@ -22,7 +22,7 @@ import playercontext
 import problem
 import relation
 
-gflags.DEFINE_integer('offercount', 1,
+gflags.DEFINE_integer('offercount', 2,
                       'New offers to generate each round')
 FLAGS = gflags.FLAGS
 
@@ -90,16 +90,33 @@ class Game(object):
     logging.debug('Accepted: %s' % str(self.context.accepted))
     logging.debug('Provided: %s' % str(self.context.provided))
 
+  def MetPercentOfferedSecrets(self, secretcount):
+    if not self.context.config.hassecrets:
+      return True
+    else:
+      if not self.CountReplyType(['offer']):
+        return False
+      else:
+        perc = float(secretcount) / float(self.CountReplyType(['offer']))
+        return not perc < self.context.config.secretratio
+
   def OfferTask(self):
     logging.info('Running OfferTask')
     ouroffer    = [x.problemnumber for x in self.context.our_offered]
     theiroffer  = [x.problemnumber for x in self.context.their_offered]
     justoffered = []
+    secretcount = 0
     for x in range(FLAGS.offercount):
-      o = offer.Offer.GenerateOffer(ouroffer, theiroffer, justoffered)
+      if not self.MetPercentOfferedSecrets(secretcount):
+        kind = 'secret'
+        secretcount += 1
+      else:
+        kind = 'all'
+      o = offer.Offer.GenerateOffer(ouroffer, theiroffer, justoffered, kind)
       logging.debug('Offering %d for %0.8f' % (o.problemnumber, o.price))
       justoffered.append(o.problemnumber)
       self.AddReply('offer', o.GetOffer())
+
       if self.ReachedMaxProposals():
         break
   
