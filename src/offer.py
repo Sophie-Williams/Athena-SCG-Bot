@@ -18,6 +18,9 @@ class Offer(object):
     self.offerid = int(offerid)
     self.playerid = int(playerid)
     self.problemnumbers = map(int, list(problemnumbers))
+    reduced = relation.reduce_rns(self.problemnumbers)
+    if reduced:
+      self.problemnumbers = [reduced]
     self.price = float(price)
     self.actedon = False
     self.bep = relation.break_even(self.problemnumbers[0], 3)
@@ -45,8 +48,7 @@ class Offer(object):
       return self.IsGoodBuyAll()
 
   def IsGoodBuySecret(self):
-    #XXX: TODO: Fix this shit.
-    return True
+    return 0 not in self.problemnumbers
 
   def IsGoodBuyAll(self):
     if self.problemnumbers[0] <= 0:

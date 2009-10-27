@@ -31,7 +31,7 @@ class Clause(object):
     :param list_of_vars: (list) list of clause variables like v1, v2, v3
     """
     self.problemnumber = int(number)
-    self.weight = weight
+    self.weight = int(weight)
     if not list_of_vars:
       self.vars = []
     else:
