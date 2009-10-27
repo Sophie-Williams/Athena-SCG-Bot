@@ -142,7 +142,7 @@ class Game(object):
     if not self.CountReplyType(['accept']):
       for offer in self.context.their_offered:
         logging.info('Reoffering their id %d' % offer.offerid)
-        self.replies.append(offer.GetReoffer())
+        self.AddReply('reoffer', offer.GetReoffer())
         if self.ReachedMaxProposals():
           break
 
