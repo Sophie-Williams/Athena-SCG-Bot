@@ -14,20 +14,20 @@ gflags.DEFINE_float('mindecrement', 0.01,
 FLAGS = gflags.FLAGS
 
 class Offer(object):
-  def __init__(self, offerid, playerid, problemnumber, price, kind='all'):
+  def __init__(self, offerid, playerid, problemnumbers, price, kind='all'):
     self.offerid = int(offerid)
     self.playerid = int(playerid)
-    self.problemnumber = int(problemnumber)
+    self.problemnumbers = map(int, list(problemnumbers))
     self.price = float(price)
     self.actedon = False
-    self.bep = relation.break_even(self.problemnumber, 3)
+    self.bep = relation.break_even(self.problemnumbers[0], 3)
     self.potential = 0
     self.kind = kind
   
   def __str__(self):
     return 'Offer(id=%s, from=%s, problem=%s, price=%s)' % (self.offerid,
                                                             self.playerid,
-                                                            self.problemnumber,
+                                                            self.problemnumbers,
                                                             self.price)
   def __repr__(self):
     return str(self)
@@ -46,17 +46,17 @@ class Offer(object):
 
   def IsGoodBuySecret(self):
     # This is really ballsy, as they say.
-    return True
+    return 0 not in self.problemnumbers
 
   def IsGoodBuyAll(self):
-    if self.problemnumber <= 0:
+    if self.problemnumbers[0] <= 0:
       return False
-    if self.problemnumber % 2 or self.problemnumber >= 128:
+    if self.problemnumbers[0] % 2 or self.problemnumbers[0] >= 128:
       return True
     if self.bep == 1:
       return True
    
-    ptv = problem.Problem.GetBestPriceAndType(self.problemnumber)
+    ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])
     if ptv:
       return self.price <= ptv[0]
     else:
@@ -66,7 +66,7 @@ class Offer(object):
     new_price = self.price - mindecrement
 
     probably_solvable = False
-    ptv = problem.Problem.GetBestPriceAndType(self.problemnumber)
+    ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])
     if ptv:
       probably_solvable = new_price < ptv[0]
     return (self.price - mindecrement) < 0 or probably_solvable
@@ -77,7 +77,7 @@ class Offer(object):
     Args:
        decrement: (float) Reoffer at the current price minus this number
     """
-    ptv = problem.Problem.GetBestPriceAndType(self.problemnumber)
+    ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])
     new_price = self.price - decrement
     if ptv:
       gen_price = ptv[0] + 0.5 * decrement
@@ -96,32 +96,33 @@ class Offer(object):
     """Generate an OfferTrans from this offer.
     Note: -1 is a fake constant, it gets replaced by the Admin.
     """
-    return ('offer[-1 %s ( %d) %0.8f]'
-            % (self.kind, self.problemnumber, self.price))
+    return ('offer[-1 %s ( %s) %0.8f]'
+            % (self.kind, ' '.join(map(str, self.problemnumbers)), self.price))
 
   def SetPrice(self, price=None, markup=0.09):
     """Set or Generate a price."""
     apply_markup = True
     if price is None:
-      ptv = problem.Problem.GetBestPriceAndType(self.problemnumber)
+      ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])
       if ptv:
         price = ptv[0] + 0.5 * FLAGS.mindecrement
         apply_markup = False
       else:
-        price = relation.break_even(self.problemnumber, 3)
+        price = relation.break_even(self.problemnumbers[0], 3)
     if apply_markup:
       price += markup
     if price > 1:
       price = 1
     self.price = price
-    logging.debug('Got problem number %d to generate price @ %s'
-                  % (self.problemnumber, self.price))
+    logging.debug('Got problem number %s to generate price @ %s'
+                  % (self.problemnumbers, self.price))
     return price
 
   @classmethod
   def GetOfferList(cls, parsedlist):
     outputlist = []
     while parsedlist:
+      print parsedlist[:5]
       outputlist.append(cls(*parsedlist[:5]))
       parsedlist = parsedlist[5:]
     return outputlist
@@ -136,7 +137,7 @@ class Offer(object):
     elif problemnumber in justoffered:
       return False
     else:
-      o = cls(-1, -1, problemnumber, -1, kind=kind)
+      o = cls(-1, -1, [problemnumber], -1, kind=kind)
       price = o.SetPrice()
       return o
 
@@ -157,18 +158,18 @@ class Offer(object):
         return x
 
 class AcceptedChallenge(object):
-  def __init__(self, acceptor, offerid, provider, problemnumber, price, kind):
+  def __init__(self, acceptor, offerid, provider, problemnumbers, price, kind):
     self.acceptor = int(acceptor)
     self.offerid = int(offerid)
     self.provider = int(provider)
-    self.problemnumber = int(problemnumber)
+    self.problemnumbers = map(int, list(problemnumbers))
     self.price = float(price)
     self.kind = kind
 
   def __str__(self):
     return ('AcceptedChallenge(acceptor=%s, offerid=%s, provider=%s,'
             ' problem=%s, price=%s)' % (self.acceptor, self.offerid,
-                                        self.provider, self.problemnumber,
+                                        self.provider, self.problemnumbers,
                                         self.price))
   def __repr__(self):
     return str(self)

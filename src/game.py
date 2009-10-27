@@ -102,8 +102,8 @@ class Game(object):
 
   def OfferTask(self):
     logging.info('Running OfferTask')
-    ouroffer    = [x.problemnumber for x in self.context.our_offered]
-    theiroffer  = [x.problemnumber for x in self.context.their_offered]
+    ouroffer    = [x.problemnumbers[0] for x in self.context.our_offered]
+    theiroffer  = [x.problemnumbers[0] for x in self.context.their_offered]
     justoffered = []
     secretcount = 0
     for x in range(FLAGS.offercount):
@@ -113,8 +113,8 @@ class Game(object):
       else:
         kind = 'all'
       o = offer.Offer.GenerateOffer(ouroffer, theiroffer, justoffered, kind)
-      logging.debug('Offering %d for %0.8f' % (o.problemnumber, o.price))
-      justoffered.append(o.problemnumber)
+      logging.debug('Offering %s for %0.8f' % (o.problemnumbers, o.price))
+      justoffered.append(o.problemnumbers[0])
       self.AddReply('offer', o.GetOffer())
 
       if self.ReachedMaxProposals():
@@ -152,8 +152,8 @@ class Game(object):
     for accepted in self.context.accepted:
       if self.context.playerid != accepted.provider:
         continue
-      logging.info('Providing number %d for offer %d'
-                   % (accepted.problemnumber, accepted.offerid))
+      logging.info('Providing number %s for offer %d'
+                   % (accepted.problemnumbers, accepted.offerid))
       p = problem.Problem.GenerateFromAccepted(accepted)
       self.AddReply('provide', p.GetProvide())
 

@@ -65,10 +65,11 @@ Var = Combine('v'+Integer)
 Clause = Group(wrap(Integer("relation_number") +
                     wrap(Integer('weight'), '{', '}') + List(Var), "(", ")"))
 
-GameType = Or([Literal('SlowPitch')])
+GameType = Or([Literal('Baseball'), Literal('TBall'), 
+               Literal('SlowPitch'), Literal('FastPitch')])
 
 Problem = Group(Group(List(Var)) + Group(List(Clause)))
-ProblemType = wrap(List(Integer("pt")), "(", ")")
+ProblemType = Group(wrap(List(Integer("pt")), "(", ")"))
 ProblemKind = Or([Literal('all'), Literal('secret')])
 
 

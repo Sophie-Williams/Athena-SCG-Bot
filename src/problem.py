@@ -76,23 +76,22 @@ class Clause(object):
 class Problem(object):
   """Describes a problem instance."""
   def __init__(self, buyer, list_of_vars, clauselist, challengeid, seller,
-               problemnumber, price, kind='all'):
+               problemnumbers, price, kind='all'):
     self.buyer = int(buyer)
     self.vars = list(list_of_vars)
     self.clauses = []
     self.AddClauses(clauselist)
     self.challengeid = int(challengeid)
     self.seller = int(seller)
-    # XXX for later games we will need to change this to be a list.
-    self.problemnumber = int(problemnumber)
+    self.problemnumbers = map(int, list(problemnumbers))
     self.price = float(price)
     self.solution = None
     self.profit = 0
     self.kind = kind
 
   def __str__(self):
-    return ('Problem(num=%d, vars=%s, price=%s, seller=%s clauses=%d)'
-            % (self.problemnumber, str(self.vars), self.price, self.seller,
+    return ('Problem(num=%s, vars=%s, price=%s, seller=%s clauses=%d)'
+            % (self.problemnumbers, str(self.vars), self.price, self.seller,
                len(self.clauses)))
 
   def __repr__(self):
@@ -131,26 +130,27 @@ class Problem(object):
 
   def GetProvided(self):
     """Get a 'provided' blob to send to the proxysolve backend."""
-    return ('provided[%d %s %s %d %d (%d ) %0.8f]'
+    return ('provided[%d %s %s %d %d (%s ) %0.8f]'
             % (self.buyer, ' '.join(self.vars),
                ' '.join([x.GetProvideBlob() for x in self.clauses]),
-               self.challengeid, self.seller, self.problemnumber, self.price))
+               self.challengeid, self.seller,
+               ' '.join(map(str, self.problemnumbers)), self.price))
 
   def TrivialSolve(self):
     fsat = len(self.clauses)
-    if self.problemnumber == 0:
+    if self.problemnumbers[0] == 0:
       logging.debug('Special Case Solve: Relation 0!')
       values = [0]*len(self.vars)
-    elif self.problemnumber % 2:
+    elif self.problemnumbers[0] % 2:
       logging.debug('Special Case Solve: All False!')
       values = [0]*len(self.vars)
-    elif self.problemnumber >= 128:
+    elif self.problemnumbers[0] >= 128:
       logging.debug('Special Case Solve: All True!')
       values = [1]*len(self.vars)
     else:
       return False
-    logging.debug('Trivially Solved # %d challenge %d'
-                  % (self.problemnumber, self.challengeid))
+    logging.debug('Trivially Solved # %s challenge %d'
+                  % (self.problemnumbers, self.challengeid))
     return fsat, values
 
   def CSolve(self):
@@ -281,8 +281,8 @@ class Problem(object):
     return proxysolver.ProxySolve(self)
 
   def DoSolve(self):
-    logging.debug('Solving offer %d relation %d cost %0.3f'
-                 % (self.challengeid, self.problemnumber, self.price))
+    logging.debug('Solving offer %d relation %s cost %0.3f'
+                 % (self.challengeid, self.problemnumbers, self.price))
     s = ''
     if self.TrivialSolve():
       s = self.GetTrivialSolution()
@@ -302,14 +302,14 @@ class Problem(object):
 
   @classmethod
   def GenerateFromAccepted(cls, acceptedproblem):
-    return cls.Generate(acceptedproblem.problemnumber,
+    return cls.Generate(acceptedproblem.problemnumbers,
                         acceptedproblem.offerid,
                         acceptedproblem.kind)
 
 
   @classmethod
-  def GetVarsGenerator(cls, problemnumber, perceived_vars=23):
-    ptv = Problem.GetBestPriceAndType(problemnumber)
+  def GetVarsGenerator(cls, problemnumbers, perceived_vars=23):
+    ptv = Problem.GetBestPriceAndType(problemnumbers[0])
     if ptv:
       numvars = ptv[2]
       if ptv[1] == 'permutations':
@@ -324,11 +324,11 @@ class Problem(object):
     return (numvars, generator, ['v%d' % x for x in range(perceived_vars)])
 
   @classmethod
-  def Generate(cls, problemnumber, offerid, kind, degree=None):
-    numvars, clausegenerator, varslist = cls.GetVarsGenerator(problemnumber)
-    p = cls(0, varslist, [], offerid, 0, problemnumber, 0, kind)
+  def Generate(cls, problemnumbers, offerid, kind, degree=None):
+    numvars, clausegenerator, varslist = cls.GetVarsGenerator(problemnumbers)
+    p = cls(0, varslist, [], offerid, 0, problemnumbers, 0, kind)
     for i, j, k in clausegenerator(range(numvars), 3):
-      p.AddClause(Clause(problemnumber,
+      p.AddClause(Clause(problemnumbers[0],
                          list_of_vars=['v%d' % x for x in [i, j, k]]))
     return p
 
