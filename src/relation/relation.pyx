@@ -563,7 +563,7 @@ cdef class Problem:
                 max = [newratio, m]
             # Search deeper
             if newratio <= oldratio:
-                count += 1
+                count = count + 1
                 if count > 3:
                     break
             f.n_map_all(m)
