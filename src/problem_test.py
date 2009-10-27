@@ -76,7 +76,7 @@ class ProblemTestCase(unittest.TestCase):
     clauses.append(problem.Clause(109, list_of_vars=['v4', 'v0', 'v1']))
     self.clauses = clauses
     self.pblm = problem.Problem(100, ['v0', 'v1', 'v2', 'v3', 'v4'], [], 501,
-                                102, 109, 1.0)
+                                102, [109], 1.0)
 
   def tearDown(self):
     del self.clauses
@@ -108,7 +108,7 @@ class ProblemTestCase(unittest.TestCase):
     clauses.append(problem.Clause(214, 1, ['v2', 'v3', 'v4']))
     clauses.append(problem.Clause(214, 1, ['v3', 'v4', 'v0']))
     pblm = problem.Problem(100, ['v0', 'v1', 'v2', 'v3', 'v4'], [], 501,
-                           102, 214, 1.0)
+                           102, [214], 1.0)
     for clause in clauses:
       pblm.AddClause(clause)
 
@@ -133,7 +133,7 @@ class ProblemTestCase(unittest.TestCase):
     inputlist = []
     inputlist.append([101, [['v1', 'v2', 'v3', 'v4', 'v5'],
                       [(2, 1, 'v1', 'v2', 'v3'), (2, 4, 'v4', 'v5', 'v1')]],
-                      543, 100, 2, 0.4])
+                      543, 100, ['2'], 0.4])
     l = problem.Problem.GetProblemList(inputlist)
     self.assertEqual(len(l), 1)
 

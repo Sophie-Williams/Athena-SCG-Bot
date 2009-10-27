@@ -5,13 +5,13 @@ import offer
 class OfferTestCase(unittest.TestCase):
 
   def setUp(self):
-    self.o1 = offer.Offer(501, 101, 3, 1.0, 'all')
-    self.o2 = offer.Offer(501, 101, 3, 0.555, 'all')
-    self.o3 = offer.Offer(501, 101, 0, 0.1, 'all')
-    self.o4 = offer.Offer(501, 101, 247, 1.0, 'all')
-    self.o5 = offer.Offer(301, 101, 128, 1.0, 'all')
-    self.o6 = offer.Offer(401, 101, 22, 1.0, 'all')
-    self.o7 = offer.Offer(501, 101, 22, 0.2, 'secret')
+    self.o1 = offer.Offer(501, 101, [3], 1.0, 'all')
+    self.o2 = offer.Offer(501, 101, [3], 0.555, 'all')
+    self.o3 = offer.Offer(501, 101, [0], 0.1, 'all')
+    self.o4 = offer.Offer(501, 101, [247], 1.0, 'all')
+    self.o5 = offer.Offer(301, 101, [128], 1.0, 'all')
+    self.o6 = offer.Offer(401, 101, [22], 1.0, 'all')
+    self.o7 = offer.Offer(501, 101, [22], 0.2, 'secret')
 
   def tearDown(self):
     del self.o1
@@ -24,25 +24,26 @@ class OfferTestCase(unittest.TestCase):
 
   def testStr(self):
     self.assertEqual(str(self.o2),
-                     'Offer(id=501, from=101, problem=3, price=0.555)')
+                     'Offer(id=501, from=101, problem=[3], price=0.555,'
+                     ' kind=all)')
 
   def testRepr(self):
     self.assertEqual(str(self.o1), repr(self.o1))
 
   def testIsGoodBuy(self):
     self.assertEqual(True,
-                     offer.Offer(-1, -1, 2, 1.0, 'secret').IsGoodBuySecret())
+                     offer.Offer(-1, -1, [2], 1.0, 'secret').IsGoodBuySecret())
     self.assertEqual(False,
-                     offer.Offer(-1, -1, 2, 1.0, 'all').IsGoodBuyAll())
+                     offer.Offer(-1, -1, [2], 1.0, 'all').IsGoodBuyAll())
 
   def testIsGoodBuySecret(self):
     # Currently we buy all secrets...
     # TODO(lee): Improve!
     self.assertEqual(True, self.o7.IsGoodBuySecret())
     self.assertEqual(True,
-                     offer.Offer(-1, -1, 1, 1.0, 'secret').IsGoodBuySecret())
+                     offer.Offer(-1, -1, [1], 1.0, 'secret').IsGoodBuySecret())
     self.assertEqual(True,
-                     offer.Offer(-1, -1, 2, 1.0, 'secret').IsGoodBuySecret())
+                     offer.Offer(-1, -1, [2], 1.0, 'secret').IsGoodBuySecret())
 
   def testIsGoodBuyAll(self):
     self.assertEqual(True, self.o1.IsGoodBuyAll())

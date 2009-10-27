@@ -25,10 +25,10 @@ class Offer(object):
     self.kind = kind
   
   def __str__(self):
-    return 'Offer(id=%s, from=%s, problem=%s, price=%s)' % (self.offerid,
-                                                            self.playerid,
-                                                            self.problemnumbers,
-                                                            self.price)
+    return ('Offer(id=%s, from=%s, problem=%s, price=%s, kind=%s)'
+            % (self.offerid, self.playerid, self.problemnumbers, self.price,
+               self.kind))
+
   def __repr__(self):
     return str(self)
 
@@ -45,7 +45,7 @@ class Offer(object):
       return self.IsGoodBuyAll()
 
   def IsGoodBuySecret(self):
-    # This is really ballsy, as they say.
+    #XXX: TODO: Fix this shit.
     return 0 not in self.problemnumbers
 
   def IsGoodBuyAll(self):
