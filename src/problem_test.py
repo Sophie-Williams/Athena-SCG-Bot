@@ -31,11 +31,11 @@ class ClauseTestCase(unittest.TestCase):
   
   def testStr(self):
     self.assertEqual(str(self.c),
-                     "Clause(num=109, vars=['v1', 'v2', 'v3'])")
+                     "Clause(num=109, weight=1, vars=['v1', 'v2', 'v3'])")
     self.assertEqual(str(self.e),
-                     "Clause(num=110, vars=['v1', 'v2', 'v3'])")
+                     "Clause(num=110, weight=1, vars=['v1', 'v2', 'v3'])")
     self.assertEqual(str(self.f),
-                     "Clause(num=109, vars=['v0', 'v2', 'v3'])")
+                     "Clause(num=109, weight=1, vars=['v0', 'v2', 'v3'])")
 
   def testRepr(self):
     self.assertEqual(str(self.c), repr(self.c))
@@ -128,6 +128,24 @@ class ProblemTestCase(unittest.TestCase):
     self.assertEquals(all_values[5], 2)
     self.assertEquals(all_values[10], 3)
     self.assertEquals(all_values[15], 4)
+
+  def testGetProblemList(self):
+    inputlist = []
+    inputlist.append([101, [['v1', 'v2', 'v3', 'v4', 'v5'],
+                      [(2, 1, 'v1', 'v2', 'v3'), (2, 4, 'v4', 'v5', 'v1')]],
+                      543, 100, 2, 0.4])
+    l = problem.Problem.GetProblemList(inputlist)
+    self.assertEqual(len(l), 1)
+
+    p = l[0]
+    self.assertEqual(p.vars, ['v1', 'v2', 'v3', 'v4', 'v5'])
+    self.assertEqual(len(p.clauses), 2)
+    self.assertEqual(p.clauses[0],
+                     problem.Clause(2, weight=1,
+                                    list_of_vars=['v1', 'v2', 'v3']))
+    self.assertEqual(p.clauses[1],
+                     problem.Clause(2, weight=4,
+                                    list_of_vars=['v4', 'v5', 'v1']))
 
 
 if __name__ == '__main__':

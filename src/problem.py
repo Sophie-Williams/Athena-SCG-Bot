@@ -35,19 +35,21 @@ class Clause(object):
     if not list_of_vars:
       self.vars = []
     else:
-      self.vars = list_of_vars
+      self.vars = list(list_of_vars)
 
   def __eq__(self, other):
     """Is this equal to other?."""
     try:
       return (self.vars == other.vars
-              and self.problemnumber == other.problemnumber)
+              and self.problemnumber == other.problemnumber
+              and self.weight == other.weight)
     except:
       return False
 
   def __str__(self):
     """Get a human readable string representing this clause."""
-    return 'Clause(num=%d, vars=%s)' % (self.problemnumber, str(self.vars))
+    return ('Clause(num=%d, weight=%d, vars=%s)'
+            % (self.problemnumber, self.weight, str(self.vars)))
 
   def __repr__(self):
     """Get a human readable representation of this clause."""
@@ -99,10 +101,12 @@ class Problem(object):
   def AddClauses(self, clauselist):
     """Add Clauses to this Problem instance.
 
-    :param clauselist: list of iterables where i[0] is the problemnumber
+    :param clauselist: list of iterables where i[0] is the problemnumber and
+      i[1] is the clause weight
     """
     for clause in clauselist:
-      self.AddClause(Clause(clause[0], clause[1:]))
+      self.AddClause(Clause(clause[0], weight=clause[1],
+                            list_of_vars=clause[2:]))
 
   def AddClause(self, clause):
     """Add a Clause to this Problem instance.
