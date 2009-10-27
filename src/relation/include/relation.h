@@ -140,4 +140,13 @@ renme(uint32_t rn, int rank, int perm_semantics, int *permutation);
 uint32_t
 n_map(uint32_t rn, int rank, int var_p);
 
+/**
+ * a implies b.
+ * @param a The first relation number.
+ * @param b The second relation number.
+ * @return a -> b
+ */
+int
+implies(uint32_t a, uint32_t b);
+
 #endif

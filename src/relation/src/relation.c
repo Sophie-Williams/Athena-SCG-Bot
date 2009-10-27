@@ -220,3 +220,8 @@ n_map(uint32_t rn, int rank, int var_p) {
     s = (1 << var_p);
     return ((rn & m0) << s) | ((rn & m1) >> s);
 }
+
+int
+implies(uint32_t a, uint32_t b) {
+    return (a & b) == a;
+}

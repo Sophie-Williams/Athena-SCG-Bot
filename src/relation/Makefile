@@ -24,13 +24,14 @@ relation_pyx.o: relation_pyx.c
 %_pyx.c: %.pyx
 	pyrexc $< -o $@
 
-test: all poly_test solve_test
+test: all poly_test solve_test relation_test
 	python tests.py
 	./poly_test
 	./solve_test
+	./relation_test
 
 test_full: test
 	python solve_test.py
 
 clean:
-	$(RM) relation_pyx.c *.o *.so *.pyc poly_test solve_test
+	$(RM) relation_pyx.c *.o *.so *.pyc *_test
