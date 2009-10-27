@@ -4,6 +4,7 @@ import time
 import relation
 import gen
 import test_data
+import sys
 
 
 class TestSolve(unittest.TestCase):
@@ -26,29 +27,32 @@ class TestSolve(unittest.TestCase):
     self.assertEquals(fsat, 36)
 
   def test_solve_from_us(self):
-    answers = [ 0,
-      792, 792, 1584, 792, 1296, 1296, 2002, 792, 1584, 1584, 2376, 1296,
-      2002, 2002, 2772, 792, 1296, 1296, 2002, 1584, 2002, 2002, 2592,
-      1296, 2002, 2002, 2772, 2002, 2592, 2592, 3280, 792, 1296, 1296,
-      2002, 1584, 2002, 2002, 2592, 1296, 2002, 2002, 2772, 2002, 2592,
-      2592, 3280, 1584, 2002, 2002, 2592, 2376, 2772, 2772, 3280, 2002,
-      2592, 2592, 3280, 2772, 3280, 3280, 3888,
+    # The best we can to on a short notice.
+    answers = [
+      0, 705, 415, 777, 790, 1120, 765, 1260, 819, 660, 820, 819, 819, 1071,
+      780, 1260, 435, 840, 501, 865, 808, 1176, 834, 1262, 819, 1056, 822,
+      995, 858, 1071, 934, 1323, 780, 651, 816, 882, 840, 1135, 1086, 1326,
+      1365, 1386, 1365, 1260, 1365, 1365, 1365, 1341, 840, 861, 824, 869,
+      840, 1386, 980, 1335, 1365, 1386, 1365, 1156, 1386, 1365, 1323, 1386,
     ]
-    i = 0
 
+    i = 0
     for rn in range(0, 128, 2):
-      vars, clauses = gen.gen_problem(rn, 18)
-      print clauses
+      vars, clauses = gen.gen_problem(rn, 23)
+
       c_p = relation.Problem(vars, clauses)
+
       s = time.time()
-      fsat, values = c_p.solve()
+      fsat, values = c_p.evergreen_aggressive()
       e = time.time()
+
       self.assertEquals(answers[i], fsat)
       i += 1
-#       print ('%d (%d) / %d = %f vs %f : %f seconds' % (
-#         rn, fsat, len(clauses), float(fsat)/len(clauses),
-#         relation.break_even(rn, 3), (e - s)))
-#       print (float(fsat) / len(clauses)) - relation.break_even(rn, 3)
+#      diff = (float(fsat) / len(clauses)) - relation.break_even(rn, 3)
+#      if diff < 0:
+#        sys.stdout.write('%d (%d) / %d = %f : %f seconds\n'
+#                         % (rn, fsat, len(clauses), diff, (e - s)))
+#        sys.stdout.flush()
 
 if __name__ == '__main__':
   unittest.main()

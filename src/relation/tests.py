@@ -216,21 +216,21 @@ class TestRelation(unittest.TestCase):
 
   def test_rn_counts(self):
     clauses = [
-      (3, 'v1', 'v2', 'v3'),
-      (22, 'v2', 'v3', 'v4'),
-      (3, 'v3', 'v4', 'v5'),
-      (22, 'v1', 'v2', 'v3'),
-      (22, 'v1', 'v2', 'v3'),
-      (22, 'v1', 'v2', 'v3'),
-      (21, 'v1', 'v2', 'v3'),
-      (22, 'v2', 'v3', 'v4'),
-      (22, 'v3', 'v4', 'v5'),
-      (21, 'v2', 'v3', 'v4'),
-      (22, 'v3', 'v4', 'v5'),
-      (21, 'v2', 'v3', 'v4'),
-      (22, 'v3', 'v4', 'v5'),
-      (21, 'v2', 'v3', 'v4'),
-      (22, 'v3', 'v4', 'v5'),
+      (3,  1, 'v1', 'v2', 'v3'),
+      (22, 1, 'v2', 'v3', 'v4'),
+      (3,  1, 'v3', 'v4', 'v5'),
+      (22, 1, 'v1', 'v2', 'v3'),
+      (22, 1, 'v1', 'v2', 'v3'),
+      (22, 1, 'v1', 'v2', 'v3'),
+      (21, 1, 'v1', 'v2', 'v3'),
+      (22, 1, 'v2', 'v3', 'v4'),
+      (22, 1, 'v3', 'v4', 'v5'),
+      (21, 1, 'v2', 'v3', 'v4'),
+      (22, 1, 'v3', 'v4', 'v5'),
+      (21, 1, 'v2', 'v3', 'v4'),
+      (22, 1, 'v3', 'v4', 'v5'),
+      (21, 1, 'v2', 'v3', 'v4'),
+      (22, 1, 'v3', 'v4', 'v5'),
     ]
     vars = ('v1', 'v2', 'v3', 'v4', 'v5')
     c_p = relation.Problem(vars, clauses)
@@ -242,9 +242,11 @@ class TestRelation(unittest.TestCase):
 
   def test_evergreen(self):
     c_p = relation.Problem(test_data.vars1, test_data.clauses1)
-    print c_p.evergreen(), len(test_data.clauses1)
+    fsat, x = c_p.evergreen()
+    self.assertEquals(fsat, 462)
     c_p = relation.Problem(test_data.vars5, test_data.clauses5)
-    print c_p.evergreen(), len(test_data.clauses5)
+    fsat, x = c_p.evergreen()
+    self.assertEquals(fsat, 66)
 
   def test_solve(self):
     clauses = [
@@ -291,11 +293,6 @@ class TestRelation(unittest.TestCase):
 
 
 class TestGen(unittest.TestCase):
-
-  def test_gen_permute3(self):
-    f = gen.permute3
-    # for x in f(450):
-    #   x
 
   def test_max_vars(self):
     f = gen.max_vars

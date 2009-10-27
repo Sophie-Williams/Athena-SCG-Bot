@@ -86,6 +86,7 @@ cdef extern from "solve.h":
         uint32_t rn
         int rank
         int *vars
+        uint32_t weight
     ctypedef __clause clause
 
     struct __problem:
@@ -381,7 +382,7 @@ def pascal(n, k):
 cdef class Problem:
     cdef problem *p
 
-    def __cinit__(self, vars, clauses, weights=None):
+    def __cinit__(self, vars, clauses):
         cdef clause *tmp
         cdef int i
         cdef int j
@@ -399,10 +400,7 @@ cdef class Problem:
             for v in c[2:]:
                 var_tmp[j] = vars.index(v)
                 j = j + 1
-            if weights:
-                clause_set_weighted(tmp+i, c[0], j, var_tmp, weights[i])
-            else:
-                clause_set(tmp+i, c[0], j, var_tmp)
+            clause_set_weighted(tmp+i, c[0], j, var_tmp, c[1])
             i = i + 1
 
         # Allocate spaces for the pointers to the variable names.
@@ -429,7 +427,7 @@ cdef class Problem:
 
         for 0 <= i < self.p[0].num_clauses:
             c = self.p[0].clauses + i
-            tmp = [c[0].rn]
+            tmp = [c[0].rn, c[0].weight]
             for 0 <= j < c[0].rank:
                 tmp.append(vars[c[0].vars[j]])
             clauses.append(tmp)
@@ -439,6 +437,10 @@ cdef class Problem:
     def copy(self):
         vars, clauses = self.get_all()
         return Problem(vars, clauses)
+
+    def weight(self):
+        """The total weight of all clauses in the problem."""
+        return problem_weight(self.p)
 
     def sat(self, assignment):
         """Return the number of satisfied clauses."""
