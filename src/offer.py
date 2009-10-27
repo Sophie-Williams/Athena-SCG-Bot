@@ -46,7 +46,7 @@ class Offer(object):
 
   def IsGoodBuySecret(self):
     #XXX: TODO: Fix this shit.
-    return 0 not in self.problemnumbers
+    return True
 
   def IsGoodBuyAll(self):
     if self.problemnumbers[0] <= 0:
@@ -122,7 +122,6 @@ class Offer(object):
   def GetOfferList(cls, parsedlist):
     outputlist = []
     while parsedlist:
-      print parsedlist[:5]
       outputlist.append(cls(*parsedlist[:5]))
       parsedlist = parsedlist[5:]
     return outputlist
