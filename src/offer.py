@@ -38,17 +38,20 @@ class Offer(object):
   def __cmp__(self, other):
     return cmp(self.BEPDiff(), other.BEPDiff())
 
+  def IsSecret(self):
+    return self.kind == 'secret'
+
   def BEPDiff(self):
     return self.bep-self.price
 
   def IsGoodBuy(self):
-    if self.kind == 'secret':
+    if self.IsSecret():
       return self.IsGoodBuySecret()
     else:
       return self.IsGoodBuyAll()
 
   def IsGoodBuySecret(self):
-    return self.IsGoodBuyAll()
+    return True
 
   def IsGoodBuyAll(self):
     if self.problemnumbers[0] <= 0:
@@ -103,6 +106,12 @@ class Offer(object):
 
   def SetPrice(self, price=None, markup=0.09):
     """Set or Generate a price."""
+    if self.IsSecret():
+      self.price = 1
+      logging.debug('Got problem number %s to generate price @ %s'
+                    % (self.problemnumbers, self.price))
+      return price
+
     apply_markup = True
     if price is None:
       ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])

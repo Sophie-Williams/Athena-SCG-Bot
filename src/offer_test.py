@@ -37,12 +37,13 @@ class OfferTestCase(unittest.TestCase):
   def testIsGoodBuySecret(self):
     # Currently we do the same for secrets as all
     # TODO(lee): Improve!
-    self.assertEqual(self.o7.IsGoodBuyAll(), self.o7.IsGoodBuySecret())
-    to1 = offer.Offer(-1, -1, [1], 1.0, 'secret')
-    to2 = offer.Offer(-1, -1, [2], 1.0, 'secret')
-    self.assertEqual(to1.IsGoodBuyAll(), to1.IsGoodBuySecret())
-    self.assertEqual(to2.IsGoodBuyAll(), to2.IsGoodBuySecret())
-                     
+    self.assertTrue(self.o7.IsGoodBuySecret())
+    self.assertTrue(self.o6.IsGoodBuySecret())
+    self.assertTrue(self.o5.IsGoodBuySecret())
+    self.assertTrue(self.o4.IsGoodBuySecret())
+    self.assertTrue(self.o3.IsGoodBuySecret())
+    self.assertTrue(self.o2.IsGoodBuySecret())
+    self.assertTrue(self.o1.IsGoodBuySecret())
 
   def testIsGoodBuyAll(self):
     self.assertEqual(True, self.o1.IsGoodBuyAll())
