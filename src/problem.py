@@ -79,6 +79,7 @@ class Problem(object):
                problemnumbers, price, kind='all'):
     self.buyer = int(buyer)
     self.vars = list(list_of_vars)
+    self.vars.sort()
     self.clauses = []
     self.AddClauses(clauselist)
     self.challengeid = int(challengeid)
