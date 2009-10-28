@@ -117,7 +117,7 @@ class Problem(object):
   def GetProvide(self):
     """Get a 'provide' blob to send to the administrator for this problem."""
     if self.kind == 'secret':
-      self.Solve()
+      self.Solve(forprovide=True)
       solution = ' [ %s ]' % self.solution
     else:
       solution = ''
@@ -242,15 +242,17 @@ class Problem(object):
 
     return best
 
-  def SetProfit(self, satisfied):
+  def SetProfit(self, satisfied, forprovide=False):
     numclauses = float(len(self.clauses))
     solperc = float(satisfied)/numclauses
     self.profit = solperc-self.price
-    logging.info('Solved %d out of %d (%d vars) | %0.3f - %0.3f = %0.3f profit'
-                  % (satisfied, numclauses, len(self.vars), solperc,
-                     self.price, self.profit))
-    if self.profit < 0:
-      logging.error('Lost money on %s' % str(self))
+    if not forprovide:
+      logging.info('Solved %d out of %d (%d vars) '
+                   '| %0.3f - %0.3f = %0.3f profit'
+                    % (satisfied, numclauses, len(self.vars), solperc,
+                      self.price, self.profit))
+      if self.profit < 0:
+        logging.error('Lost money on %s' % str(self))
     return self.profit
 
   def CreateSolution(self, values, variables=None):
@@ -260,43 +262,43 @@ class Problem(object):
     s = csptree.CSPTree.CreateSolution(variables, values)
     return str(s)
 
-  def GetTrivialSolution(self):
+  def GetTrivialSolution(self, forprovide=False):
     if not self.TrivialSolve():
       return
     fsat, values = self.TrivialSolve()
-    self.SetProfit(fsat)
+    self.SetProfit(fsat, forprovide=forprovide)
     return self.CreateSolution(values)
 
-  def GetPySolution(self):
+  def GetPySolution(self, forprovide=False):
     _, fsat, values = self.PySolve()
-    self.SetProfit(fsat)
+    self.SetProfit(fsat, forprovide=forprovide)
     return self.CreateSolution(values)
 
-  def GetCSolution(self):
+  def GetCSolution(self, forprovide=False):
     fsat, values = self.CSolve()
-    self.SetProfit(fsat)
+    self.SetProfit(fsat, forprovide=forprovide)
     return self.CreateSolution(values)
 
   def GetProxySolution(self):
     return proxysolver.ProxySolve(self)
 
-  def DoSolve(self):
+  def DoSolve(self, forprovide=False):
     logging.debug('Solving offer %d relation %s cost %0.3f'
                  % (self.challengeid, self.problemnumbers, self.price))
     s = ''
     if self.TrivialSolve():
-      s = self.GetTrivialSolution()
+      s = self.GetTrivialSolution(forprovide=forprovide)
     elif FLAGS.solver == 'c':
-      s = self.GetCSolution()
+      s = self.GetCSolution(forprovide=forprovide)
     elif FLAGS.solver == 'proxy':
-      s = self.GetProxySolution()
+      s = self.GetProxySolution(forprovide=forprovide)
     else:
       s = self.GetPySolution()
     return s
 
-  def Solve(self):
+  def Solve(self, forprovide=False):
     if self.solution is None:
-      rs = self.DoSolve()
+      rs = self.DoSolve(forprovide=forprovide)
       self.solution = rs
     return 'solve[[ %s ] %d]' % (str(self.solution), self.challengeid)
 

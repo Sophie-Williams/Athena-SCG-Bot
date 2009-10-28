@@ -48,7 +48,7 @@ class Offer(object):
       return self.IsGoodBuyAll()
 
   def IsGoodBuySecret(self):
-    return 0 not in self.problemnumbers
+    return self.IsGoodBuyAll()
 
   def IsGoodBuyAll(self):
     if self.problemnumbers[0] <= 0:
