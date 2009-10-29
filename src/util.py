@@ -39,7 +39,7 @@ def DoRegistration(server, ourport, ourteam, ourpass):
 
 def setuplogging():
   msgformat = '%(asctime)s %(filename)s %(lineno)s %(levelname)s %(message)s'
-  logfilename='/var/tmp/athena-%s.log' % time.time()
+  logfilename = '/var/tmp/athena-%s.log' % time.time()
   # set up logging to file - see previous section for more details
   logging.basicConfig(level=logging.DEBUG,
                       format=msgformat,
@@ -48,9 +48,9 @@ def setuplogging():
                       filemode='w')
   # define a Handler which writes INFO messages or higher to the sys.stderr
   console = logging.StreamHandler()
-  levelmap = {'debug':logging.DEBUG, 'info':logging.INFO,
-              'warning':logging.WARNING, 'error':logging.ERROR,
-              'critical':logging.CRITICAL}
+  levelmap = {'debug':    logging.DEBUG,   'info':  logging.INFO,
+              'warning':  logging.WARNING, 'error': logging.ERROR,
+              'critical': logging.CRITICAL}
   console.setLevel(levelmap[FLAGS.loglevel])
   # set a format which is simpler for console use
   formatter = logging.Formatter(msgformat)

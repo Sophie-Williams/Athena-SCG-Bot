@@ -244,8 +244,8 @@ class Problem(object):
 
   def SetProfit(self, satisfied, forprovide=False):
     numclauses = float(len(self.clauses))
-    solperc = float(satisfied)/numclauses
-    self.profit = solperc-self.price
+    solperc = float(satisfied) / numclauses
+    self.profit = solperc - self.price
     if not forprovide:
       logging.info('Solved %d out of %d (%d vars) '
                    '| %0.3f - %0.3f = %0.3f profit'
@@ -307,7 +307,6 @@ class Problem(object):
     return cls.Generate(acceptedproblem.problemnumbers,
                         acceptedproblem.offerid,
                         acceptedproblem.kind)
-
 
   @classmethod
   def GetVarsGenerator(cls, problemnumbers, perceived_vars=23):
