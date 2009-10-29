@@ -8,10 +8,10 @@ problem_create(char **vars, int num_vars, clause *clauses, int num_clauses) {
 
     assert(num_vars > 0);
     assert(num_clauses > 0);
-    assert(vars != NULL);
-    assert(clauses != NULL);
+    assert(vars);
+    assert(clauses);
 
-    if((p = malloc(sizeof(problem))) == NULL) {
+    if ((p = malloc(sizeof(problem))) == NULL) {
         perror("malloc");
         return NULL;
     }
@@ -34,7 +34,7 @@ problem_shallow_copy(const problem * restrict from) {
     problem *to;
     register size_t size;
 
-    assert(from != NULL);
+    assert(from);
 
     if ((to = malloc(sizeof(problem))) == NULL) {
         perror("malloc");
@@ -62,7 +62,7 @@ problem_shallow_copy(const problem * restrict from) {
 void
 problem_set(problem *problem, char **vars, int num_vars, clause *clauses,
             int num_clauses) {
-    assert(problem != NULL);
+    assert(problem);
     problem->vars = vars;
     problem->num_vars = num_vars;
     problem->clauses = clauses;
@@ -91,7 +91,7 @@ solution *
 solution_create(const problem * restrict problem) {
     solution *s;
 
-    assert(problem != NULL);
+    assert(problem);
 
     s = malloc(sizeof(solution));
     if (s == NULL) {
@@ -141,7 +141,7 @@ void
 clause_set_real(clause *clause, uint32_t rn, int rank, int *vars,
                 uint32_t weight) {
     register size_t size;
-    assert(clause != NULL);
+    assert(clause);
 
     size = sizeof(int) * rank;
 
@@ -150,7 +150,7 @@ clause_set_real(clause *clause, uint32_t rn, int rank, int *vars,
     clause->weight = weight;
 
     /* Short-circuit if vars is not going to change. */
-    if (vars == NULL)
+    if (!vars)
         return;
 
     if ((clause->vars = malloc(size)) == NULL) {
@@ -162,7 +162,7 @@ clause_set_real(clause *clause, uint32_t rn, int rank, int *vars,
 
 void
 clause_delete(clause *clause) {
-    assert(clause != NULL);
+    assert(clause);
     free(clause->vars);
     free(clause);
 }

@@ -34,12 +34,10 @@ so, 10010110 => 2^1 + 2^2 + 2^4 + 2^7
 The rank of a number is the number of variables a clause can have.
 
 """
-import itertools
 
 cdef extern from "stdlib.h":
     ctypedef unsigned long int size_t
     cdef void *malloc(size_t size)
-    cdef void free(void *ptr)
 
 
 cdef extern from "string.h":
@@ -71,6 +69,7 @@ cdef extern from "relation.h":
     uint32_t c_reduce "reduce" (uint32_t rn, int rank, int var_p, int value)
     uint32_t c_n_map "n_map" (uint32_t rn, int rank, int var_p)
     int c_implies "implies" (uint32_t a, uint32_t b)
+    uint32_t c_x_true_vars "x_true_vars" (int rank, int num_true_vars)
 
 
 cdef extern from "poly.h":
@@ -112,7 +111,7 @@ cdef extern from "solve.h":
     void clause_set_weighted(clause *c, uint32_t rn, int rank, int *vars,
                              int weight)
     void clause_delete(clause *clause)
-    int fsat(problem *p, solution *s)
+    int sat(problem *p, solution *s)
     int problem_weight(problem *p)
     problem *problem_reduce_all(problem *p, int var, int value)
     solution *solve_iterate(problem *p, solution *s)
@@ -143,25 +142,9 @@ def is_irrelevant(uint32_t rn, int rank, int var_p):
     return c_is_irrelevant(rn, rank, var_p)
 
 def num_relevant_variables(uint32_t rn, int rank):
-    """
-    Counts the number of relevant variables in the given relation
-    @param rn the relation number whose number of relevant variables
-              is to be counted
-    @param rank rank of the given relation
-    @return The number of relevant variables in the given relation
-    """
     return c_num_relevant_variables(rn, rank)
 
 def is_forced(uint32_t rn, int rank, int var_p):
-    """
-    Checks if the given relation forces the given var_p
-    @param rn
-    @param rank rank of the given relation
-    @param var_p positon of the varible checked for being forced
-    @return 0 if the given relation force the given variable to 0
-            1 if the given relation force the given variable to 1
-            -1 given relation doesn't force the given variable
-    """
     cdef uint32_t m
     cdef uint32_t rm
 
@@ -192,43 +175,12 @@ def first_forced_variable(uint32_t rn, int rank, int start_p):
             return var_p
 
 def n_map(uint32_t rn, int rank, int var_p):
-    """
-    NMaps one of the variables in a relation i.e. replaces it by it's
-    complement for example: nMapping x in Or(x,y,z) results in: or(!x,y,z)
-    @param rn The relation number. 
-    @param rank The rank of the given relation.
-    @param var_p The position of the variable to be nmapped.
-    @return The number of the given relation with the specified variable
-            nmapped.
-    """
     return c_n_map(rn, rank, var_p)
 
 def reduce(uint32_t rn, int rank, int var_p, int value):
-    """
-    Reduces a relation by assigning a value to one of its variables.
-    @param rn The relation number.
-    @param rank The rank of the relation number.
-    @param var_p The position of the variable.
-    @param value The value at the given position.
-    @return The reduced relation number.
-    """
     return c_reduce(rn, rank, var_p, value)
 
 def swap(uint32_t rn, int rank, int var_p1, int var_p2):
-    """
-    Swaps two variables in a relation. When variables are swapped, The truth
-    table order gets scrambled rows of the truth table needs to be reordered
-    to restore the correct truth table order. Here are two exmples showing
-    how the swap method works for two relations: 
-            1in3(x,y,z), x implies z.
-    We are swapping variables at positions 0,2 i.e: x ,z
-
-    @param rn The relation number.
-    @param rank The rank of the relation number.
-    @param var_p1 The first position.
-    @param var_p2 The second position.
-    @return The swapped relation number.
-    """
     return c_swap(rn, rank, var_p1, var_p2)
 
 def renme(uint32_t rn, int rank, int perm_semantics, permutation):
@@ -290,44 +242,13 @@ def renme(uint32_t rn, int rank, int perm_semantics, permutation):
     return rn
 
 def ones(uint32_t rn, int rank):
-    """
-    Return the number of 1-bits in the given rn masked by the rank.
-    m = 2 ** (2 ** rank)
-    so, the 1-bits of (rn & m)
-    @param rn The relation number.
-    @param rank The rank of the relation number.
-    @return The number of 1-bits in rn limited by rank.
-    """
     return c_ones(rn, rank)
 
 def q(uint32_t rn, int rank, int num_true_vars):
-    """
-    @param rn The relation number.
-    @param rank The rank of the relation number.
-    @param num_true_vars Used to identify a set of rows in the truth table.
-    @return Number of ones corresponding to truth table rows
-            with the given number of true variables.
-    """
     return c_q(rn, rank, num_true_vars)
 
 def x_true_vars(int rank, int num_true_vars):
-    """
-    @param rank The rank.
-    @param num_true_vars The number of true variables.
-    @return An integer representing the relation number which is true
-            only when the given number of vars is true.
-
-    This is in relation_consts.h
-    TRUE_VARS = (
-        (),
-        (1, 2),
-        (1, 6, 8),
-        (1, 22, 104, 128),
-        (1, 278, 5736, 26752, 32768)
-        (1, 65814, 18224744, 375941248, 1753251840, 2147483648L),
-    )
-    """
-    return TRUE_VARS[rank][num_true_vars]
+    return c_x_true_vars(rank, num_true_vars)
 
 def implies(uint32_t a, uint32_t b):
     return c_implies(a, b)
@@ -367,16 +288,15 @@ cdef mean(problem *p, int num_vars, int num_vars_true):
     # FIXME variable rank.
     rank = 3
     for rn, count in rn_counts(p).items():
-        sum = sum + sat(p, rn, rank, num_vars, num_vars_true) * count
+        sum = sum + SAT(p, rn, rank, num_vars, num_vars_true) * count
     return sum / p[0].num_vars
 
 
-cdef sat(problem *p, uint32_t rn, int rank, int n, int k):
+cdef SAT(problem *p, uint32_t rn, int rank, int n, int k):
     sum = 0.0
     for j in range(0, rank + 1):
         sum = sum + ((float(c_q(rn, rank, j)) / pascal(rank, j))
                     * pascal(k, j) * pascal(n - k, rank - j))
-
     return sum / pascal(n, rank)
 
 def pascal(n, k):
@@ -468,7 +388,7 @@ cdef class Problem:
             s[0].values[i] = assignment[i]
 
         # find the number of clauses satisfied
-        satisfied = fsat(self.p, s)
+        satisfied = sat(self.p, s)
 
         solution_delete(s)
         return satisfied
@@ -478,7 +398,7 @@ cdef class Problem:
 
     def rn_counts(self):
         cdef int i
-        
+
         counts = {}
 
         for 0 <= i < self.p[0].num_clauses:
@@ -598,7 +518,7 @@ cdef class Problem:
             ret.append((s[0].values)[i])
 
         # Record the number of satisified clauses.
-        f = fsat(self.p, s)
+        f = sat(self.p, s)
         solution_delete(s)
 
         return (f, ret)
@@ -612,7 +532,7 @@ cdef class Problem:
         for 0 <= i < s[0].size:
             ret.append((s[0].values)[i])
 
-        f = fsat(self.p, s)
+        f = sat(self.p, s)
         solution_delete(s)
 
         return (f, ret)

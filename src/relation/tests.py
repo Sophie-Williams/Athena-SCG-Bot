@@ -259,11 +259,11 @@ class TestRelation(unittest.TestCase):
 
   def test_evergreen(self):
     c_p = relation.Problem(test_data.vars1, test_data.clauses1)
-    fsat, x = c_p.evergreen()
-    self.assertEquals(fsat, 462)
+    sat, x = c_p.evergreen()
+    self.assertEquals(sat, 462)
     c_p = relation.Problem(test_data.vars5, test_data.clauses5)
-    fsat, x = c_p.evergreen()
-    self.assertEquals(fsat, 66)
+    sat, x = c_p.evergreen()
+    self.assertEquals(sat, 66)
 
   def test_solve(self):
     clauses = [
@@ -274,9 +274,9 @@ class TestRelation(unittest.TestCase):
     vars = ('v1', 'v2', 'v3', 'v4', 'v5')
     c_p = relation.Problem(vars, clauses)
 
-    fsat, values = c_p.solve()
+    sat, values = c_p.solve()
 
-    self.assertEquals(fsat, 3)
+    self.assertEquals(sat, 3)
     self.assertTrue(values in [
         [0, 0, 1, 0, 0],
         [1, 0, 0, 1, 0],
@@ -298,9 +298,9 @@ class TestRelation(unittest.TestCase):
     ]
     vars = ('v0', 'v1', 'v2', 'v3', 'v4')
     c_p = relation.Problem(vars, clauses)
-    fsat, values = c_p.solve()
+    sat, values = c_p.solve()
 
-    self.assertEquals(fsat, 5)
+    self.assertEquals(sat, 5)
     self.assertTrue(values in [
         [1, 1, 1, 0, 1],
         [1, 1, 1, 0, 0],

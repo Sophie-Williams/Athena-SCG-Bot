@@ -11,20 +11,20 @@ class TestSolve(unittest.TestCase):
 
   def test_solve_from_other(self):
     c_p = relation.Problem(test_data.vars1, test_data.clauses1)
-    fsat, values = c_p.solve()
-    self.assertEquals(fsat, 468)
+    sat, values = c_p.solve()
+    self.assertEquals(sat, 468)
 
     c_p = relation.Problem(test_data.vars2, test_data.clauses2)
-    fsat, values = c_p.solve()
-    self.assertEquals(fsat, 468)
+    sat, values = c_p.solve()
+    self.assertEquals(sat, 468)
 
     c_p = relation.Problem(test_data.vars3, test_data.clauses3)
-    fsat, values = c_p.solve()
-    self.assertEquals(fsat, 6)
+    sat, values = c_p.solve()
+    self.assertEquals(sat, 6)
 
     c_p = relation.Problem(test_data.vars4, test_data.clauses4)
-    fsat, values = c_p.solve()
-    self.assertEquals(fsat, 36)
+    sat, values = c_p.solve()
+    self.assertEquals(sat, 36)
 
   def test_solve_from_us(self):
     # The best we can to on a short notice.
@@ -43,15 +43,15 @@ class TestSolve(unittest.TestCase):
       c_p = relation.Problem(vars, clauses)
 
       s = time.time()
-      fsat, values = c_p.evergreen_aggressive()
+      sat, values = c_p.evergreen_aggressive()
       e = time.time()
 
-      self.assertEquals(answers[i], fsat)
+      self.assertEquals(answers[i], sat)
       i += 1
-#      diff = (float(fsat) / len(clauses)) - relation.break_even(rn, 3)
+#      diff = (float(sat) / len(clauses)) - relation.break_even(rn, 3)
 #      if diff < 0:
 #        sys.stdout.write('%d (%d) / %d = %f : %f seconds\n'
-#                         % (rn, fsat, len(clauses), diff, (e - s)))
+#                         % (rn, sat, len(clauses), diff, (e - s)))
 #        sys.stdout.flush()
 
 if __name__ == '__main__':

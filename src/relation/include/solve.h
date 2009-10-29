@@ -149,7 +149,7 @@ clause_delete(clause *clause);
  * Calculate the number of satisfied clauses.
  */
 int
-fsat(const problem * restrict problem, const solution * restrict solution);
+sat(const problem * restrict problem, const solution * restrict solution);
 
 /**
  * @return true if the clause is satisfied by the clause.

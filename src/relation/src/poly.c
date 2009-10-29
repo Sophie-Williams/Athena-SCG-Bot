@@ -19,7 +19,7 @@
  */
 poly3 *
 poly3_create(uint32_t rn, poly3 *poly) {
-    assert(poly != NULL);
+    assert(poly);
 
     POLY3(*poly, 0, 0, 0, 0); /* A blank, if you will. */
 
@@ -37,8 +37,8 @@ poly3_create(uint32_t rn, poly3 *poly) {
 
 poly3 *
 poly3_add(poly3 *a, poly3 *b) {
-    assert(a != NULL);
-    assert(b != NULL);
+    assert(a);
+    assert(b);
 
     a->coeff3 += b->coeff3;
     a->coeff2 += b->coeff2;
@@ -55,8 +55,8 @@ poly3_find_critical_points(poly3 *poly, pair_double *answer) {
     double c;
     double z;
 
-    assert(answer != NULL);
-    assert(poly != NULL);
+    assert(answer);
+    assert(poly);
 
     /* Differentiate */
     a = poly->coeff3 * 3;
@@ -95,8 +95,8 @@ pair_double *
 poly3_get_maximum(poly3 *poly, pair_double *answer) {
     pair_double possible_points;
 
-    assert(answer != NULL);
-    assert(poly != NULL);
+    assert(answer);
+    assert(poly);
 
     answer->first = 0.0;
     answer->last = 0.0;
@@ -111,7 +111,7 @@ poly3_get_maximum(poly3 *poly, pair_double *answer) {
 
 double
 poly3_eval(poly3 *poly, double x) {
-    assert(poly != NULL);
+    assert(poly);
 
     return (pow(x, 3) * poly->coeff3 + pow(x, 2) * poly->coeff2 +
             x * poly->coeff1 + poly->coeff0);
@@ -198,7 +198,7 @@ poly *
 poly_create(int *coeffs, int degree) {
     poly *p;
 
-    assert(coeffs != NULL);
+    assert(coeffs);
 
     if ((p = malloc(sizeof(poly))) == NULL) {
         perror("malloc");
@@ -225,8 +225,8 @@ poly_eval(poly *p, double value) {
     double ret;
     int i;
 
-    assert(p != NULL);
-    assert(p->coeffs != NULL);
+    assert(p);
+    assert(p->coeffs);
 
     /* Horner's rule */
     ret = p->coeffs[p->degree];
@@ -315,7 +315,7 @@ poly_maxima(poly *p, double left, double right) {
     double max;
     double temp;
 
-    assert(p != NULL);
+    assert(p);
     assert(left < right);
 
     max = -INFINITY;
@@ -335,7 +335,7 @@ poly_synth_div(poly *p, int q) {
     int i;
     int r;
 
-    assert(p != NULL);
+    assert(p);
 
     r = *(p->coeffs+p->degree);
     for (i = p->degree - 1; i >= 0; i--) {

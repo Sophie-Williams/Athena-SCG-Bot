@@ -28,13 +28,13 @@ typedef struct __thread_data {
 
 /* Returns the number of satisfied clauses. */
 int
-fsat(const problem * restrict problem, const solution * restrict solution) {
+sat(const problem * restrict problem, const solution * restrict solution) {
     int i;
     int count = 0;
     clause *c;
 
-    assert(problem != NULL);
-    assert(solution != NULL);
+    assert(problem);
+    assert(solution);
 
     /* for c in clauses */
     for (i = 0; i < problem->num_clauses; i++) {
@@ -52,7 +52,7 @@ fsat(const problem * restrict problem, const solution * restrict solution) {
  */
 int
 solve_value(const clause * restrict clause, int assignment) {
-    assert(clause != NULL);
+    assert(clause);
     assert(assignment >= 0);
     assert(assignment < (1 << clause->rank));
     /* The assignment is represented as a binary number whose length is the
@@ -72,7 +72,7 @@ to_row_number(const int * restrict values, int rank) {
     register int i;
     register int ret = 0;
 
-    assert(values != NULL);
+    assert(values);
 
     for(i = 0; i < rank; i++) {
         ret += (1 << i) * (*(values+i) ? TRUE : FALSE);
@@ -86,8 +86,8 @@ clause_is_satisfied(const clause * restrict c, const solution * restrict s) {
     int i;
     int t_v[MAX_RANK];
 
-    assert(c != NULL);
-    assert(s != NULL);
+    assert(c);
+    assert(s);
 
     /* copy the values from the clause */
     for (i = 0; i < c->rank; i++) {
@@ -105,8 +105,8 @@ clause_is_satisfied_v0(const clause * restrict c, const solution * restrict s) {
     int i;
     uint32_t rn_temp;
 
-    assert(c != NULL);
-    assert(s != NULL);
+    assert(c);
+    assert(s);
 
     /* 0 is not valid. */
     if (c->rn == 0) {
@@ -129,7 +129,7 @@ clause_is_satisfied_v0(const clause * restrict c, const solution * restrict s) {
 
 solution *
 solve(const problem * restrict p, solution *s) {
-    /* FIXME filter unused variables */
+    /* Unused variables are filtered in Python */
     return solve_iterate(p, s);
 }
 
@@ -145,7 +145,7 @@ variable_count(const problem * restrict p) {
     int j;
     clause *c;
 
-    assert(p != NULL);
+    assert(p);
 
     if ((var_count = malloc(sizeof(int) * p->num_vars)) == NULL)
         return NULL;
@@ -189,7 +189,7 @@ problem_reduce_all(problem *p, int var, int value) {
     register clause *c;
     register int var_p;
 
-    assert(p != NULL);
+    assert(p);
     assert(var >= 0);
     assert(var < p->num_vars);
 
@@ -234,8 +234,8 @@ solve_iterate(const problem * restrict p, solution *s) {
     thread_data tds[NTHREADS];
     problem p_copy;
 
-    assert(p != NULL);
-    assert(s != NULL);
+    assert(p);
+    assert(s);
 
     search_space = (1 << p->num_vars);
 
@@ -273,7 +273,7 @@ solve_iterate(const problem * restrict p, solution *s) {
         pthread_attr_destroy(attrs+i);
 
         /* Keep track of the best one. */
-        if ((clauses_satisfied = fsat(p, x)) > max) {
+        if ((clauses_satisfied = sat(p, x)) > max) {
             if (best != NULL) {
                 solution_delete(best);
             }
@@ -302,7 +302,7 @@ __solve_helper(void *t_d) {
     thread_data *t;
     solution *s;
 
-    assert(t_d != NULL);
+    assert(t_d);
 
     t = (thread_data *)t_d;
 
@@ -342,8 +342,8 @@ __solve_iterate(const problem * restrict p, solution *s,
     double max_p;
 #endif
 
-    assert(p != NULL);
-    assert(s != NULL);
+    assert(p);
+    assert(s);
 
 #if OPTIMIZE
     max_p = find_maximum_point(p->clauses->rn, 3);
@@ -378,7 +378,7 @@ __solve_iterate(const problem * restrict p, solution *s,
         }
 
         /* Keep track of the maximum. */
-        temp = fsat(p, s);
+        temp = sat(p, s);
         if (temp > max) {
             max = temp;
             memcpy(max_solution->values, s->values, sizeof(int) * s->size);

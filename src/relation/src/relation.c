@@ -25,7 +25,6 @@ get_magic_number(int rank, int var_p, int value) {
 int
 is_irrelevant(uint32_t rn, int rank, int var_p) {
     register uint32_t m = get_magic_number(rank, var_p, 1);
-
     return ((rn & m) >> (1 << var_p)) == (rn & (~m));
 }
 
@@ -35,11 +34,10 @@ num_relevant_variables(uint32_t rn, int rank) {
     register int i;
 
     rel_vars = rank;
-    for (i = 0; i < rank; i++) {
-        if (is_irrelevant(rn, rank, i)) {
+    for (i = 0; i < rank; i++)
+        if (is_irrelevant(rn, rank, i))
             rel_vars--;
-        }
-    }
+
     return rel_vars;
 }
 
