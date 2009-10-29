@@ -88,7 +88,6 @@ reduce(uint32_t rn, int rank, int var_p, int value) {
     return rn_masked | (rn_masked >> (1 << var_p));
 }
 
-
 uint32_t
 swap(uint32_t rn, int rank, int var_p1, int var_p2) {
     int tmp;
@@ -160,8 +159,6 @@ swap(uint32_t rn, int rank, int var_p1, int var_p2) {
     /* move the rows and combine the three components */
     return (s | (d << shift_amt) | (u >> shift_amt));
 }
-
-
 
 uint32_t
 renme(uint32_t rn, int rank, int perm_semantics, int *permutation) {

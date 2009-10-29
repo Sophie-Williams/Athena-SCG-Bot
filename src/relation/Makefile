@@ -10,19 +10,21 @@ OBJECTS = relation_pyx.o relation.o poly.o solve.o
 all: relation.so
 
 relation.so: $(OBJECTS)
-	$(CC) $(CFLAGS) -shared $(OBJECTS) -o $@
+	$(CC) $(CFLAGS) -shared $^ -o $@
 
 relation_pyx.o: relation_pyx.c
-	$(CC) $(CFLAGS) -fPIC -I/usr/include/python2.6 -c -o $@ relation_pyx.c
+	$(CC) $(CFLAGS) -fPIC -I/usr/include/python2.6 -c -o $@ $^
 
 %_test: %.o relation.o poly.o tests/%_test.c
-	$(CC) $(CFLAGS) -lm $? -o $@
+	$(CC) $(CFLAGS) -lm $^ -o $@
 
 %.o: src/%.c
-	$(CC) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CFLAGS) -c -o $@ $^
 
 %_pyx.c: %.pyx
-	pyrexc $< -o $@
+	pyrexc $^ -o $@
+
+.PHONY : clean test test_full
 
 test: all poly_test solve_test relation_test
 	python tests.py

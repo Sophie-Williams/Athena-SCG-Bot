@@ -9,43 +9,7 @@ int tests_run = 0;
 int asserts = 0;
 
 static char *test_solve() {
-    problem *p;
-    solution *s;
-
-    p = malloc(sizeof(problem));
-    p->vars = malloc(sizeof(char *) * 5);
-    *(p->vars+0) = malloc(sizeof(char) * 10);
-    sprintf(*(p->vars+0), "v1");
-    *(p->vars+1) = malloc(sizeof(char) * 10);
-    sprintf(*(p->vars+1), "v2");
-    *(p->vars+2) = malloc(sizeof(char) * 10);
-    sprintf(*(p->vars+2), "v3");
-    *(p->vars+3) = malloc(sizeof(char) * 10);
-    sprintf(*(p->vars+3), "v4");
-    *(p->vars+4) = malloc(sizeof(char) * 10);
-    sprintf(*(p->vars+4), "v5");
-    p->num_vars = 5;
-    p->clauses = malloc(sizeof(clause) * 4);
-    /*
-    *(p->clauses+1) = malloc(sizeof(clause));
-    *(p->clauses+2) = malloc(sizeof(clause));
-    *(p->clauses+3) = malloc(sizeof(clause));
-     */
-    (p->clauses+0)->rn = 22;
-    (p->clauses+0)->rank = 3;
-    (p->clauses+0)->vars = malloc(sizeof(int) * 3);
-    *((p->clauses+0)->vars+0) = 0;
-    *((p->clauses+0)->vars+1) = 1;
-    *((p->clauses+0)->vars+2) = 2;
-
-    p->num_clauses = 1;
-
-    s = solution_create(p);
-    solve(p, s);
-
-    solution_delete(s);
-    problem_delete(p);
-
+    /* XXX much more sane to test in Python */
     return NULL;
 }
 

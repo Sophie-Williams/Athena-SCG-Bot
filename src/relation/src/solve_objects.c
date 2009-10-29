@@ -23,7 +23,7 @@ problem_create(char **vars, int num_vars, clause *clauses, int num_clauses) {
         strcpy(*(p->vars+i), *(vars+i));
     }
 
-    p->clauses = malloc(sizeof(clause) * num_clauses);
+    p->clauses = calloc(num_clauses, sizeof(clause));
     memcpy(p->clauses, clauses, sizeof(clause) * num_clauses);
 
     return p;
@@ -32,7 +32,6 @@ problem_create(char **vars, int num_vars, clause *clauses, int num_clauses) {
 problem *
 problem_shallow_copy(const problem * restrict from) {
     problem *to;
-    register size_t size;
 
     assert(from);
 
@@ -45,15 +44,13 @@ problem_shallow_copy(const problem * restrict from) {
     to->num_vars = from->num_vars;
     to->num_clauses = from->num_clauses;
 
-    size = sizeof(clause) * from->num_clauses;
-
-    if ((to->clauses = malloc(size)) == NULL) {
-        perror("malloc");
+    if ((to->clauses = calloc(from->num_clauses, sizeof(clause))) == NULL) {
+        perror("calloc");
         free(to);
         return NULL;
     }
 
-    memcpy(to->clauses, from->clauses, size);
+    memcpy(to->clauses, from->clauses, sizeof(clause) * from->num_clauses);
 
     return to;
 }

@@ -1,5 +1,5 @@
 
-__author__ = "Alex Lee <lee@ccs.neu.edu"
+__author__ = "Alex Lee <lee@ccs.neu.edu>"
 
 from pyparsing import *
 from parser import String, Double, sup_lit, wrap

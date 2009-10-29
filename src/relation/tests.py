@@ -114,7 +114,7 @@ class TestRelation(unittest.TestCase):
     self.assertEqual(f(234, 3, 0), 0)
     self.assertEqual(f(234, 3, 1), 1)
     self.assertEqual(f(234, 3, 2), 3)
-    self.assertEqual(f(234, 3, 3), 1) 
+    self.assertEqual(f(234, 3, 3), 1)
 
     self.assertEqual(f(12354312, 5, 4), 2)
 

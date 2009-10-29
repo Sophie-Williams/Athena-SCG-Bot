@@ -133,7 +133,6 @@ solve(const problem * restrict p, solution *s) {
     return solve_iterate(p, s);
 }
 
-
 /** FIXME TEST ME
  * @param p The problem
  * @return The occurences of variables.
@@ -156,7 +155,7 @@ variable_count(const problem * restrict p) {
     for (i = 0; i < p->num_clauses; i++) {
         c = p->clauses + i;
         for (j = 0; j < c->rank; j++) {
-            *(var_count + *(c->vars+j)) += 1;
+            *(var_count + *(c->vars+j)) += c->weight;
         }
     }
 
@@ -192,7 +191,6 @@ problem_reduce_all(problem *p, int var, int value) {
     assert(p);
     assert(var >= 0);
     assert(var < p->num_vars);
-
 
     for (i = 0; i < p->num_clauses; i++) {
         c = p->clauses + i;
@@ -274,7 +272,7 @@ solve_iterate(const problem * restrict p, solution *s) {
 
         /* Keep track of the best one. */
         if ((clauses_satisfied = sat(p, x)) > max) {
-            if (best != NULL) {
+            if (best) {
                 solution_delete(best);
             }
             max = clauses_satisfied;
