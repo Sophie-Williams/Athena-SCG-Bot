@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 GAMEREG_PORT = 7005
-GAMEREG_HOST = 'tvtennis.ccs.neu.edu'
+GAMEREG_HOST = 'cs4500tmp.ccs.neu.edu'
 TEAM_NAME = 'Athena'
 TEMPLATE_DIR = 'static/'
 

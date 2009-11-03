@@ -18,6 +18,7 @@ class Offer(object):
     self.offerid = int(offerid)
     self.playerid = int(playerid)
     self.problemnumbers = map(int, list(problemnumbers))
+    self.problemnumbers.sort()
     reduced = relation.reduce_rns(self.problemnumbers)
     if reduced:
       self.problemnumbers = reduced
@@ -173,6 +174,7 @@ class AcceptedChallenge(object):
     self.offerid = int(offerid)
     self.provider = int(provider)
     self.problemnumbers = map(int, list(problemnumbers))
+    self.problemnumbers.sort()
     self.price = float(price)
     self.kind = kind
 

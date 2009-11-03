@@ -85,6 +85,7 @@ class Problem(object):
     self.challengeid = int(challengeid)
     self.seller = int(seller)
     self.problemnumbers = map(int, list(problemnumbers))
+    self.problemnumbers.sort()
     self.price = float(price)
     self.solution = None
     self.profit = 0
