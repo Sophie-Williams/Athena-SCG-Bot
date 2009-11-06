@@ -37,12 +37,12 @@ The rank of a number is the number of variables a clause can have.
 
 cdef extern from "stdlib.h":
     ctypedef unsigned long int size_t
-    cdef void *malloc(size_t size)
+    void *malloc(size_t size)
 
 
 cdef extern from "string.h":
-    cdef char *strcpy(char *s1, char *s2)
-
+    char *strcpy(char *s1, char *s2)
+    void *memset(void *s, int c, size_t n)
 
 cdef extern from "stdint.h":
     ctypedef unsigned long int uint32_t
@@ -254,14 +254,25 @@ def implies(uint32_t a, uint32_t b):
     return c_implies(a, b)
 
 def reduce_rns(rns):
-    """Reduce the relation numbers in the given list"""
-    for rn in rns:
-        for x in rns:
-            if not implies(rn, x):
+    """Reduce the relation numbers in the given list.
+    >>> reduce_rns([2, 10, 26, 1, 3, 8])
+    [1, 2, 8]
+    >>> reduce_rns([3, 7])
+    [3]
+    """
+    rns = list(rns)
+    stop = 0
+    for _ in range(0, len(rns)):
+        for rn in rns:
+            for x in rns:
+                if rn != x and implies(rn, x):
+                    rns.remove(x)
+                    stop = 1
+                    break
+            if stop:
+                stop = 0
                 break
-        else:
-            return rn
-    return None
+    return sorted(set(rns))
 
 # rank should be 3 for now.
 def break_even(uint32_t rn, int rank):
@@ -323,6 +334,7 @@ cdef class Problem:
         cdef char **c_vars
 
         tmp = <clause *> malloc(sizeof(clause) * len(clauses))
+        memset(tmp, 0, sizeof(clause) * len(clauses))
 
         # For all clauses, which is a list of the form
         # [ <relation_number>, weight, <var>, ... ]
@@ -503,6 +515,7 @@ cdef class Problem:
                     break
             f.n_map_all(m)
             A = map(operator.xor, A, m)
+
         return max[0], max[1]
 
     def solve(self):

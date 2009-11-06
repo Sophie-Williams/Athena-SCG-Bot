@@ -138,6 +138,7 @@ void
 clause_set_real(clause *clause, uint32_t rn, int rank, int *vars,
                 uint32_t weight) {
     register size_t size;
+    int *tmp;
     assert(clause);
 
     size = sizeof(int) * rank;
@@ -150,10 +151,17 @@ clause_set_real(clause *clause, uint32_t rn, int rank, int *vars,
     if (!vars)
         return;
 
-    if ((clause->vars = malloc(size)) == NULL) {
+    tmp = clause->vars;
+    if (!(clause->vars = malloc(size))) {
         perror("malloc");
+        clause->vars = tmp;
         return;
     }
+    
+    if (tmp) {
+        free(tmp);
+    }
+
     memcpy(clause->vars, vars, size);
 }
 

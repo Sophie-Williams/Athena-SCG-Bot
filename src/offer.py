@@ -20,7 +20,7 @@ class Offer(object):
     self.problemnumbers = map(int, list(problemnumbers))
     reduced = relation.reduce_rns(self.problemnumbers)
     if reduced:
-      self.problemnumbers = [reduced]
+      self.problemnumbers = reduced
     self.price = float(price)
     self.actedon = False
     self.bep = relation.break_even(self.problemnumbers[0], 3)
