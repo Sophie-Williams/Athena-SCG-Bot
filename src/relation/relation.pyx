@@ -39,7 +39,6 @@ cdef extern from "stdlib.h":
     ctypedef unsigned long int size_t
     void *malloc(size_t size)
 
-
 cdef extern from "string.h":
     char *strcpy(char *s1, char *s2)
     void *memset(void *s, int c, size_t n)
@@ -47,14 +46,12 @@ cdef extern from "string.h":
 cdef extern from "stdint.h":
     ctypedef unsigned long int uint32_t
 
-
 cdef extern from "relation_consts.h":
-    cdef uint32_t TRUE_VARS[][6]
-    cdef uint32_t MAGIC_NUMBERS[]
-    cdef uint32_t MASKS[]
-    cdef int C_SOURCE "SOURCE"
-    cdef int C_TARGET "TARGET"
-
+    uint32_t TRUE_VARS[][6]
+    uint32_t MAGIC_NUMBERS[]
+    uint32_t MASKS[]
+    int C_SOURCE "SOURCE"
+    int C_TARGET "TARGET"
 
 cdef extern from "relation.h":
     int c_is_irrelevant "is_irrelevant" (uint32_t rn, int rank, int var_p)
@@ -71,10 +68,8 @@ cdef extern from "relation.h":
     int c_implies "implies" (uint32_t a, uint32_t b)
     uint32_t c_x_true_vars "x_true_vars" (int rank, int num_true_vars)
 
-
 cdef extern from "poly.h":
-    cdef double find_break_even(uint32_t rn, int rank)
-
+    double find_break_even(uint32_t rn, int rank)
 
 cdef extern from "solve.h":
     struct __solution:
@@ -117,7 +112,6 @@ cdef extern from "solve.h":
     solution *solve_iterate(problem *p, solution *s)
     solution *__solve_iterate(problem *p, solution *s,
                               uint32_t start, uint32_t end)
-
 
 # for the module
 SOURCE = C_SOURCE
@@ -293,7 +287,6 @@ cdef rn_counts(problem *p):
 
     return counts
 
-
 cdef mean(problem *p, int num_vars, int num_vars_true):
     sum = 0.0
     # FIXME variable rank.
@@ -301,7 +294,6 @@ cdef mean(problem *p, int num_vars, int num_vars_true):
     for rn, count in rn_counts(p).items():
         sum = sum + SAT(p, rn, rank, num_vars, num_vars_true) * count
     return sum / p[0].num_vars
-
 
 cdef SAT(problem *p, uint32_t rn, int rank, int n, int k):
     sum = 0.0
@@ -321,7 +313,6 @@ def pascal(n, k):
         result = result / y
 
     return result
-
 
 cdef class Problem:
     cdef problem *p

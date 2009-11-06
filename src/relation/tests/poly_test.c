@@ -10,85 +10,6 @@ int asserts = 0;
 #define IN_RANGE(actual, expected) \
     (((expected - DELTA) <= actual) && (actual <= (expected + DELTA)))
 
-static char *test_poly3_create() {
-    poly3 p;
-    poly3 test;
-
-    poly3_create(10, &p);
-    POLY3(test, 0, -1, 1, 0); 
-    mu_assert("RN 10 -> 001 + 011", POLY3_EQUAL(p, test));
-
-    poly3_create(78, &p);
-    POLY3(test, 0, -2, 2, 0);
-    mu_assert("RN 78 -> 101 011 010 001", POLY3_EQUAL(p, test));
-
-    poly3_create(255, &p);
-    POLY3(test, 0, 0, 0, 1);
-    mu_assert("RN 255 -> ALL", POLY3_EQUAL(p, test));
-
-    return NULL;
-}
-
-static char *test_poly3_get_maximum() {
-    pair_double pd;
-    poly3 p1;
-    poly3 p2;
-    poly3 p3;
-    poly3 p4;
-    poly3 p5;
-
-    POLY3(p1, -1, 3, -3, 1);
-    POLY3(p2, 1, -2, 1, 0);
-    POLY3(p3, -1, 1, 0, 0);
-    POLY3(p4, 1, 0, 0, 0);
-    POLY3(p5, 0, -1, 1, 0);
-
-    poly3_get_maximum(&p1, &pd);
-    mu_assert("The 03 case. (three 0's)",
-              IN_RANGE(pd.first, 0.0) || IN_RANGE(pd.last, 0.0));
-
-    poly3_get_maximum(&p2, &pd);
-    mu_assert("The 12 case. (two 0's one 1's)",
-              IN_RANGE(pd.first, 0.148148) || IN_RANGE(pd.last, 0.148148));
-
-    poly3_get_maximum(&p3, &pd);
-    mu_assert("The 21 case. (one 0's two 1's)",
-              IN_RANGE(pd.first, 0.148148) || IN_RANGE(pd.last, 0.148148));
-
-    poly3_get_maximum(&p4, &pd);
-    mu_assert("The 30 case. (three 1's)",
-              IN_RANGE(pd.first, 0.0) || IN_RANGE(pd.last, 0.0));
-
-    poly3_get_maximum(&p5, &pd);
-    mu_assert("10 -> 2^3 + 2^1 -> 001, 011",
-              IN_RANGE(pd.first, 0.25) || IN_RANGE(pd.last, 0.25));
-    return NULL;
-}
-
-static char *test_poly3_eval() {
-    poly3 p;
-
-    POLY3(p, 0, 0, 0, 1);
-    mu_assert("eval 1 with 1",
-              IN_RANGE(poly3_eval(&p, 1), 1.0));
-    mu_assert("eval 1 with 23",
-              IN_RANGE(poly3_eval(&p, 23), 1.0));
-
-    POLY3(p, 0, 0, 3, 1);
-    mu_assert("eval 3*x + 1, x = 1",
-              IN_RANGE(poly3_eval(&p, 1), 4.0));
-    mu_assert("eval 3*x + 1, x = 4",
-              IN_RANGE(poly3_eval(&p, 4), 13.0));
-
-    POLY3(p, 1, 2, 3, 4);
-    mu_assert("eval x^3 + 2*x^2 + 3*x + 4, x = 1",
-              IN_RANGE(poly3_eval(&p, 1), 10.0));
-    mu_assert("eval x^3 + 2*x^2 + 3*x + 4, x = 2",
-              IN_RANGE(poly3_eval(&p, 2), 26.0));
-
-    return NULL;
-}
-
 static char *test_find_break_even() {
     uint32_t rn;
 
@@ -267,9 +188,6 @@ static char *test_poly_eval() {
 }
 
 char *all_tests() {
-    mu_run_test(test_poly3_get_maximum);
-    mu_run_test(test_poly3_create);
-    mu_run_test(test_poly3_eval);
     mu_run_test(test_find_break_even);
     mu_run_test(test_poly_new);
     mu_run_test(test_poly_synth_div);
