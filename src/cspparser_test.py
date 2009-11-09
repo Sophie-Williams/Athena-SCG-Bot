@@ -83,5 +83,15 @@ class cspparserTestCase(unittest.TestCase):
     self.assertEqual(len(pctx['accepted']), 0)
     self.assertEqual(len(pctx['provided']), 0)
 
+  def test_PlayerTransaction(self):
+    s = '''playertrans[
+    307
+    offer[10820 all (121 206 ) 1.0] 
+    offer[10819 all (31 252 ) 1.0] 
+    offer[10818 all (33 232 ) 1.0] 
+    offer[10817 all (65 228 ) 1.0] 
+        ]'''
+    self.assert_(cspparser.PlayerTransaction.searchString(s))
+
 if __name__ == '__main__':
   unittest.main()

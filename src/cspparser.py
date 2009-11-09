@@ -113,9 +113,9 @@ ReofferTrans = ( Suppress("reoffer") + wrap(Integer("challengeid")
 
 Transaction = Or([OfferTrans, AcceptTrans, ReofferTrans, ProvideTrans,
                   SolveTrans])
-ListOfTransactions = List(L + Transaction)
-PlayerTransaction = ( sup_lit("playertrans") + wrap(L
-                    + PlayerID("playerid") + L
+ListOfTransactions = List(Transaction)
+PlayerTransaction = ( sup_lit("playertrans") + wrap(
+                      PlayerID("playerid")
                     + ListOfTransactions("ts")) )
 
 # Describes the config syntax
@@ -147,3 +147,20 @@ PlayerContext = (sup_lit("context") + wrap(L
                  + ChallengeList("accepted") + L
                  + ChallengeList("provided") + L
                 ))
+
+# BalanceTransfer
+AccOffCommon = sup_lit('acceptor:') + Integer + sup_lit('offerer:') + Integer
+Payment = wrap(sup_lit('acceptor paid') + Double + sup_lit('for challenge')
+               + Integer + sup_lit('.') + AccOffCommon)
+Profit  = wrap(sup_lit('acceptor received') + Double + sup_lit('for solving')
+               + Double + sup_lit('of challenge') + Integer + sup_lit('.')
+               + AccOffCommon)
+BalanceTransfer = Or([Payment, Profit])
+
+# Round for history parsing
+PlayerSpec = (sup_lit('playerspec') +
+              wrap(String('name') + String('ip') + Integer('port')))
+PlayerAssign = wrap(Integer('number') + sup_lit('->') + PlayerSpec,'(', ')')
+GameRound = (sup_lit("round") + wrap(Integer('number')
+             + List(Or([PlayerTransaction, BalanceTransfer]))))
+GameHistory = List(Or([PlayerSpec, GameRound]))
