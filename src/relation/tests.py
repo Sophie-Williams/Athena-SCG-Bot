@@ -52,7 +52,7 @@ class TestRelation(unittest.TestCase):
 
   def test_first_forced_variable(self):
     # XXX needs more tests
-    self.assertEqual(relation.first_forced_variable(123123, 3, 0), None)
+    self.assertEqual(relation.first_forced_variable(123123, 3, 0), -1)
 
   def test_n_map(self):
     # XXX needs more tests
@@ -85,9 +85,10 @@ class TestRelation(unittest.TestCase):
     self.assertEqual(relation.swap(57587, 5, 0, 3), 61905)
 
   def test_renme(self):
+    f = relation.renme
     # XXX what the fuck?
-    self.assertEqual(relation.renme(7, 2, relation.SOURCE, [1, 2, 0]), 7)
-    self.assertEqual(relation.renme(4, 5, relation.SOURCE, [1, 2, 0]), 4)
+    self.assertEqual(f(7, 2, relation.SOURCE, [1, 2, 0]), 6)
+    self.assertEqual(f(4, 5, relation.SOURCE, [1, 2, 0]), 4)
 
   def test_ones(self):
     self.assertEqual(relation.ones(0, 5), 0)

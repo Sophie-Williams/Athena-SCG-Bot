@@ -220,3 +220,24 @@ int
 implies(uint32_t a, uint32_t b) {
     return (a & b) == a;
 }
+
+int
+is_forced(uint32_t rn, int rank, int var_p) {
+    uint32_t rm;
+
+    if (is_irrelevant(rn, rank, var_p))
+        return -1;
+
+    rm = rn & get_magic_number(rank, var_p, 1);
+    return rm == 0 ? 0 : (rm == rn ? 1 : -1);
+}
+
+int
+first_forced_variable(uint32_t rn, int rank, int start_p) {
+    for (; start_p < rank; start_p++) {
+        if (is_forced(rn, rank, start_p) != -1) {
+            return start_p;
+        }
+    }
+    return -1;
+}

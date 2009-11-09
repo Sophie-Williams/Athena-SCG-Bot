@@ -149,4 +149,27 @@ n_map(uint32_t rn, int rank, int var_p);
 int
 implies(uint32_t a, uint32_t b);
 
+/**
+ * @param rn The relation number.
+ * @param rank The rank.
+ * @param var_p The position of the variable.
+ * @return 0 if forced to 0,
+ *         1 if forced to 1.
+ *        -1 if not forced.
+ */
+int
+is_forced(uint32_t rn, int rank, int var_p);
+
+/*
+ * Starting at the given starting position, get the position of the first
+ * variable forced by the given relation.
+ * @param rn The relation number.
+ * @param rank The rank of the given relation number.
+ * @param start_p The starting position.
+ * @return if nothing is forced = -1
+ *         else = the position of the first forced variable
+ */
+int
+first_forced_variable(uint32_t rn, int rank, int start_p);
+
 #endif

@@ -38,6 +38,7 @@ The rank of a number is the number of variables a clause can have.
 cdef extern from "stdlib.h":
     ctypedef unsigned long int size_t
     void *malloc(size_t size)
+    void free(void *ptr)
 
 cdef extern from "string.h":
     char *strcpy(char *s1, char *s2)
@@ -67,6 +68,11 @@ cdef extern from "relation.h":
     uint32_t c_n_map "n_map" (uint32_t rn, int rank, int var_p)
     int c_implies "implies" (uint32_t a, uint32_t b)
     uint32_t c_x_true_vars "x_true_vars" (int rank, int num_true_vars)
+    int c_is_forced "is_forced" (uint32_t rn, int rank, int var_p)
+    int c_first_forced_variable "first_forced_variable" (uint32_t rn, int rn,
+                                                         int start_p)
+    uint32_t c_renme "renme" (uint32_t rn, int rank, int perm_semantics,
+                              int *permutation)
 
 cdef extern from "poly.h":
     double find_break_even(uint32_t rn, int rank)
@@ -139,34 +145,10 @@ def num_relevant_variables(uint32_t rn, int rank):
     return c_num_relevant_variables(rn, rank)
 
 def is_forced(uint32_t rn, int rank, int var_p):
-    cdef uint32_t m
-    cdef uint32_t rm
-
-    if is_irrelevant(rn, rank, var_p):
-        return -1
-    else:
-        m = get_magic_number(rank, var_p, 1)
-        rm = rn & m;
-        if rm == 0:
-            return 0
-        elif rm == rn:
-            return 1
-        else:
-            return -1
+    return c_is_forced(rn, rank, var_p)
 
 def first_forced_variable(uint32_t rn, int rank, int start_p):
-    """
-    Starting at the given starting position, get the position of the first
-    variable forced by the given relation.
-    @param rn The relation number.
-    @param rank The rank of the given relation number.
-    @param start_p
-    @return if nothing is forced = -1
-            else = the position of the first forced variable
-    """
-    for var_p in range(start_p, rank):
-        if is_forced(rn, rank, var_p) != -1:
-            return var_p
+    return c_first_forced_variable(rn, rank, start_p)
 
 def n_map(uint32_t rn, int rank, int var_p):
     return c_n_map(rn, rank, var_p)
@@ -178,62 +160,14 @@ def swap(uint32_t rn, int rank, int var_p1, int var_p2):
     return c_swap(rn, rank, var_p1, var_p2)
 
 def renme(uint32_t rn, int rank, int perm_semantics, permutation):
-    """
-    Permute the variables in the given rn according to the given permutation
-    fix the truth table order after doing the permutation. @see swap
-    @param rn The relation number.
-    @param rank The rank of the given relation.
-    @param perm_semantics Specifies how the permutation should be applied.
-                          can be either SOURCE or TARGET.
-    For example:
-       for the relation: R(v2,v1,v0)
-       and the permutation {1,2,0} 
-       SOURCE semantics means that v0 goes to position1, v1 goes to position2,
-              v2 goes to position 0
-       TARGET semantics means that position0 gets v1, position1 gets v2,
-              position2 gets v0
-    @param permutation an array of variable positions describing the desired
-                       location of every variables
-    For example:
-       for the relation: R(v2,v1,v0)
-       and the permutation {1,2,0} means v0 goes to position1, v1 goes to
-           position2, v2 goes to position 0
-    @return The modified relation number.
-    """
-    cdef uint32_t new_rn
-    new_rn = 0
-
-    if perm_semantics == C_SOURCE:
-        for x in permutation:
-            new_rn = new_rn + (rn & (1 << x))
-        return new_rn
-
-    # sort dimensions
+    cdef int *c_perm
     cdef int i
-    cdef int j
-    cdef int min
-    cdef int tmp
-
-    for 0 <= i < rank - 1:
-        min = i
-        for i + 1 <= j < rank:
-            if (permutation[j] < permutation[min]):
-                # if min greater,
-                min = j
-        # swap elements at min, i
-        permutation[i], permutation[min] = permutation[min], permutation[i]
-        # tmp = permutation[i]
-        # permutation[i] = permutation[min]
-        # permutation[min] = tmp
-
-        if perm_semantics == C_SOURCE:
-            rn = swap(rn, rank, permutation[min], permutation[i])
-        elif perm_semantics == C_TARGET:
-            rn = swap(rn, rank, min, i)
-        else:
-            pass # error
-
-    return rn
+    c_perm = <int *> malloc(sizeof(int) * len(permutation))
+    for 0 <= i < len(permutation):
+        c_perm[i] = permutation[i]
+    ret = c_renme(rn, rank, perm_semantics, c_perm)
+    free(c_perm)
+    return ret
 
 def ones(uint32_t rn, int rank):
     return c_ones(rn, rank)
@@ -271,7 +205,6 @@ def reduce_rns(rns):
 # rank should be 3 for now.
 def break_even(uint32_t rn, int rank):
     return find_break_even(rn, rank)
-
 
 cdef rn_counts(problem *p):
     cdef int i
