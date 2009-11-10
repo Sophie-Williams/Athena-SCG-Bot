@@ -139,6 +139,8 @@ class Problem(object):
                ' '.join(map(str, self.problemnumbers)), self.price))
 
   def TrivialSolve(self):
+    if len(self.problemnumbers) > 1:
+      return False
     fsat = len(self.clauses)
     if self.problemnumbers[0] == 0:
       logging.debug('Special Case Solve: Relation 0!')
@@ -312,7 +314,9 @@ class Problem(object):
 
   @classmethod
   def GetVarsGenerator(cls, problemnumbers, perceived_vars=23):
-    ptv = Problem.GetBestPriceAndType(problemnumbers[0])
+    ptv = False
+    if len(problemnumbers) == 1:
+      ptv = Problem.GetBestPriceAndType(problemnumbers[0])
     if ptv:
       numvars = ptv[2]
       if ptv[1] == 'permutations':
@@ -322,17 +326,23 @@ class Problem(object):
     else:
       generator = itertools.combinations
       numvars = 23
-    #XXX: This is a hack to always generate the appearance of 23 vars, even
-    #     when we only use 13.
+      #XXX: This is a hack to always generate the appearance of 23 vars, even
+      #     when we only use 13.
+    if len(problemnumbers) > 1:
+      generator = itertools.combinations
+      numvars = 19
+      # XXX: This assumes 2 different relation numbers
     return (numvars, generator, ['v%d' % x for x in range(perceived_vars)])
 
   @classmethod
   def Generate(cls, problemnumbers, offerid, kind, degree=None):
     numvars, clausegenerator, varslist = cls.GetVarsGenerator(problemnumbers)
     p = cls(0, varslist, [], offerid, 0, problemnumbers, 0, kind)
-    for i, j, k in clausegenerator(range(numvars), 3):
-      p.AddClause(Clause(problemnumbers[0],
-                         list_of_vars=['v%d' % x for x in [i, j, k]]))
+    max = len(problemnumbers) > 1 and 2 or 1
+    for n in range(max):
+      for i, j, k in clausegenerator(range(numvars), 3):
+        p.AddClause(Clause(problemnumbers[n],
+                           list_of_vars=['v%d' % x for x in [i, j, k]]))
     return p
 
   @classmethod

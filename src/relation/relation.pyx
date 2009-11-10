@@ -203,8 +203,15 @@ def reduce_rns(rns):
     return sorted(set(rns))
 
 # rank should be 3 for now.
-def break_even(uint32_t rn, int rank):
-    return find_break_even(rn, rank)
+def break_even(rns, int rank):
+    if isinstance(rns, int):
+        return find_break_even(rns, rank)
+    x = []
+    for rn in rns:
+        x.append(find_break_even(rn, rank))
+    x.sort()
+    return x[0]
+#find_break_even(rn, rank)
 
 cdef rn_counts(problem *p):
     cdef int i

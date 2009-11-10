@@ -19,12 +19,16 @@ class Offer(object):
     self.playerid = int(playerid)
     self.problemnumbers = map(int, list(problemnumbers))
     self.problemnumbers.sort()
+    logging.debug('BEFORE PN: %s' % str(self.problemnumbers))
     reduced = relation.reduce_rns(self.problemnumbers)
     if reduced:
       self.problemnumbers = reduced
+    logging.debug('AFTER  PN: %s' % str(self.problemnumbers))
     self.price = float(price)
     self.actedon = False
-    self.bep = relation.break_even(self.problemnumbers[0], 3)
+    # XXX This is totally bogus.
+    self.bep = (relation.break_even(self.problemnumbers, 3)
+                / len(self.problemnumbers))
     self.potential = 0
     self.kind = kind
   
@@ -55,13 +59,15 @@ class Offer(object):
     return True
 
   def IsGoodBuyAll(self):
-    if self.problemnumbers[0] <= 0:
-      return False
-    if self.problemnumbers[0] % 2 or self.problemnumbers[0] >= 128:
-      return True
-    if self.bep == 1:
-      return True
-   
+    # Specials only apply to singular lists
+    if len(self.problemnumbers) <= 1:
+      if self.problemnumbers[0] <= 0:
+        return False
+      if self.problemnumbers[0] % 2 or self.problemnumbers[0] >= 128:
+        return True
+      if self.bep == 1:
+        return True
+    # XXX FIXME
     ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])
     if ptv:
       return self.price <= ptv[0]
@@ -83,7 +89,9 @@ class Offer(object):
     Args:
        decrement: (float) Reoffer at the current price minus this number
     """
-    ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])
+    ptv = False
+    if len(self.problemnumbers) == 1:
+      ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])
     new_price = self.price - decrement
     if ptv:
       gen_price = ptv[0] + 0.5 * decrement
@@ -120,7 +128,7 @@ class Offer(object):
         price = ptv[0] + 0.5 * FLAGS.mindecrement
         apply_markup = False
       else:
-        price = relation.break_even(self.problemnumbers[0], 3)
+        price = relation.break_even(self.problemnumbers, 3)
     if apply_markup:
       price += markup
     if price > 1:
