@@ -263,8 +263,9 @@ class Problem(object):
     if not variables:
       variables = self.vars
     logging.debug('Solution values are: %s' % str(values))
-    s = csptree.CSPTree.CreateSolution(variables, values)
-    return str(s)
+    s = map((lambda var, val: '(%s -> %s)' % (var, val and 'true' or 'false')),
+            variables, values)
+    return ' '.join(s) + ' '
 
   def GetTrivialSolution(self, forprovide=False):
     if not self.TrivialSolve():
