@@ -6,7 +6,6 @@ import random
 import threading
 
 import constants
-import csptree
 import proxysolver
 import relation
 
