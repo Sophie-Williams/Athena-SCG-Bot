@@ -19,11 +19,9 @@ class Offer(object):
     self.playerid = int(playerid)
     self.problemnumbers = map(int, list(problemnumbers))
     self.problemnumbers.sort()
-    logging.debug('BEFORE PN: %s' % str(self.problemnumbers))
     reduced = relation.reduce_rns(self.problemnumbers)
     if reduced:
       self.problemnumbers = reduced
-    logging.debug('AFTER  PN: %s' % str(self.problemnumbers))
     self.price = float(price)
     self.actedon = False
     # XXX This is totally bogus.

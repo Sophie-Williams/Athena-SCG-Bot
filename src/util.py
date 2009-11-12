@@ -34,7 +34,7 @@ def DoRegistration(server, ourport, ourteam, ourpass):
     else:
       return '"%s" != "%s"' % (str(resp), str(ourteam))
   except Exception, e:
-    logging.exception('Reg Failure at %s ' % regurl)
+    logging.exception('Reg Failure at %s with %s ' % (regurl, str(regdata)))
     return '%s registration FAILURE! (%s)' % (ourteam, str(e))
 
 def setuplogging():
