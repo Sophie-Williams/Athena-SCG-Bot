@@ -143,8 +143,7 @@ class Game(object):
       for offer in self.context.their_offered:
         logging.info('Reoffering their id %d' % offer.offerid)
         self.AddReply('reoffer', offer.GetReoffer())
-        if self.ReachedMaxProposals():
-          break
+        break
 
   def ProvideTask(self):
     logging.info('Running ProvideTask')

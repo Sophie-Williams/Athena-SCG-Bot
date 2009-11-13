@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 import gflags
 import logging
+import os
+import signal
 import sys
 import web
-import os
 from web import wsgiserver
 
 ## For Django Templating
@@ -66,6 +67,7 @@ class OkHandler(object):
   POST = GET
 
 def apprunner(args=sys.argv):
+  signal.signal(signal.SIGINT, lambda sig,oth: os.abort())
   FLAGS(args)
   util.setuplogging()
   web.webapi.config.debug = False
