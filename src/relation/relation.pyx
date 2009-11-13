@@ -210,8 +210,7 @@ def break_even(rns, int rank):
     for rn in rns:
         x.append(find_break_even(rn, rank))
     x.sort()
-    return x[0]
-#find_break_even(rn, rank)
+    return x[0] / len(rns)
 
 cdef rn_counts(problem *p):
     cdef int i

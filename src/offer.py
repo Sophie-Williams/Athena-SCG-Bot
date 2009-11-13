@@ -24,9 +24,8 @@ class Offer(object):
       self.problemnumbers = reduced
     self.price = float(price)
     self.actedon = False
-    # XXX This is totally bogus.
-    self.bep = (relation.break_even(self.problemnumbers, 3)
-                / len(self.problemnumbers))
+    # FIXME This is totally bogus.
+    self.bep = relation.break_even(self.problemnumbers, 3)
     self.potential = 0
     self.kind = kind
   
@@ -58,19 +57,17 @@ class Offer(object):
 
   def IsGoodBuyAll(self):
     # Specials only apply to singular lists
-    if len(self.problemnumbers) <= 1:
+    if len(self.problemnumbers) == 1:
       if self.problemnumbers[0] <= 0:
         return False
       if self.problemnumbers[0] % 2 or self.problemnumbers[0] >= 128:
         return True
       if self.bep == 1:
         return True
-    # XXX FIXME
-    ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])
-    if ptv:
-      return self.price <= ptv[0]
-    else:
-      return (self.bep + FLAGS.bepbump) >= self.price
+      ptv = problem.Problem.GetBestPriceAndType(self.problemnumbers[0])
+      if ptv:
+        return self.price <= ptv[0]
+    return (self.bep + FLAGS.bepbump) >= self.price
 
   def AvoidReoffer(self, mindecrement=0.01):
     new_price = self.price - mindecrement
