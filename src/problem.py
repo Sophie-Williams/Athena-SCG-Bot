@@ -326,23 +326,20 @@ class Problem(object):
     else:
       generator = itertools.combinations
       numvars = 23
-      #XXX: This is a hack to always generate the appearance of 23 vars, even
-      #     when we only use 13.
     if len(problemnumbers) > 1:
       generator = itertools.combinations
-      numvars = 19
-      # XXX: This assumes 2 different relation numbers
+      numvars = relation.gen.max_vars(2000 / len(problemnumbers))
+    # XXX: This is a hack to always generate the appearance of 23 vars, even
+    #      when we only use 13.
     return (numvars, generator, ['v%d' % x for x in range(perceived_vars)])
 
   @classmethod
   def Generate(cls, problemnumbers, offerid, kind, degree=None):
     numvars, clausegenerator, varslist = cls.GetVarsGenerator(problemnumbers)
     p = cls(0, varslist, [], offerid, 0, problemnumbers, 0, kind)
-    max = len(problemnumbers) > 1 and 2 or 1
-    for n in range(max):
-      for i, j, k in clausegenerator(range(numvars), 3):
-        p.AddClause(Clause(problemnumbers[n],
-                           list_of_vars=['v%d' % x for x in [i, j, k]]))
+    for num in problemnumbers:
+      for vars in clausegenerator(range(numvars), 3):
+        p.AddClause(Clause(num, list_of_vars=['v%d' % x for x in vars]))
     return p
 
   @classmethod

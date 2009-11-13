@@ -1,3 +1,4 @@
+import itertools
 import relation
 import gen
 import unittest
@@ -316,10 +317,11 @@ class TestGen(unittest.TestCase):
 
   def test_max_vars(self):
     f = gen.max_vars
-
-    self.assertEquals(f(2000, rank=3), 13)
-    self.assertEquals(f(2700, rank=3), 14)
-    self.assertEquals(f(2800, rank=3), 15)
+    self.assertEquals(f(2000, rank=3), 23)
+    self.assertEquals(f(1000, rank=3), 19)
+    self.assertEquals(f(666, rank=3), 16)
+    l = len([x for x in itertools.combinations(range(16), 3)])
+    self.assertTrue(l <= 666)
 
 if __name__ == '__main__':
   unittest.main()

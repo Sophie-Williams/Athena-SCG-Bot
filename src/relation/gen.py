@@ -4,17 +4,22 @@ import itertools
 
 def max_vars(max_clauses, rank=3):
   """Return the maximum number of variables we can use, given the maximum
-  number of clauses."""
+  number of clauses.
+  >>> max_vars(2000)
+  23
+  >>> max_vars(1000)
+  19
+  """
+  divisor = math.factorial(rank)
   x = rank
   k = math.factorial(x)
   y = 1
 
-  while k < max_clauses:
+  while k / divisor < max_clauses:
     x += 1
-    k = (k / y) * x
+    k = k * x / y
     y += 1
   return x - 1
-
 
 def var(n):
   return 'v%d' % n
