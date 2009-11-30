@@ -1,0 +1,168 @@
+% vim: set textwidth=75 :
+\documentclass[letterpaper,12pt,oneside]{article}
+
+%\usepackage{fullpage}
+
+%\thispagestyle{empty}
+%\pagestyle{empty}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\title{Athena}
+\author{Alex Lee, William Nowak}
+\date{\today}
+
+% No longer than 7 pages
+\begin{document}
+\maketitle
+
+% It is important that your code itself is appropriately documented.
+% In the project document you reflect on your project experience
+% and tell the story behind your project. 
+
+% There are two parts.
+
+% Part 1. Design Decisions 
+% ========================
+% highlights the difficulties you had and motivates
+% your important design decisions. It also compares your original 
+% road map with the actual road taken by your project.
+\section{Design Decisions}
+
+Not using Java was the best decision we made. We both think of Java as a
+lesser language than Python.
+
+The MAX-CSP problem is exponential in nature. So, In the beginning
+stages, it was beneficial to have speed while searching for a better
+algorithm. At one point, we were doing five million random solves. This
+was only possible because we were using C.
+
+
+% Part 2. Innovation
+% ==================
+% In this course you developed an agent that can fend for itself
+% against the agents developed by your peers.
+% You developed your agent with great freedom:
+% You could choose the programming language, implementation technologies,
+% architecture of your agent, algorithms etc. The only requirement was to win
+% the game. At the same time, you collaborated with your
+% peers by giving them feedback that helped them to locate faults
+% in their code.
+\section{Innovation}
+
+\subsection{Freedom}
+% How did you take advantage of the freedom you had?
+% Did the freedom inspire you to investigate more options?
+% Describe the options you considered and which ones
+% you implemented.
+
+For the first few competitions, we leveraged the fact that,
+\begin{itemize}
+\item C is faster than Java
+\item Python has a nice interface to C
+\end{itemize}
+Our solver searched every possible solution where it would be impossible to
+do in reasonable time in Java.
+
+At one point, we discussed having a networked solver, which would
+distribute work over many machines. However, it was too much work with
+little payoff.
+
+\subsection{Competitive / Cooperative Nature}
+% The game is competitive / cooperative.
+% How did you react to the competitive nature of the game?
+
+The competitive nature was a huge driving factor in getting us to write
+the actual code. It was not, however, a factor in producing {\em good}
+code.
+
+There was not much cooperation. Will's competition runner and Brent's
+history viewer are nice tools, but they ultimately did not affect our
+agent in a significant way.
+
+\subsection{The need to do all steps well}
+% Writing winning agents takes a lot of skill: at the conceptual,
+% design and implementation level.
+% If the conceptual understanding is perfect, but there is a flaw 
+% in the design or implementation, your agent probably won't win. 
+% How did you react to the need to do all steps well.
+
+Writing the parser and creating the infrastructure (the straight-forward
+parts that everyone can do) had virtually nothing to do with winning. All
+the components that actually mattered were strenuous exercises in algorithm
+design.
+
+\subsection{Diversity}
+% The success of such a class depends on having a community
+% of students with different skills: Some like a more
+% tactical approach, others strive for a strategic solution.
+% Some are good programmers and others are not but they have other skills.
+% Some like to use new tools and others only well tested tools.
+% 
+% How did you react to the diversity that was all focused through the game.
+
+As the minority group, we did not encounter real diversity.
+
+\subsection{Grades}
+% How did you react to using the competition results as part of your grade?
+
+We would not have minded so much if the code for the administrator was not
+the specification.
+
+\subsection{Feedback}
+% Did the feedback you received through the competitions help
+% you find bugs in your software?
+
+\subsection{Observe, Design, Implement, Test}
+% The other agents posed problems to you. Did the cycle:
+% Observe history - Identify issues - Plan an approach - 
+% Design your code - Implement - Test
+% that you were exposed to after every competition help 
+% you improve your problem solving skills?
+There were no data mining efforts that made into the code base. Everything
+was designed, implemented, then tested.
+
+We did look at the history files of the games where we lost, but we didn't
+let it sway how we implemented the code.
+
+\subsection{Problems create by your peers}
+% Many software design and implementation problems you had to solve during the course
+% were caused by your peers. I only made sure through the game design
+% that they could pose reasonable problems to you.
+% Did the fact that you solved problems created by your peers
+% motivate you?
+
+\subsection{SCG skills}
+% The SCG game was designed so that it is sound, i.e.,
+% the game score reflects **only** the agent's skill level in:
+
+\subsubsection{Solving problems}
+
+This skill is seldom tested, since the game itself is not a benchmark on
+the solver alone. There have been games were no problems were solved. There
+have been games were only one agent solved. So, even logically, the game is
+not a reflection on the solver.
+
+\subsubsection{Providing hard problems}
+
+Same thing for this skill. There can be an instance of a game were nothing
+is ever provided (only offers and re-offers).
+
+\subsubsection{Introspective skills}
+
+% Argue for or against soundness of the SCG game.
+
+\subsection{SCG game}
+% 2.9
+% The game was designed so that it has the following 3 properties:
+
+\subsubsection{An agent can't force other agents to consistently lose}
+\subsubsection{An agent can't force other agents to consistently draw}
+\subsubsection{An agent can't force other agents to consistently win}
+
+% Argue for or against those 3 properties of the SCG game.
+% 
+% The entire document should not be longer than 7 pages. 
+% 
+\end{document}
