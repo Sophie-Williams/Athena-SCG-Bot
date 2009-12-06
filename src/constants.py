@@ -1,9 +1,17 @@
 #!/usr/bin/env python
+"""Athena constants."""
+
 
 GAMEREG_PORT = 7005
 GAMEREG_HOST = 'cs4500tmp.ccs.neu.edu'
 TEAM_NAME = 'Athena'
 TEMPLATE_DIR = 'static/'
+
+
+##### Static pricing #########
+# BELOW:
+# Used to price offers and good buys
+# Generated from `relation`
 
 PRICES = {}
 

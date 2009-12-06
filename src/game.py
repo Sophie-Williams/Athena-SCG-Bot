@@ -10,6 +10,8 @@ ROFL:ROFL:LOL:ROFL:ROFL
         \_________\
           |     |
        -------------/
+
+Core gameplay logic
 """
 
 import gflags
@@ -27,6 +29,7 @@ gflags.DEFINE_integer('offercount', 2,
 FLAGS = gflags.FLAGS
 
 class Game(object):
+  """Contain core gameplay logic in this class."""
 
   REPLYTYPES = ['offer', 'reoffer', 'accept', 'provide', 'solve']
 
@@ -56,12 +59,15 @@ class Game(object):
     return count
 
   def NumProposals(self):
+    """Number of proposals currently on the table."""
     return self.CountReplyType(['offer', 'reoffer'])
 
   def NumPropositions(self):
+    """Number of propositions currently on the table."""
     return self.CountReplyType(['accept', 'reoffer'])
 
   def ReachedMaxProposals(self):
+    """Have we offered enough proposals?"""
     if self.NumProposals() >= self.context.config.maxproposals:
       logging.info('Quitting offering because we reached maxProposals')
       return True
@@ -91,6 +97,7 @@ class Game(object):
     logging.debug('Provided: %s' % str(self.context.provided))
 
   def MetPercentOfferedSecrets(self, secretcount):
+    """Determine if we met the secret percentage rule."""
     if not self.context.config.hassecrets:
       return True
     else:
@@ -200,4 +207,3 @@ class Game(object):
         logging.exception('Encountered MAJOR error during gameplay')
 
     return 'Well, shit.'
-

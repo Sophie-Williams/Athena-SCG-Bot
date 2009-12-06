@@ -36,7 +36,7 @@ def KeyAndValue(key, value_type, sep=':'):
 
 
 class QString(str):
-
+  """Quoted string helper."""
   def __init__(self, s):
     self.s = s
 
@@ -62,17 +62,19 @@ List = ZeroOrMore
 PlayerID = Integer
 Var = Combine('v'+Integer)
 
-Clause = Group(wrap(Integer("relation_number") +
-                    wrap(Integer('weight'), '{', '}') + List(Var), "(", ")"))
-
+# Predicates
 GameType = Or([Literal('Baseball'), Literal('TBall'), 
                Literal('SlowPitch'), Literal('FastPitch')])
 
+# Problems and clauses
+Clause = Group(wrap(Integer("relation_number") +
+                    wrap(Integer('weight'), '{', '}') + List(Var), "(", ")"))
 Problem = Group(Group(List(Var)) + Group(List(Clause)))
 ProblemType = Group(wrap(List(Integer("pt")), "(", ")"))
 ProblemKind = Or([Literal('all'), Literal('secret')])
 
 
+# Challenges
 ChallengeCommon = ( Integer("key") + PlayerID("challenger") +
                     ProblemType("pred") + Double("price") +
                     ProblemKind('kind'))
@@ -93,6 +95,7 @@ Objective = Literal("[]")
 Predicate = GameType + wrap(Integer("maxClauses"))
 ChallengeList = wrap(List(Challenge), "(", ")")
 
+# Red-black tree stuff
 TrueFalse = Or([Literal('true'), Literal('false')])
 TreeColor = Or([Literal('red'), Literal('black')])
 TreeNode = Forward()

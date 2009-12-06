@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""Athena offer logic."""
+
 import gflags
 import logging
 import random
@@ -14,6 +16,8 @@ gflags.DEFINE_float('mindecrement', 0.01,
 FLAGS = gflags.FLAGS
 
 class Offer(object):
+  """Represents a CSP Offer and its associated logic."""
+
   def __init__(self, offerid, playerid, problemnumbers, price, kind='all'):
     self.offerid = int(offerid)
     self.playerid = int(playerid)
@@ -41,21 +45,26 @@ class Offer(object):
     return cmp(self.BEPDiff(), other.BEPDiff())
 
   def IsSecret(self):
+    """Is this a secret offer?"""
     return self.kind == 'secret'
 
   def BEPDiff(self):
+    """What is the difference between this price and its breakeven price?"""
     return self.bep-self.price
 
   def IsGoodBuy(self):
+    """Is this offer a good buy?"""
     if self.IsSecret():
       return self.IsGoodBuySecret()
     else:
       return self.IsGoodBuyAll()
 
   def IsGoodBuySecret(self):
+    """Is this secret offer a good buy?"""
     return True
 
   def IsGoodBuyAll(self):
+    """Is this all offer a good buy?"""
     # Specials only apply to singular lists
     if len(self.problemnumbers) == 1:
       if self.problemnumbers[0] <= 0:
@@ -70,6 +79,7 @@ class Offer(object):
     return (self.bep + FLAGS.bepbump) >= self.price
 
   def AvoidReoffer(self, mindecrement=0.01):
+    """Should we avoid reoffering this offer?"""
     new_price = self.price - mindecrement
 
     probably_solvable = False
@@ -135,6 +145,7 @@ class Offer(object):
 
   @classmethod
   def GetOfferList(cls, parsedlist):
+    """Given garbage from the parser, turn it into a list of offers."""
     outputlist = []
     while parsedlist:
       outputlist.append(cls(*parsedlist[:5]))
@@ -144,6 +155,7 @@ class Offer(object):
   @classmethod
   def GetGenerateOffer(cls, ouroffered, theiroffered, justoffered, 
                        problemnumber, kind='all'):
+    """Dumb Generate an offer."""
     if problemnumber in ouroffered:
       return False
     elif problemnumber in theiroffered:
@@ -157,6 +169,7 @@ class Offer(object):
 
   @classmethod
   def GenerateOffer(cls, ouroffered, theiroffered, justoffered, kind='all'):
+    """Slightly more intelligent Generate an offer."""
     goodones = filter(lambda x: not x%2, range(128))
     badones = filter(lambda x: x%2, range(128)) + range(128,256)
     random.shuffle(goodones)
@@ -172,6 +185,8 @@ class Offer(object):
         return x
 
 class AcceptedChallenge(object):
+  """Class representing accepted challenges."""
+
   def __init__(self, acceptor, offerid, provider, problemnumbers, price, kind):
     self.acceptor = int(acceptor)
     self.offerid = int(offerid)
@@ -191,6 +206,7 @@ class AcceptedChallenge(object):
 
   @classmethod
   def GetAcceptedChallengeList(cls, parsedlist):
+    """Given garbage from the parser, turn it into a list of accepted offers."""
     outputlist = []
     while parsedlist:
       outputlist.append(cls(*parsedlist[:6]))

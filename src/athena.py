@@ -10,6 +10,10 @@ ROFL:ROFL:LOL:ROFL:ROFL
         \_________\\
           |     |
        -------------/
+
+
+This is the executable for the Athena agent. It imports the rest of the
+codebase and makes it available for command line action.
 """
 from weblogic import apprunner
 
