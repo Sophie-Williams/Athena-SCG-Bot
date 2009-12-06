@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""Forward a solve to another agent."""
+
 import gflags
 import urllib
 import urllib2

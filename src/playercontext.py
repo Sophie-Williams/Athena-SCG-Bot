@@ -1,9 +1,12 @@
 #!/usr/bin/env python
+"""Game context and configuration classes."""
+
 import offer
 import cspparser
 import problem
 
 class Config(object):
+  """Represents a CSP configuration object."""
 
   def __init__(self, gamekind=None, turnduration=None, mindecrement=None,
                initacc=None, maxProposals=0, minProposals=0,
@@ -32,6 +35,7 @@ class Config(object):
 
   @classmethod
   def FromString(cls, input):
+    """Get a config object from an input string."""
     ps = cspparser.Config.searchString(input)
     if ps:
       return cls.FromParsed(ps[0])
@@ -40,10 +44,13 @@ class Config(object):
 
   @classmethod
   def FromParsed(cls, parse_obj):
+    """Get a config object from the parser output."""
     return cls(**parse_obj.asDict())
 
 
 class PlayerContext(object):
+  """Represent a CSP PlayerContext object from the administrator."""
+
   def __init__(self, config=None, their_offered=None,
                our_offered=None, accepted=None, 
                provided=None, playerid=None, currentround=None,
@@ -61,6 +68,7 @@ class PlayerContext(object):
 
   @classmethod
   def FromString(cls, input):
+    """Get a playercontext from the inputstring."""
     ps = cspparser.PlayerContext.searchString(input)
     if ps:
       return cls.FromParsed(ps[0])
@@ -69,6 +77,7 @@ class PlayerContext(object):
 
   @classmethod
   def FromParsed(cls, parsed):
+    """Get a playercontext from the parser."""
     return cls(config=Config.FromParsed(parsed.config),
                their_offered=parsed.their_offered,
                our_offered=parsed.our_offered,

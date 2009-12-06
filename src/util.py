@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""Utility methods for CS4500 competitions."""
+
 import gflags
 import logging
 import urllib
@@ -15,14 +17,17 @@ gflags.DEFINE_enum('loglevel', 'info',
 FLAGS = gflags.FLAGS
 
 def GetPlayerSpec(teamname, teamport):
+  """Get a player spec for registration."""
   return 'playerspec["%s" "auto" %d]' % (teamname, teamport)
 
 def GetRegistrationURL(server, password):
+  """Get a registration URL."""
   reghost = '%s:%s' % (server, constants.GAMEREG_PORT)
   return urlparse.urlunparse(('http', reghost, '/register', '',
                               urllib.urlencode({'password': password}), ''))
 
 def DoRegistration(server, ourport, ourteam, ourpass):
+  """Try and register to an administrator."""
   regdata = GetPlayerSpec(ourteam, ourport)
   regurl  = GetRegistrationURL(server, ourpass)
   req = urllib2.Request(regurl, regdata)
@@ -38,6 +43,7 @@ def DoRegistration(server, ourport, ourteam, ourpass):
     return '%s registration FAILURE! (%s)' % (ourteam, str(e))
 
 def setuplogging():
+  """Setup agent logging."""
   msgformat = '%(asctime)s %(filename)s %(lineno)s %(levelname)s %(message)s'
   logfilename = '/var/tmp/athena-%s.log' % time.time()
   # set up logging to file - see previous section for more details

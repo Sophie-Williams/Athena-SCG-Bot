@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+"""Represent CSP problems."""
+
 import gflags
 import itertools
 import logging
@@ -138,6 +140,7 @@ class Problem(object):
                ' '.join(map(str, self.problemnumbers)), self.price))
 
   def TrivialSolve(self):
+    """Solve trivial problems."""
     if len(self.problemnumbers) > 1:
       return False
     fsat = len(self.clauses)
@@ -172,6 +175,7 @@ class Problem(object):
     return fsat, values
 
   def TransposeValues(self, usedvars, values):
+    """If we reduced a solve to fewer variables, transpose those values."""
     self.vars.sort()
     # Create the default mapping.
     mapping = dict([(v, 0) for v in self.vars])
@@ -230,6 +234,7 @@ class Problem(object):
     return (totalsat, len(self.clauses))
 
   def PySolve(self):
+    """Solve in python. VERY SLOW."""
     best = None
     for solution in itertools.product(range(2), repeat=len(self.vars)):
       sat, tot = self.PercentSat(solution)
@@ -246,6 +251,7 @@ class Problem(object):
     return best
 
   def SetProfit(self, satisfied, forprovide=False):
+    """Try and calculate profit for this solution."""
     numclauses = float(len(self.clauses))
     solperc = float(satisfied) / numclauses
     self.profit = solperc - self.price
@@ -259,6 +265,7 @@ class Problem(object):
     return self.profit
 
   def CreateSolution(self, values, variables=None):
+    """Create a string solution."""
     if not variables:
       variables = self.vars
     logging.debug('Solution values are: %s' % str(values))
@@ -267,6 +274,7 @@ class Problem(object):
     return ' '.join(s) + ' '
 
   def GetTrivialSolution(self, forprovide=False):
+    """Try and get a trivial solution."""
     if not self.TrivialSolve():
       return
     fsat, values = self.TrivialSolve()
@@ -274,19 +282,23 @@ class Problem(object):
     return self.CreateSolution(values)
 
   def GetPySolution(self, forprovide=False):
+    """Try and get a pythonic solution."""
     _, fsat, values = self.PySolve()
     self.SetProfit(fsat, forprovide=forprovide)
     return self.CreateSolution(values)
 
   def GetCSolution(self, forprovide=False):
+    """Try and get a c solution."""
     fsat, values = self.CSolve()
     self.SetProfit(fsat, forprovide=forprovide)
     return self.CreateSolution(values)
 
   def GetProxySolution(self):
+    """Try and get a python solution."""
     return proxysolver.ProxySolve(self)
 
   def DoSolve(self, forprovide=False):
+    """Try to solve this with all available methods based on options."""
     logging.debug('Solving offer %d relation %s cost %0.3f'
                  % (self.challengeid, self.problemnumbers, self.price))
     s = ''
@@ -301,6 +313,7 @@ class Problem(object):
     return s
 
   def Solve(self, forprovide=False):
+    """Run the solver and format it for the admin."""
     if self.solution is None:
       rs = self.DoSolve(forprovide=forprovide)
       self.solution = rs
@@ -308,12 +321,14 @@ class Problem(object):
 
   @classmethod
   def GenerateFromAccepted(cls, acceptedproblem):
+    """Generate a problem from an accepted offer."""
     return cls.Generate(acceptedproblem.problemnumbers,
                         acceptedproblem.offerid,
                         acceptedproblem.kind)
 
   @classmethod
   def GetVarsGenerator(cls, problemnumbers, perceived_vars=23):
+    """Pick a generator for variable layout."""
     ptv = False
     if len(problemnumbers) == 1:
       ptv = Problem.GetBestPriceAndType(problemnumbers[0])
@@ -335,6 +350,7 @@ class Problem(object):
 
   @classmethod
   def Generate(cls, problemnumbers, offerid, kind, degree=None):
+    """Generate a problem with given parameters."""
     numvars, clausegenerator, varslist = cls.GetVarsGenerator(problemnumbers)
     p = cls(0, varslist, [], offerid, 0, problemnumbers, 0, kind)
     for num in problemnumbers:
@@ -344,6 +360,7 @@ class Problem(object):
 
   @classmethod
   def GetProblemList(cls, parsedlist):
+    """Get a list of problems from the parser."""
     outputlist = []
     for problem in parsedlist:
       # buyer, list_of_vars, clauselist, challengeid,
@@ -355,6 +372,7 @@ class Problem(object):
 
   @staticmethod
   def GetPriceAndType(problemnumber):
+    """Given a problem number, get prices and types for it."""
     output = []
     for x in constants.PRICES:
       if problemnumber in constants.PRICES[x]:
@@ -369,6 +387,7 @@ class Problem(object):
 
   @staticmethod
   def GetBestPriceAndType(problemnumber):
+    """Use the logic in GetPriceAndType to get the best price and type."""
     l = Problem.GetPriceAndType(problemnumber)
     if l:
       return l[0]
