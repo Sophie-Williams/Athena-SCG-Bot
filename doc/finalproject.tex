@@ -228,8 +228,14 @@ we were not using the Java player, but this was not the common case.
 \subsection{Grades}
 % How did you react to using the competition results as part of your grade?
 
-We would not have minded so much if the code for the administrator was not
-the specification.
+Using the competitions as grading was a source of much stress for the course.
+We had the good fortune to get a string of A's in competition from the start.
+In courses, students prefer to have a firm idea of what will make up their
+grades. In this course, we had the unpleasant situation where grading was based
+on the soundness of the game, which as demonstrated below was suboptimal. If
+the game was presented as design specifications in one place, instead of
+multiple specifications in multiple places and some Java code comprising the
+administrator, it would have been more palatable.
 
 \subsection{Feedback}
 % Did the feedback you received through the competitions help
@@ -326,6 +332,12 @@ of SCG, we forced other agents to lose using the method described in
 \ref{Middle Game}.
 
 \subsubsection{An agent can't force other agents to consistently draw}
+
+It is not possible, as far as we can determine, to force an agent to draw. If
+an agent is forcing a loss, it is impossible to change its behavior. The only
+way to get this effect would be to use an external method -- killing both
+agents for example so they can no longer respond to the administrator.
+
 \subsubsection{An agent can't force other agents to consistently win}
 
 Assuming that the other agents can play at least the first round, an agent
