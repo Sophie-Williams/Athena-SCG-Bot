@@ -89,7 +89,7 @@ little payoff. This determination was largely based on the level of the other
 teams agents; that is, when other teams are still using a random solver the
 benefits of a large distributed solver do not become apparent.
 
-\subsubsection{Middle Game}
+\subsubsection{Middle Game} \label{Middle Game}
 
 During the competitions in the middle (before the weighted games), we
 devised a strategy. It was based on these rules:
@@ -320,8 +320,17 @@ whose results can not be trusted to be valid.
 % The game was designed so that it has the following 3 properties:
 
 \subsubsection{An agent can't force other agents to consistently lose}
+
+A counter example, we had a perfect game on October 29th. In that version
+of SCG, we forced other agents to lose using the method described in
+\ref{Middle Game}.
+
 \subsubsection{An agent can't force other agents to consistently draw}
 \subsubsection{An agent can't force other agents to consistently win}
+
+Assuming that the other agents can play at least the first round, an agent
+that registers, but doesn't do much more than that will always lose.
+
 
 % Argue for or against those 3 properties of the SCG game.
 % 
