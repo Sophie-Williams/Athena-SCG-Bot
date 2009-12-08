@@ -32,13 +32,26 @@
 \section{Design Decisions}
 
 Not using Java was the best decision we made. We both think of Java as a
-lesser language than Python.
+lesser language than Python, especially in a course like Software Development,
+where rapid innovation is encouraged.
 
 The MAX-CSP problem is exponential in nature. So, In the beginning
 stages, it was beneficial to have speed while searching for a better
 algorithm. At one point, we were doing five million random solves. This
 was only possible because we were using C.
 
+Organizing our agent into a series of task-based classes assisted with the
+progression of our agent. A class for offering, for problems, for parsing,
+general game play, and one for context interactions with the administrator.
+A variety of classes were also created for testing and utility functions, such
+as game registration and logging.
+
+Modularity was another focus area for our design. We chose to make our solvers
+modular, so we could quickly swap out one for another, or fall back on a known
+good solver when experimenting with a new one. We included the ability to turn
+features on and off with command line flags, or tweak constant values without
+changing a single line of code. These benefits proved invaluable because of the
+tweaking nature of the game.
 
 % Part 2. Innovation
 % ==================
