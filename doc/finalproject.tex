@@ -191,7 +191,10 @@ first for break-even calculation.
 
 There was not much cooperation. Will's competition runner and Brent's
 history viewer are nice tools, but they ultimately did not affect our
-agent in a significant way.
+agent in a significant way. There was {\em no} component marketplace as was
+outlined in the game specification. As far as we are aware, zero components
+changed hands. Because our agent was written in a different language than the
+rest of the class, shared code was of little use to us anyway.
 
 \subsection{The need to do all steps well}
 % Writing winning agents takes a lot of skill: at the conceptual,
@@ -203,7 +206,7 @@ agent in a significant way.
 Writing the parser and creating the infrastructure (the straight-forward
 parts that everyone can do) had virtually nothing to do with winning. All
 the components that actually mattered were strenuous exercises in algorithm
-design.
+design. 
 
 \subsection{Diversity}
 % The success of such a class depends on having a community
@@ -214,7 +217,13 @@ design.
 % 
 % How did you react to the diversity that was all focused through the game.
 
-As the minority group, we did not encounter real diversity.
+While the class as a whole consisted of a diverse group of students, our team
+fell into the minority. This was largely due to our usage of Python instead of
+the Java baby agent base. We were often singled out in class for our
+``drastic'' decision, but it was a well made choice. Within our outcast group
+of one, we did not experience any other diversity. Occasionally discussions
+would arise during class where we could provide a different viewpoint because
+we were not using the Java player, but this was not the common case.
 
 \subsection{Grades}
 % How did you react to using the competition results as part of your grade?
@@ -288,8 +297,23 @@ Same thing for this skill. There can be an instance of a game were nothing
 is ever provided (only offers and re-offers).
 
 \subsubsection{Introspective skills}
-
 % Argue for or against soundness of the SCG game.
+It seems as though the game attempts to combine too many individual aspects of
+software development into one figure representing the quality of the agent.
+A minor issue within a parser could cause an agent to fail to compete
+entirely, and thus its score would be greatly affected. Defects in the
+administrator were as important as, or even more important than defects within
+agents themselves.
+
+In scientific experiments, one tries to isolate one variable
+to test independently of all others. This was not possible in the SCG game. The
+outcome of the game depended on hundreds of characteristics including but not
+limited to: system load, administrator quality, a teams agent, other teams
+agents, network traffic, scglibs stability, time of day, and rule changes.
+Variations in a teams agent would encompass an even greater list of possible
+variables like solver, provider, parser, acceptor, and other utility modules.
+All of these variables sum up to an entirely unscientific competition system
+whose results can not be trusted to be valid.
 
 \subsection{SCG game}
 % 2.9
