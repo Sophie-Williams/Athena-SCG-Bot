@@ -68,7 +68,7 @@ do in reasonable time in Java.
 
 At one point, we discussed having a networked solver, which would
 distribute work over many machines. However, it was too much work with
-little payoff.
+little payoff. This determination was largely based on the level of the other teams agents; that is, when other teams are still using a random solver the benefits of a large distributed solver do not become apparent.
 
 \begin{figure}[htp]
 \centering
@@ -83,7 +83,9 @@ little payoff.
 
 The competitive nature was a huge driving factor in getting us to write
 the actual code. It was not, however, a factor in producing {\em good}
-code.
+code. Some of the source code produced for competitions was in fact, awful. The
+first competition that allowed multiple relation numbers, for example, Athena's
+source code did not utilize all the relation numbers and only examined the first for break-even calculation
 
 There was not much cooperation. Will's competition runner and Brent's
 history viewer are nice tools, but they ultimately did not affect our
