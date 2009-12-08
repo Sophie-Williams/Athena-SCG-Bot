@@ -6,6 +6,7 @@
 %\thispagestyle{empty}
 %\pagestyle{empty}
 
+\usepackage{hyperref}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{graphicx}
@@ -83,13 +84,15 @@ do in reasonable time in Java.
 
 At one point, we discussed having a networked solver, which would
 distribute work over many machines. However, it was too much work with
-little payoff. This determination was largely based on the level of the other teams agents; that is, when other teams are still using a random solver the benefits of a large distributed solver do not become apparent.
+little payoff. This determination was largely based on the level of the other
+teams agents; that is, when other teams are still using a random solver the
+benefits of a large distributed solver do not become apparent.
 
 During the competitions in the middle (before the weighted games), we
 devised a strategy. It was based on these rules:
 \begin{enumerate}
 \item You must offer at least 1.
-\item You must accept at least 1 or reoffer all.
+\item You must accept at least 1 or re-offer all.
 \item You must decrement by at least 0.01.
 \end{enumerate}
 
@@ -99,17 +102,27 @@ is the maximum number of clauses $P$ can have ($n = 2000$).
 We offer one problem $P$ at $\phi + \frac{\delta}{2}$ (assumption 1).
 
 From assumption 2, we know that the opponent has to accept at least 1 (A)
-or reoffer all (B).
+or re-offer all (B).
 
 \begin{enumerate}
 \renewcommand{\labelenumi}{(\Alph{enumi})}
     \item The opponent accepts $P$. He can only solve up to $\phi$,
           creating a difference of $\frac{\delta}{2}$, and they lose.
-    \item The opponent reoffers $P$. The new price is at most $\phi -
+    \item The opponent re-offers $P$. The new price is at most $\phi -
           \frac{\delta}{2}$ (Assumption 3). We accept $P$. From
           the fact that the minimum quality $q_n(P) = \phi > \phi -
           \frac{\delta}{2}$, we win.
 \end{enumerate}
+
+\subsubsection{Agent niceties}
+
+Several features were implemented that did not become a factor in the
+performance of our agent in competitions.
+
+\textbf{Web based registration} (Figure \ref{fig:registration}) was added
+purely for team convenience. For weeks that our code did not change, we
+could simple leave an agent running on a machine at CCIS, log in from our
+web-enabled telephones, and register for the game when the time was right.
 
 \begin{figure}[htp]
 \centering
@@ -117,6 +130,27 @@ or reoffer all (B).
 \caption{Athena web based registration}
 \label{fig:registration}
 \end{figure}
+
+By moving registration out of the command line arguments (as featured in the 
+Basic Player), we eliminated a security risk. When an agent based on the Basic
+Player runs, it publishes its team name and password on the machine process
+tables. Some clever players took advantage of this, and ``registered'' all the
+teams they had passwords for on a Tuesday competition without those teams
+knowledge.
+
+\textbf{Command line flags} were another crucial part of our agent. We designed
+our code such that all magic numbers and constants were built as command line
+flags. Anywhere we wanted to use such a value in the code base, we could call it
+from a FLAGS global variable. Take our solver command like argument as an
+example. Athena could be run with the solver flag,
+\verb=./athena.py --solver c=, and then that value could be accessed anywhere
+in our agent source as follows, \verb=print FLAGS.solver=, which yields ``c''.
+This type of flexibility protects programmers from needing to pipe command line
+processing from main methods all throughout their code. Along with the ease of
+access, our flags library GFlags (located at 
+\url{http://code.google.com/p/google-gflags/}), automatically generates command
+line documentation for all the flags defined. This removes yet another tedious
+development step.
 
 \subsection{Competitive / Cooperative Nature}
 % The game is competitive / cooperative.
@@ -126,7 +160,8 @@ The competitive nature was a huge driving factor in getting us to write
 the actual code. It was not, however, a factor in producing {\em good}
 code. Some of the source code produced for competitions was in fact, awful. The
 first competition that allowed multiple relation numbers, for example, Athena's
-source code did not utilize all the relation numbers and only examined the first for break-even calculation
+source code did not utilize all the relation numbers and only examined the
+first for break-even calculation.
 
 There was not much cooperation. Will's competition runner and Brent's
 history viewer are nice tools, but they ultimately did not affect our
