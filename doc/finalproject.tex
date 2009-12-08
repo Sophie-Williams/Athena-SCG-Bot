@@ -65,6 +65,7 @@ tweaking nature of the game.
 % in their code.
 \section{Innovation}
 
+\setcounter{subsection}{-1}
 \subsection{Freedom}
 % How did you take advantage of the freedom you had?
 % Did the freedom inspire you to investigate more options?
@@ -82,6 +83,32 @@ do in reasonable time in Java.
 At one point, we discussed having a networked solver, which would
 distribute work over many machines. However, it was too much work with
 little payoff. This determination was largely based on the level of the other teams agents; that is, when other teams are still using a random solver the benefits of a large distributed solver do not become apparent.
+
+During the competitions in the middle (before the weighted games), we
+devised a strategy. It was based on these rules:
+\begin{enumerate}
+\item You must offer at least 1.
+\item You must accept at least 1 or reoffer all.
+\item You must decrement by at least 0.01.
+\end{enumerate}
+
+Let the minimum decrement be $\delta > 0$.
+Now suppose a problem $P$ has the minimum quality $q_n(P) = \phi$, where $n$
+is the maximum number of clauses $P$ can have ($n = 2000$).
+We offer one problem $P$ at $\phi + \frac{\delta}{2}$ (assumption 1).
+
+From assumption 2, we know that the opponent has to accept at least 1 (A)
+or reoffer all (B).
+
+\begin{enumerate}
+\renewcommand{\labelenumi}{(\Alph{enumi})}
+    \item The opponent accepts $P$. He can only solve up to $\phi$,
+          creating a difference of $\frac{\delta}{2}$, and they lose.
+    \item The opponent reoffers $P$. The new price is at most $\phi -
+          \frac{\delta}{2}$ (Assumption 3). We accept $P$. From
+          the fact that the minimum quality $q_n(P) = \phi > \phi -
+          \frac{\delta}{2}$, we win.
+\end{enumerate}
 
 \begin{figure}[htp]
 \centering
