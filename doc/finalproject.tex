@@ -1,7 +1,7 @@
 % vim: set textwidth=75 :
 \documentclass[letterpaper,12pt,oneside]{article}
 
-%\usepackage{fullpage}
+\usepackage{fullpage}
 
 %\thispagestyle{empty}
 %\pagestyle{empty}
@@ -64,6 +64,7 @@ tweaking nature of the game.
 % peers by giving them feedback that helped them to locate faults
 % in their code.
 \section{Innovation}
+\setcounter{subsection}{-1}
 
 \setcounter{subsection}{-1}
 \subsection{Freedom}
@@ -163,6 +164,20 @@ the specification.
 \subsection{Feedback}
 % Did the feedback you received through the competitions help
 % you find bugs in your software?
+Overall, competitions provided little feedback to us as software developers.
+Because for the majority of the semester we were doing quite well, there was
+little incentive to look over the rather convoluted game play logs to
+determine where we were doing well, and where we needed to improve. Most of the
+feedback garnered by our agent took the form of local competitions using the
+runner tool. New features or other improvements were tested with the most
+recently available administrator and other teams agent software. If we
+continued to do well after a few sample group and tournament games, we
+considered the new feature or improvement a success, and went for it in the
+next competition.
+
+This type of feedback model is ultimately flawed -- it relied on our team
+believing that other teams would not improve enough game to game to exceeded
+the level of improvement in our agent. 
 
 \subsection{Observe, Design, Implement, Test}
 % The other agents posed problems to you. Did the cycle:
@@ -171,17 +186,29 @@ the specification.
 % that you were exposed to after every competition help 
 % you improve your problem solving skills?
 There were no data mining efforts that made into the code base. Everything
-was designed, implemented, then tested.
+was designed, implemented, then tested. Most of the design-implement-test cycle
+was completed independent of external factors like game performance. We usually
+had a feature list of things we wanted to implement, and weekly would try and
+tackle at least one of them. This pace happened to coincide with features
+needed to stay on the upper edge, but this was not a cause and effect
+relationship.
 
 We did look at the history files of the games where we lost, but we didn't
-let it sway how we implemented the code.
+let it sway how we implemented the code. Game history files were too much of
+a burden to study regularly. They contain a great deal of information, while
+only a small percentage of the total is useful to individual teams.
 
-\subsection{Problems create by your peers}
+\subsection{Problems created by your peers}
 % Many software design and implementation problems you had to solve during the course
 % were caused by your peers. I only made sure through the game design
 % that they could pose reasonable problems to you.
 % Did the fact that you solved problems created by your peers
 % motivate you?
+We were not motivated directly by our peers. Other teams merely provided a test
+data set for the soundness of our algorithms. In general, it seemed that the
+best approach to this problem was to design a solution that worked in the
+general case. Special case ``hacks'' were seldom made, as they tended to be
+extremely fragile. 
 
 \subsection{SCG skills}
 % The SCG game was designed so that it is sound, i.e.,
