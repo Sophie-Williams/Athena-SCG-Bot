@@ -65,15 +65,16 @@ tweaking nature of the game.
 % peers by giving them feedback that helped them to locate faults
 % in their code.
 \section{Innovation}
-\setcounter{subsection}{-1}
 
 \setcounter{subsection}{-1}
+\setcounter{subsubsection}{-1}
 \subsection{Freedom}
 % How did you take advantage of the freedom you had?
 % Did the freedom inspire you to investigate more options?
 % Describe the options you considered and which ones
 % you implemented.
 
+\subsubsection{Opening}
 For the first few competitions, we leveraged the fact that,
 \begin{itemize}
 \item C is faster than Java
@@ -87,6 +88,8 @@ distribute work over many machines. However, it was too much work with
 little payoff. This determination was largely based on the level of the other
 teams agents; that is, when other teams are still using a random solver the
 benefits of a large distributed solver do not become apparent.
+
+\subsubsection{Middle Game}
 
 During the competitions in the middle (before the weighted games), we
 devised a strategy. It was based on these rules:
@@ -113,6 +116,19 @@ or re-offer all (B).
           the fact that the minimum quality $q_n(P) = \phi > \phi -
           \frac{\delta}{2}$, we win.
 \end{enumerate}
+
+\subsubsection{End Game}
+
+The need arised for a better solver. Making the solver weighted was a
+relatively easy change. However, the performance did suffer slightly. We
+wanted a linear-time solver, whether or not it finds the optimal solution.
+
+We opted to use {\tt EvergreenPlayer} as described in Prof. Lieberherr's
+research with the Evergreen Project \cite{Evergreen:lscs-07}.
+
+As it is apparent in the grades, we did not finish strongly. If SCG is an
+indication of the effectiveness of the solver, it suggests {\em some} flaw
+in the {\tt EvergreenPlayer} algorithm.
 
 \subsubsection{Agent niceties}
 
