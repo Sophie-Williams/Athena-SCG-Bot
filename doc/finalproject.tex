@@ -32,8 +32,8 @@
 % road map with the actual road taken by your project.
 \section{Design Decisions}
 
-Not using Java was the best decision we made. We both think of Java as a
-lesser language than Python, especially in a course like Software Development,
+Choosing Python was the best decision we made. We both think of Java as a
+lesser language than Python, especially in Software Development,
 where rapid innovation is encouraged.
 
 The MAX-CSP problem is exponential in nature. So, In the beginning
@@ -43,7 +43,7 @@ was only possible because we were using C.
 
 Organizing our agent into a series of task-based classes assisted with the
 progression of our agent. A class for offering, for problems, for parsing,
-general game play, and one for context interactions with the administrator.
+for general game play, and for context interactions with the administrator.
 A variety of classes were also created for testing and utility functions, such
 as game registration and logging.
 
@@ -92,12 +92,13 @@ benefits of a large distributed solver do not become apparent.
 \subsubsection{Middle Game} \label{Middle Game}
 
 During the competitions in the middle (before the weighted games), we
-devised a strategy. It was based on these rules:
+devised a strategy. It was based on these rules: \\ \\
+\frame{\parbox{10cm}{%
 \begin{enumerate}
 \item You must offer at least 1.
 \item You must accept at least 1 or re-offer all.
 \item You must decrement by at least 0.01.
-\end{enumerate}
+\end{enumerate}}}
 
 Let the minimum decrement be $\delta > 0$.
 Now suppose a problem $P$ has the minimum quality $q_n(P) = \phi$, where $n$
@@ -136,9 +137,9 @@ Several features were implemented that did not become a factor in the
 performance of our agent in competitions.
 
 \textbf{Web based registration} (Figure \ref{fig:registration}) was added
-purely for team convenience. For weeks that our code did not change, we
-could simple leave an agent running on a machine at CCIS, log in from our
-web-enabled telephones, and register for the game when the time was right.
+purely for team convenience. For weeks that our code did not change between
+competitions, we could simply leave an agent running on a machine at CCIS, 
+log in from our web-enabled telephones, and register for the game when the time was right.
 
 \begin{figure}[htp]
 \centering
@@ -192,9 +193,9 @@ first for break-even calculation.
 There was not much cooperation. Will's competition runner and Brent's
 history viewer are nice tools, but they ultimately did not affect our
 agent in a significant way. There was {\em no} component marketplace as was
-outlined in the game specification. As far as we are aware, zero components
-changed hands. Because our agent was written in a different language than the
-rest of the class, shared code was of little use to us anyway.
+outlined in the game specification. As far as we are aware, {\em zero}
+components changed hands. Because our agent was written in a different language 
+than the rest of the class, shared code was of little use to us anyway.
 
 \subsection{The need to do all steps well}
 % Writing winning agents takes a lot of skill: at the conceptual,
@@ -205,8 +206,8 @@ rest of the class, shared code was of little use to us anyway.
 
 Writing the parser and creating the infrastructure (the straight-forward
 parts that everyone can do) had virtually nothing to do with winning. All
-the components that actually mattered were strenuous exercises in algorithm
-design. 
+the components that actually mattered were strenuous exercises in 
+{\em algorithm} design. 
 
 \subsection{Diversity}
 % The success of such a class depends on having a community
@@ -232,7 +233,7 @@ Using the competitions as grading was a source of much stress for the course.
 We had the good fortune to get a string of A's in competition from the start.
 In courses, students prefer to have a firm idea of what will make up their
 grades. In this course, we had the unpleasant situation where grading was based
-on the soundness of the game, which as demonstrated below was suboptimal. If
+on the soundness of the game, which as demonstrated below was sub-optimal. If
 the game was presented as design specifications in one place, instead of
 multiple specifications in multiple places and some Java code comprising the
 administrator, it would have been more palatable.
@@ -252,8 +253,8 @@ considered the new feature or improvement a success, and went for it in the
 next competition.
 
 This type of feedback model is ultimately flawed -- it relied on our team
-believing that other teams would not improve enough game to game to exceeded
-the level of improvement in our agent. 
+believing that other teams would not improve enough from game to game to 
+exceeded the level of improvement in our agent. 
 
 \subsection{Observe, Design, Implement, Test}
 % The other agents posed problems to you. Did the cycle:
@@ -261,13 +262,13 @@ the level of improvement in our agent.
 % Design your code - Implement - Test
 % that you were exposed to after every competition help 
 % you improve your problem solving skills?
-There were no data mining efforts that made into the code base. Everything
+No data mining efforts made it into our code base. Everything
 was designed, implemented, then tested. Most of the design-implement-test cycle
 was completed independent of external factors like game performance. We usually
 had a feature list of things we wanted to implement, and weekly would try and
 tackle at least one of them. This pace happened to coincide with features
-needed to stay on the upper edge, but this was not a cause and effect
-relationship.
+needed to stay on the upper edge, but this correlation was not a cause and
+effect relationship.
 
 We did look at the history files of the games where we lost, but we didn't
 let it sway how we implemented the code. Game history files were too much of
@@ -312,16 +313,16 @@ administrator were as important as, or even more important than defects within
 agents themselves.
 
 In scientific experiments, one tries to isolate one variable
-to test independently of all others. This was not possible in the SCG game. The
+to test independently of all others. This was not possible in SCG. The
 outcome of the game depended on hundreds of characteristics including but not
 limited to: system load, administrator quality, a teams agent, other teams
-agents, network traffic, scglibs stability, time of day, and rule changes.
+agents, network traffic, scglib stability, time of day, and rule changes.
 Variations in a teams agent would encompass an even greater list of possible
 variables like solver, provider, parser, acceptor, and other utility modules.
 All of these variables sum up to an entirely unscientific competition system
 whose results can not be trusted to be valid.
 
-\subsection{SCG game}
+\subsection{SCG}
 % 2.9
 % The game was designed so that it has the following 3 properties:
 
